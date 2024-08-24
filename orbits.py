@@ -1,20 +1,29 @@
+"""
+FIXME
+"""
 import math
 from abc import ABC, abstractmethod
-from typing import List
 from enum import Enum, auto
 import vpython as vp
 
-TIME_SCALE_FACTOR = 100000
-DIST_SCALE_FACTOR = 0.1  # This will reduce the orbit distance by this scale
-SECS_IN_HR = 3600
-HRS_IN_DAY = 23.9344696
+# Constants
+SECS_IN_HR: int = 3600
+HRS_IN_DAY: float = 23.9344696
+
 
 class OrbitDirection(Enum):
     CLOCKWISE = auto()
     COUNTER_CLOCKWISE = auto()
 
+
 class Orbit(ABC):
-    def __init__(self):
+    """
+    FIXME
+    """
+    def __init__(self, dist_scale_factor: float = 1):
+        self.dist_scale_factor: float = dist_scale_factor
+        self._orbit_mag: float = 1
+
         self._create_path()
 
     @property
@@ -43,11 +52,15 @@ class Orbit(ABC):
         ...
 
     @property
+    def orbit_mag(self) -> float:
+        return self._orbit_mag
+
+    @property
     def a(self) -> float:
         """
         Semi-major axis of the Orbit
         """
-        return self.semi_major_axis * DIST_SCALE_FACTOR
+        return self.semi_major_axis * self.dist_scale_factor
 
     @property
     def b(self) -> float:
@@ -64,26 +77,29 @@ class Orbit(ABC):
 
         return av
     
-    def _calculate_next_point_on_path(self, angle: float) -> vp.vector:
+    def calculate_next_point_on_path(self, angle: float) -> vp.vector:
         # Calculate the radial distance for this angle
         r = self.a * (1 - self.eccentricity**2) / (1 + self.eccentricity * math.cos(angle))
 
         # Calculate position in the x-y-z plane
-        c = r * math.cos(angle)  # length of max x with no inclination
-        x = c * math.cos(self.inclination)
+        x_zero_inclination = r * math.cos(angle)  # length of max x with no inclination
+        x = x_zero_inclination * math.cos(self.inclination)
         z = r * math.sin(angle)
-        y = c * math.sin(self.inclination)
+        y = x_zero_inclination * math.sin(self.inclination)
 
-        return vp.vector(x, y, z)
+        next_point = vp.vector(x,y,z)
+        self._orbit_mag = next_point.mag
 
+        return next_point
 
     def _create_path(self) -> None:
-        orbit_ellipse = vp.curve(color=vp.color.red)
+        orbit_ellipse = vp.curve(color=vp.color.gray(0.5))
 
         for theta in range(0, 360+1):
             theta_rad = math.radians(theta)
-            next_point = self._calculate_next_point_on_path(theta_rad)
+            next_point = self.calculate_next_point_on_path(theta_rad)
             orbit_ellipse.append(next_point)
+
 
 class MoonOrbit(Orbit):
     semi_major_axis: float = 384405  # km
@@ -94,8 +110,9 @@ class MoonOrbit(Orbit):
     period: float = period_days * HRS_IN_DAY * SECS_IN_HR
     direction: OrbitDirection = OrbitDirection.COUNTER_CLOCKWISE
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, dist_scale_factor: float = 1):
+        super().__init__(dist_scale_factor)
+
 
 class CelestialBody(ABC):
     def __init__(self, position=vp.vector(0, 0, 0)):
@@ -150,6 +167,7 @@ class CelestialBody(ABC):
         self.sphere.rotate(angle=self.angular_velocity * dt, axis=self.axis, origin=self.sphere.pos)
         self.axis_line.rotate(angle=self.angular_velocity * dt, axis=self.axis, origin=self.sphere.pos)
 
+
 class Earth(CelestialBody):
     radius: float = 6378  # km
     tilt_degrees: float = 23.44  # degrees
@@ -160,15 +178,16 @@ class Earth(CelestialBody):
     def __init__(self):
         super().__init__()
 
+
 class Moon(CelestialBody):
     radius: float = 1738  # km
     tilt_degrees: float  = 6.68  # degrees
     sidereal_month: float = 27.321661  # days
     rotation_period: float = sidereal_month * HRS_IN_DAY * SECS_IN_HR  # seconds
-    texture: object = vp.textures.rock
+    texture: object = 'moon_texture.jpg'
 
-    def __init__(self):
-        self.orbit = MoonOrbit()
+    def __init__(self, dist_scale_factor: float = 1):
+        self.orbit = MoonOrbit(dist_scale_factor)
         super().__init__(position=vp.vector(self.orbit.a, 0, 0))
         self.arrow = self._create_arrow()
 
@@ -180,11 +199,11 @@ class Moon(CelestialBody):
                         round=True)
 
     def update_position(self, t):
-        # Compute the Moon's position in the orbital plane
+        '''Compute the Moon's position in the orbital plane'''
         theta = self.orbit.angular_velocity * t
 
         # Update the position with the rotated values
-        next_point = self.orbit._calculate_next_point_on_path(theta)
+        next_point = self.orbit.calculate_next_point_on_path(theta)
         self.sphere.pos = next_point
 
         # Update axis line and arrow positions
@@ -198,50 +217,115 @@ class Moon(CelestialBody):
         # the magnitude of the arrow's axis vector
         self.arrow.axis = vp.norm(-self.sphere.pos) * self.arrow.axis.mag
 
+
 class Simulation:
-    def __init__(self):
-        self.scene = self._setup_scene()
+    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY
+    """
+    Determines how sped up the simulation is vs. real-time.
+    """
+
+    DEFAULT_DIST_SCALE_FACTOR: float = 0.1
+    """
+    This will reduce the orbit distance by this scale
+    """
+
+    def __init__(self,
+                 time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR,
+                 dist_scale_factor: float = DEFAULT_DIST_SCALE_FACTOR):
+        self._time_scale_factor: float = time_scale_factor
+        self._dist_scale_factor: float = dist_scale_factor
+
+        self._canvas: vp.canvas = vp.canvas(title='Moon Orbiting Earth',
+                                            width=1600,
+                                            height=1000,
+                                            align='left')
+
         self.earth = Earth()
-        self.moon = Moon()
-        self.orientation = self._create_orientation()
+        self.moon = Moon(dist_scale_factor)
 
-    def _setup_scene(self):
-        return vp.canvas(title="Moon Orbiting Earth", width=1600, height=1000, background=vp.color.black)
+        self._create_orientation_figure()
+        self._info_canvas: vp.canvas
+        self._time_scale_label: vp.label
+        self._distance_scale_label: vp.label
+        self._setup_info_canvas()
 
-    def _create_orientation(self):
-        orient_size = self.earth.radius
-        orient_ps = vp.vector(-self.moon.orbit.a, self.moon.orbit.a/2, 0)  #FIXME
-        orient_object = vp.compound([
-            vp.arrow(pos=orient_ps, axis=vp.vector(orient_size, 0, 0), color=vp.color.red, round=True),
-            vp.arrow(pos=orient_ps, axis=vp.vector(0, orient_size, 0), color=vp.color.green, round=True),
-            vp.arrow(pos=orient_ps, axis=vp.vector(0, 0, orient_size), color=vp.color.blue, round=True)
-        ])
-        label_distance = orient_size * 1.2
-        vp.label(pos=orient_ps + vp.vector(label_distance, 0, 0), text="X", color=vp.color.red, box=False)
-        vp.label(pos=orient_ps + vp.vector(0, label_distance, 0), text="Y", color=vp.color.green, box=False)
-        vp.label(pos=orient_ps + vp.vector(0, 0, label_distance), text="Z", color=vp.color.blue, box=False)
-        return orient_object
+    def _create_orientation_figure(self) -> None:
+        # Define orientation figure size and position using the largest object on the scene
+        # Currently this is the Moon's orbit, be will change. FIXME
+        canvas_mag: float = self.moon.orbit.orbit_mag
+        orient_size: float = canvas_mag/8
+        orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
+
+        # Create the arrows in each direction of x,y,z axis
+        vp.arrow(pos=orient_pos, axis=vp.vector(orient_size, 0, 0), color=vp.color.red, round=True, emissive=True)
+        vp.arrow(pos=orient_pos, axis=vp.vector(0, orient_size, 0), color=vp.color.green, round=True, emissive=True)
+        vp.arrow(pos=orient_pos, axis=vp.vector(0, 0, orient_size), color=vp.color.yellow, round=True, emissive=True)
+
+        # Label the arrows
+        label_distance = orient_size * 1.1
+        vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0), text='X', color=vp.color.red, box=False)
+        vp.label(pos=orient_pos + vp.vector(0, label_distance, 0), text='Y', color=vp.color.green, box=False)
+        vp.label(pos=orient_pos + vp.vector(0, 0, label_distance), text='Z', color=vp.color.yellow, box=False)
+
+    def _setup_info_canvas(self) -> None:
+        # Create canvas and configure
+        width = 400
+        height = 1000
+        self._info_canvas = vp.canvas(width=width, height=height, align='left')
+        self._info_canvas.range = 10
+        self._info_canvas.userzoom = False
+        self._info_canvas.userspin = False
+        self._info_canvas.userpan = False
+
+        # Start labels 1 over from left margin (range -10 to 10)
+        left_margin: int = -self._info_canvas.range + 1
+
+        # Start lines at the top minus 1
+        line_number: int = int(self._info_canvas.range * height/width - 1)
+
+        # Create time scale label
+        self._time_scale_label = vp.label(pos=vp.vector(left_margin, line_number, 0),
+                                          text=f'Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
+                                               self._time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).',
+                                          height=16,
+                                          align='left',
+                                          box=False)
+
+        line_number -= 1
+
+        # Create distance scale label
+        self._distance_scale_label = vp.label(pos=vp.vector(left_margin, line_number, 0),
+                                              text=f'Orbital distance scale: 1/{1/self._dist_scale_factor:.0f}.',
+                                              height=16,
+                                              align='left',
+                                              box=False)
+
+        # Set default canvas back to normal canvas
+        self._canvas.select()
 
     def run(self):
+        """
+        FIXME
+        """
         t = 0
-        dt = 0.01  # Small time step for smooth animation
+        dt = 0.01 * self._time_scale_factor
 
         while True:
             vp.rate(100)
             
             # Update moon's position based on total time elapsed
-            self.moon.update_position(t * TIME_SCALE_FACTOR)
+            self.moon.update_position(t)
             
             # Rotate the moon and earth based on the small time step and their respective angular velocities
-            self.earth.rotate(dt * TIME_SCALE_FACTOR)
-            self.moon.rotate(dt * TIME_SCALE_FACTOR)
+            self.earth.rotate(dt)
+            self.moon.rotate(dt)
             
             t += dt
 
 
 def main():
-    simulation = Simulation()
+    simulation = Simulation(time_scale_factor=50000, dist_scale_factor=0.1)
     simulation.run()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
