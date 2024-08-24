@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>orbits.orbit API documentation</title>
+<meta name="description" content="Orbit Module …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>orbits.orbit</code></h1>
+</header>
+<section id="section-intro">
+<p>Orbit Module</p>
+<p>This module defines classes and data structures for representing orbits
+in the celestial body simulation. It includes abstract base classes and
+specific implementations for orbits, along with their associated parameters
+and visualization elements.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="orbits.orbit.MoonOrbit"><code class="flex name class">
+<span>class <span class="ident">MoonOrbit</span></span>
+<span>(</span><span>dist_scale_factor: float = 1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the orbit of the Moon around Earth.</p>
+<p>This class inherits from the Orbit base class and defines
+specific parameters for the Moon's orbit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dist_scale_factor</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Scaling factor for orbital distance. Defaults to 1.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MoonOrbit(Orbit):
+    &#34;&#34;&#34;
+    Represents the orbit of the Moon around Earth.
+
+    This class inherits from the Orbit base class and defines
+    specific parameters for the Moon&#39;s orbit.
+    &#34;&#34;&#34;
+    sidereal_month: float = 27.321661  # days
+
+    params = OrbitParams(
+        semi_major_axis = 384405,  # km
+        eccentricity = 0.0549,
+        inclination = math.radians(5.145),  # radians
+        period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # secs
+        direction = OrbitDirection.COUNTER_CLOCKWISE)
+
+    def __init__(self, dist_scale_factor: float = 1):
+        &#34;&#34;&#34;
+        Args:
+            dist_scale_factor (float, optional): Scaling factor for orbital distance. Defaults to 1.
+        &#34;&#34;&#34;
+        super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.orbit.MoonOrbit.params"><code class="name">var <span class="ident">params</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.MoonOrbit.sidereal_month"><code class="name">var <span class="ident">sidereal_month</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></b></code>:
+<ul class="hlist">
+<li><code><a title="orbits.orbit.Orbit.a" href="#orbits.orbit.Orbit.a">a</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.angular_velocity" href="#orbits.orbit.Orbit.angular_velocity">angular_velocity</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.b" href="#orbits.orbit.Orbit.b">b</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.calculate_next_point_on_path" href="#orbits.orbit.Orbit.calculate_next_point_on_path">calculate_next_point_on_path</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.orbit_mag" href="#orbits.orbit.Orbit.orbit_mag">orbit_mag</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="orbits.orbit.Orbit"><code class="flex name class">
+<span>class <span class="ident">Orbit</span></span>
+<span>(</span><span>params: <a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a>, dist_scale_factor: float = 1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract base class that defines common properties and methods for all orbits.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
+<dd>Parameters defining the orbit</dd>
+<dt><strong><code>dist_scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>Scaling factor to adjust the displayed orbital distance.</dd>
+</dl>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
+<dd>Parameters defining the orbit</dd>
+<dt><strong><code>dist_scale_factor</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Scaling factor for orbital distance. Defaults to 1.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Orbit(ABC):
+    &#34;&#34;&#34;
+    Abstract base class that defines common properties and methods for all orbits.
+    
+    Attributes:
+        params (OrbitParams): Parameters defining the orbit
+        dist_scale_factor (float): Scaling factor to adjust the displayed orbital distance.
+    &#34;&#34;&#34;
+    def __init__(self, params: OrbitParams, dist_scale_factor: float = 1):
+        &#34;&#34;&#34;
+        Args:
+            params (OrbitParams): Parameters defining the orbit
+            dist_scale_factor (float, optional): Scaling factor for orbital distance. Defaults to 1.
+        &#34;&#34;&#34;
+        self.params: OrbitParams = params
+        self.dist_scale_factor: float = dist_scale_factor
+        self.__orbit_mag: float = 1
+        self.__create_path()
+
+    @property
+    def a(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate the scaled semi-major axis of the orbit.
+
+        Returns:
+            float: Scaled semi-major axis
+        &#34;&#34;&#34;
+        return self.params.semi_major_axis * self.dist_scale_factor
+
+    @property
+    def b(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate the scaled semi-minor axis of the orbit.
+
+        Returns:
+            float: Scaled semi-minor axis
+        &#34;&#34;&#34;
+        return self.a * math.sqrt(1 - self.params.eccentricity**2)
+
+    @property
+    def angular_velocity(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate the angular velocity of the orbit.
+
+        Returns:
+            float: Angular velocity in radians per second
+        &#34;&#34;&#34;
+        av: float = 2 * math.pi / self.params.period
+        if self.params.direction == OrbitDirection.COUNTER_CLOCKWISE:
+            av = -av
+
+        return av
+
+    @property
+    def orbit_mag(self) -&gt; float:
+        &#34;&#34;&#34;
+        Get the current magnitude of the orbit.
+
+        Returns:
+            float: Orbit magnitude
+        &#34;&#34;&#34;
+        return self.__orbit_mag
+
+    def calculate_next_point_on_path(self, angle: float) -&gt; vp.vector:
+        &#34;&#34;&#34;
+        Calculate the next point on the orbit path at the given angle.
+        
+        Args:
+            angle (float): The current angle in radians along the orbit
+            
+        Returns:
+            vp.vector: The 3D position of the body on the orbit
+        &#34;&#34;&#34;
+        # Calculate the radial distance for this angle
+        r = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
+
+        # Calculate position in the x-y-z plane
+        x_zero_inclination = r * math.cos(angle)  # length of max x with no inclination
+        x = x_zero_inclination * math.cos(self.params.inclination)
+        z = r * math.sin(angle)
+        y = x_zero_inclination * math.sin(self.params.inclination)
+
+        next_point = vp.vector(x,y,z)
+        self.__orbit_mag = next_point.mag
+
+        return next_point
+
+    def __create_path(self) -&gt; None:
+        &#34;&#34;&#34;Create the visual representation of the orbit path.&#34;&#34;&#34;
+        orbit_ellipse = vp.curve(color=vp.color.gray(0.5))
+
+        for theta in range(0, 360+1):
+            theta_rad = math.radians(theta)
+            next_point = self.calculate_next_point_on_path(theta_rad)
+            orbit_ellipse.append(next_point)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="orbits.orbit.MoonOrbit" href="#orbits.orbit.MoonOrbit">MoonOrbit</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="orbits.orbit.Orbit.a"><code class="name">prop <span class="ident">a</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate the scaled semi-major axis of the orbit.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Scaled semi-major axis</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def a(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate the scaled semi-major axis of the orbit.
+
+    Returns:
+        float: Scaled semi-major axis
+    &#34;&#34;&#34;
+    return self.params.semi_major_axis * self.dist_scale_factor</code></pre>
+</details>
+</dd>
+<dt id="orbits.orbit.Orbit.angular_velocity"><code class="name">prop <span class="ident">angular_velocity</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate the angular velocity of the orbit.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Angular velocity in radians per second</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def angular_velocity(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate the angular velocity of the orbit.
+
+    Returns:
+        float: Angular velocity in radians per second
+    &#34;&#34;&#34;
+    av: float = 2 * math.pi / self.params.period
+    if self.params.direction == OrbitDirection.COUNTER_CLOCKWISE:
+        av = -av
+
+    return av</code></pre>
+</details>
+</dd>
+<dt id="orbits.orbit.Orbit.b"><code class="name">prop <span class="ident">b</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate the scaled semi-minor axis of the orbit.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Scaled semi-minor axis</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def b(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate the scaled semi-minor axis of the orbit.
+
+    Returns:
+        float: Scaled semi-minor axis
+    &#34;&#34;&#34;
+    return self.a * math.sqrt(1 - self.params.eccentricity**2)</code></pre>
+</details>
+</dd>
+<dt id="orbits.orbit.Orbit.orbit_mag"><code class="name">prop <span class="ident">orbit_mag</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Get the current magnitude of the orbit.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Orbit magnitude</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def orbit_mag(self) -&gt; float:
+    &#34;&#34;&#34;
+    Get the current magnitude of the orbit.
+
+    Returns:
+        float: Orbit magnitude
+    &#34;&#34;&#34;
+    return self.__orbit_mag</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="orbits.orbit.Orbit.calculate_next_point_on_path"><code class="name flex">
+<span>def <span class="ident">calculate_next_point_on_path</span></span>(<span>self, angle: float) ‑> vp.vector</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate the next point on the orbit path at the given angle.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>angle</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current angle in radians along the orbit</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The 3D position of the body on the orbit</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="orbits.orbit.OrbitDirection"><code class="flex name class">
+<span>class <span class="ident">OrbitDirection</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enum to represent the direction of an orbit (clockwise or counter-clockwise).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OrbitDirection(Enum):
+    &#34;&#34;&#34;Enum to represent the direction of an orbit (clockwise or counter-clockwise).&#34;&#34;&#34;
+    CLOCKWISE = auto()
+    COUNTER_CLOCKWISE = auto()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.orbit.OrbitDirection.CLOCKWISE"><code class="name">var <span class="ident">CLOCKWISE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.OrbitDirection.COUNTER_CLOCKWISE"><code class="name">var <span class="ident">COUNTER_CLOCKWISE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="orbits.orbit.OrbitParams"><code class="flex name class">
+<span>class <span class="ident">OrbitParams</span></span>
+<span>(</span><span>semi_major_axis: float, eccentricity: float, inclination: float, period: float, direction: <a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a> = OrbitDirection.COUNTER_CLOCKWISE)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data class to encapsulate the key parameters of a celestial body's orbit</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>semi_major_axis</code></strong> :&ensp;<code>float</code></dt>
+<dd>The semi-major axis of the orbit in km</dd>
+<dt><strong><code>eccentricity</code></strong> :&ensp;<code>float</code></dt>
+<dd>The eccentricity of the orbit (0 &lt;= e &lt; 1)</dd>
+<dt><strong><code>inclination</code></strong> :&ensp;<code>float</code></dt>
+<dd>The inclination of the orbit in radians</dd>
+<dt><strong><code>period</code></strong> :&ensp;<code>float</code></dt>
+<dd>The orbital period in seconds</dd>
+<dt><strong><code>direction</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a></code></dt>
+<dd>The direction of the orbit (clockwise or counter-clockwise)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class OrbitParams:
+    &#34;&#34;&#34;
+    Data class to encapsulate the key parameters of a celestial body&#39;s orbit
+    
+    Attributes:
+        semi_major_axis (float): The semi-major axis of the orbit in km
+        eccentricity (float): The eccentricity of the orbit (0 &lt;= e &lt; 1)
+        inclination (float): The inclination of the orbit in radians
+        period (float): The orbital period in seconds
+        direction (OrbitDirection): The direction of the orbit (clockwise or counter-clockwise)
+    &#34;&#34;&#34;
+    semi_major_axis: float
+    eccentricity: float
+    inclination: float
+    period: float
+    direction: OrbitDirection = OrbitDirection.COUNTER_CLOCKWISE
+
+    @property
+    def inclination_degs(self) -&gt; float:
+        &#34;&#34;&#34;
+        Convert the inclination from radians to degrees.
+
+        Returns:
+            float: Inclination in degrees
+        &#34;&#34;&#34;
+        return math.degrees(self.inclination)
+
+    @property
+    def period_hrs(self) -&gt; float:
+        &#34;&#34;&#34;
+        Convert the period from seconds to hours.
+
+        Returns:
+            float: Period in hours
+        &#34;&#34;&#34;
+        return self.period / SECS_IN_HR
+
+    @property
+    def period_days(self) -&gt; float:
+        &#34;&#34;&#34;
+        Convert the period from seconds to days.
+
+        Returns:
+            float: Period in days
+        &#34;&#34;&#34;
+        return self.period_hrs / HRS_IN_DAY</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.orbit.OrbitParams.direction"><code class="name">var <span class="ident">direction</span> : <a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.OrbitParams.eccentricity"><code class="name">var <span class="ident">eccentricity</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.OrbitParams.inclination"><code class="name">var <span class="ident">inclination</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.OrbitParams.period"><code class="name">var <span class="ident">period</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.OrbitParams.semi_major_axis"><code class="name">var <span class="ident">semi_major_axis</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="orbits.orbit.OrbitParams.inclination_degs"><code class="name">prop <span class="ident">inclination_degs</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Convert the inclination from radians to degrees.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Inclination in degrees</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def inclination_degs(self) -&gt; float:
+    &#34;&#34;&#34;
+    Convert the inclination from radians to degrees.
+
+    Returns:
+        float: Inclination in degrees
+    &#34;&#34;&#34;
+    return math.degrees(self.inclination)</code></pre>
+</details>
+</dd>
+<dt id="orbits.orbit.OrbitParams.period_days"><code class="name">prop <span class="ident">period_days</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Convert the period from seconds to days.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Period in days</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def period_days(self) -&gt; float:
+    &#34;&#34;&#34;
+    Convert the period from seconds to days.
+
+    Returns:
+        float: Period in days
+    &#34;&#34;&#34;
+    return self.period_hrs / HRS_IN_DAY</code></pre>
+</details>
+</dd>
+<dt id="orbits.orbit.OrbitParams.period_hrs"><code class="name">prop <span class="ident">period_hrs</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Convert the period from seconds to hours.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>Period in hours</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def period_hrs(self) -&gt; float:
+    &#34;&#34;&#34;
+    Convert the period from seconds to hours.
+
+    Returns:
+        float: Period in hours
+    &#34;&#34;&#34;
+    return self.period / SECS_IN_HR</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="orbits" href="index.html">orbits</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="orbits.orbit.MoonOrbit" href="#orbits.orbit.MoonOrbit">MoonOrbit</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.orbit.MoonOrbit.params" href="#orbits.orbit.MoonOrbit.params">params</a></code></li>
+<li><code><a title="orbits.orbit.MoonOrbit.sidereal_month" href="#orbits.orbit.MoonOrbit.sidereal_month">sidereal_month</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.orbit.Orbit.a" href="#orbits.orbit.Orbit.a">a</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.angular_velocity" href="#orbits.orbit.Orbit.angular_velocity">angular_velocity</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.b" href="#orbits.orbit.Orbit.b">b</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.calculate_next_point_on_path" href="#orbits.orbit.Orbit.calculate_next_point_on_path">calculate_next_point_on_path</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.orbit_mag" href="#orbits.orbit.Orbit.orbit_mag">orbit_mag</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.orbit.OrbitDirection.CLOCKWISE" href="#orbits.orbit.OrbitDirection.CLOCKWISE">CLOCKWISE</a></code></li>
+<li><code><a title="orbits.orbit.OrbitDirection.COUNTER_CLOCKWISE" href="#orbits.orbit.OrbitDirection.COUNTER_CLOCKWISE">COUNTER_CLOCKWISE</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></h4>
+<ul class="two-column">
+<li><code><a title="orbits.orbit.OrbitParams.direction" href="#orbits.orbit.OrbitParams.direction">direction</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.eccentricity" href="#orbits.orbit.OrbitParams.eccentricity">eccentricity</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.inclination" href="#orbits.orbit.OrbitParams.inclination">inclination</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.inclination_degs" href="#orbits.orbit.OrbitParams.inclination_degs">inclination_degs</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.period" href="#orbits.orbit.OrbitParams.period">period</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.period_days" href="#orbits.orbit.OrbitParams.period_days">period_days</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.period_hrs" href="#orbits.orbit.OrbitParams.period_hrs">period_hrs</a></code></li>
+<li><code><a title="orbits.orbit.OrbitParams.semi_major_axis" href="#orbits.orbit.OrbitParams.semi_major_axis">semi_major_axis</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>
