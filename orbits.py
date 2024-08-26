@@ -26,7 +26,7 @@ dist_scale_factor: This factor decreases the orbital distance vs. the actual dis
 import os
 import sys
 import math
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
 import argparse
@@ -34,7 +34,7 @@ import vpython as vp
 
 # Constants
 SECS_IN_HR: int = 3600
-HRS_IN_DAY: float = 23.9344696
+HRS_IN_DAY: int = 24
 
 
 class OrbitDirection(Enum):
@@ -59,14 +59,17 @@ class OrbitParams:
 
     @property
     def inclination_degs(self) -> float:
+        """FIXME"""
         return math.degrees(self.inclination)
 
     @property
     def period_hrs(self) -> float:
+        """FIXME"""
         return self.period / SECS_IN_HR
 
     @property
     def period_days(self) -> float:
+        """FIXME"""
         return self.period_hrs / HRS_IN_DAY
 
 
@@ -152,60 +155,58 @@ class MoonOrbit(Orbit):
         inclination = math.radians(5.145),  # radians
         period = period_days * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
-    
+
     def __init__(self, dist_scale_factor: float = 1):
         super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
 
 
+@dataclass
+class CelestialBodyParams:
+    """
+    Data class to encapsulate the key parameters of a celestial body
+    
+    Attributes:
+        radius (float): Radius of the celestial body in km
+        tilt (float): Axial tilt of the celestial body in radians
+        rotation_period (float): Rotation period of the body in seconds
+        texture (object): Texture object for the celestial body
+    """
+    radius: float
+    tilt: float
+    rotation_period: float
+    texture: object
+
+    @property
+    def tilt_degrees(self) -> float:
+        """FIXME"""
+        return math.degrees(self.tilt)
+
 
 class CelestialBody(ABC):
-    """Base class for visualizing and animating celestial bodies"""
-    def __init__(self, position=vp.vector(0, 0, 0)):
-        self.sphere = vp.sphere(pos=position, radius=self.radius, texture=self.texture)
+    """Abstract base class for visualizing and animating celestial bodies"""
+    def __init__(self, params: CelestialBodyParams, position=vp.vector(0, 0, 0)):
+        self.params = params
+        self.sphere = vp.sphere(pos=position, radius=self.params.radius, texture=self.params.texture)
         self.axis = self._calculate_axis()
         self.axis_line = self._create_axis_line()
 
     @property
-    @abstractmethod
-    def radius(self) -> float:
-        """Get the radius of the celestial body in km"""
-        ...
-
-    @property
-    @abstractmethod
-    def rotation_period(self) -> float:
-        """Get the rotation period of the body in seconds"""
-        ...
-
-    @property
-    @abstractmethod
-    def texture(self) -> object:
-        """FIXME"""
-        ...
-
-    @property
-    @abstractmethod
-    def tilt(self) -> float:
-        """FIXME"""
-        ...
-
-    @property
     def angular_velocity(self) -> float:
         """FIXME"""
-        return 2 * math.pi / self.rotation_period
+        return 2 * math.pi / self.params.rotation_period
 
     def _calculate_axis(self):
         """FIXME"""
-        assert self.tilt
-        return vp.vector(math.sin(self.tilt), math.cos(self.tilt), 0)
+        assert self.params.tilt
+        return vp.vector(math.sin(self.params.tilt), math.cos(self.params.tilt), 0)
 
     def _create_axis_line(self):
         """FIXME"""
-        assert self.radius
-        axis_length = self.radius * 3
+        assert self.params.radius
+        axis_length = self.params.radius * 3
         return vp.cylinder(pos=self.sphere.pos - axis_length/2 * self.axis,
                            axis=axis_length * self.axis,
-                           radius=self.radius/50,
+                           radius=self.params.radius/50,
                            color=vp.color.white)
 
     def rotate(self, dt):
@@ -220,12 +221,18 @@ class CelestialBody(ABC):
 
 
 class Earth(CelestialBody):
-    """FIXME"""
-    radius: float = 6378  # km
-    tilt: float = math.radians(23.44)  # radians
-    sidereal_day: float = HRS_IN_DAY  # hours
-    rotation_period: float = sidereal_day * SECS_IN_HR  # seconds
-    texture: object = vp.textures.earth
+    """Representation of Earth"""
+    sidereal_day: float = 23.9344696  # hours
+
+    params = CelestialBodyParams(
+        radius = 6378,  # km
+        tilt = math.radians(23.44),  # radians
+        rotation_period = sidereal_day * SECS_IN_HR,  # seconds
+        texture=vp.textures.earth
+    )
+
+    def __init__(self, position=vp.vector(0, 0, 0)):
+        super().__init__(params=self.params, position=position)
 
 
 class Moon(CelestialBody):
@@ -233,19 +240,17 @@ class Moon(CelestialBody):
     Represents the Earth's moon with its own orbit and visualization.
     
     Attributes:
-        radius (float): Radius of the moon in km
-        tilt (float): Axial tilt of the moon in radians
-        sidereal_month (float): Moon's rotation period in days
-        rotation_period (float): Moon's rotation period in seconds
-        texture (object): VPython texture object for the moon
+        FIXME
         orbit (Orbit): Object handling the moon's orbital mechanics
         arrow (vp.arrow): Visual indicator of moon's orientation
     """
-    radius: float = 1738  # km
-    tilt: float  = math.radians(6.68)  # radians
     sidereal_month: float = 27.321661  # days
-    rotation_period: float = sidereal_month * HRS_IN_DAY * SECS_IN_HR  # seconds
-    texture: object = 'images/moon_texture.jpg'
+
+    params = CelestialBodyParams(
+        radius = 1738,  # km
+        tilt = math.radians(6.68),  # radians
+        rotation_period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # seconds
+        texture = 'images/moon_texture.jpg')
 
     def __init__(self, dist_scale_factor: float = 1):
         """
@@ -255,12 +260,12 @@ class Moon(CelestialBody):
             dist_scale_factor (float): Factor to scale down the orbital distances
         """
         self.orbit = MoonOrbit(dist_scale_factor)
-        super().__init__(position=vp.vector(self.orbit.a, 0, 0))
+        super().__init__(params=self.params, position=vp.vector(self.orbit.a, 0, 0))
         self.arrow = self._create_arrow()
 
     def _create_arrow(self):
         """FIXME"""
-        arrow_length = self.radius * 2
+        arrow_length = self.params.radius * 2
         return vp.arrow(pos=self.sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,
@@ -412,14 +417,14 @@ class OrbitSimulator:
         line_number -= 2
 
         # Create Earth info label
-        self._create_info_label(f'Earth Info:\n  Radius: {self._earth.radius:,.0f} km\n  Tilt: {
-            math.degrees(self._earth.tilt):.1f}°\n  Sidereal day: {self._earth.sidereal_day:.2f} hrs',
+        self._create_info_label(f'Earth Info:\n  Radius: {self._earth.params.radius:,.0f} km\n  Tilt: {
+            self._earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self._earth.sidereal_day:.2f} hrs',
                                 left_margin, line_number)
         line_number -= 5
 
         # Create Moon info label
-        self._create_info_label(f'Moon Info:\n  Radius: {self._moon.radius:,.0f} km\n  Tilt: {
-            math.degrees(self._moon.tilt):.1f}°\n  Sidereal month: {self._moon.sidereal_month:.2f} days',
+        self._create_info_label(f'Moon Info:\n  Radius: {self._moon.params.radius:,.0f} km\n  Tilt: {
+            self._moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self._moon.sidereal_month:.2f} days',
                                 left_margin, line_number)
         line_number -= 5
 
@@ -462,6 +467,7 @@ class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
 
 
 def main():
+    """FIXME"""
     parser = argparse.ArgumentParser(prog=os.path.basename(__file__),
                                      formatter_class=CustomArgparseFormatter,
                                      description=__doc__)
