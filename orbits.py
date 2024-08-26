@@ -166,7 +166,7 @@ class CelestialBody(ABC):
 
     @property
     @abstractmethod
-    def texture(self) -> float:
+    def texture(self) -> object:
         ...
 
     @property
@@ -290,13 +290,15 @@ class OrbitSimulator:
 
         self._create_orientation_figure()
         self._info_canvas: vp.canvas
-        self._time_scale_label: vp.label
-        self._distance_scale_label: vp.label
         self._setup_info_canvas()
 
+        # rotate camera around the x axis to see the orbits better (not straight on)
+        camera_rotate_angle = 2  # degrees
+        self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+
     def _create_orientation_figure(self) -> None:
-        # Define orientation figure size and position using the largest object on the scene
-        # Currently this is the Moon's orbit, be will change. FIXME
+        # Define orientation figure size and position using the largest object on the canvas.
+        # Currently this is the Moon's orbit.  This will need to change when adding more orbits.
         canvas_mag: float = self._moon.orbit.orbit_mag
         orient_size: float = canvas_mag/8
         orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
@@ -336,6 +338,13 @@ class OrbitSimulator:
                  opacity=0,
                  box=False)
 
+    def _create_info_label(self, text: str, left_margin: int, line_number: int) -> vp.label:
+        return vp.label(pos=vp.vector(left_margin, line_number, 0),
+                                      text=text,
+                                      height=16,
+                                      align='left',
+                                      box=False)
+
     def _setup_info_canvas(self) -> None:
         # Create canvas and configure
         width = 400
@@ -353,21 +362,35 @@ class OrbitSimulator:
         line_number: int = int(self._info_canvas.range * height/width - 1)
 
         # Create time scale label
-        self._time_scale_label = vp.label(pos=vp.vector(left_margin, line_number, 0),
-                                          text=f'Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
-                                               self._time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).',
-                                          height=16,
-                                          align='left',
-                                          box=False)
-
+        self._create_info_label(f'Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
+              self._time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).',
+              left_margin, line_number)
         line_number -= 1
 
         # Create distance scale label
-        self._distance_scale_label = vp.label(pos=vp.vector(left_margin, line_number, 0),
-                                              text=f'Orbital distance scale: 1/{1/self._dist_scale_factor:.0f}.',
-                                              height=16,
-                                              align='left',
-                                              box=False)
+        self._create_info_label(f'Orbital distance scale: 1/{1/self._dist_scale_factor:.0f}.',
+                                left_margin, line_number)
+        line_number -= 2
+
+        # Create Earth info label
+        self._create_info_label(f'Earth Info:\n  Radius: {self._earth.radius:,.0f} km\n  Tilt: {
+            self._earth.tilt_degrees:.1f}°\n  Sidereal day: {self._earth.sidereal_day:.2f} hrs',
+                                left_margin, line_number)
+        line_number -= 5
+
+        # Create Moon info label
+        self._create_info_label(f'Moon Info:\n  Radius: {self._moon.radius:,.0f} km\n  Tilt: {
+            self._moon.tilt_degrees:.1f}°\n  Sidereal month: {self._moon.sidereal_month:.2f} days',
+                                left_margin, line_number)
+        line_number -= 5
+
+        # Create Moon's Orbit info label
+        self._create_info_label(f"Moon's Orbit Info:\n  Semi-major axis: {
+            self._moon.orbit.semi_major_axis:,.0f} km\n  Eccentricity: {
+            self._moon.orbit.eccentricity:.3f}\n  Inclination: {
+            self._moon.orbit.inclination_degrees:.2f}°\n  Period: {self._moon.orbit.period_days:.2f} days",
+                                left_margin, line_number)
+        line_number -= 6
 
         # Set default canvas back to normal canvas
         self._canvas.select()
@@ -377,18 +400,14 @@ class OrbitSimulator:
         FIXME
         """
 
-        # rotate camera around the x axis to see the orbit better (not straight on)
-        camera_rotate_angle = 2  # degrees
-        self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
-
         # Initialize simulation loop time variables
-        t = 0
-        dt = 0.01 * self._time_scale_factor
+        t: float = 0
+        dt: float = 0.01 * self._time_scale_factor
 
         while True:
             vp.rate(100)
 
-            # Update moon's position based on total time elapsed
+            # Update Moon's position based on total time elapsed
             self._moon.update_position(t)
 
             # Rotate the moon and earth based on the small time step and their respective angular velocities
@@ -398,7 +417,8 @@ class OrbitSimulator:
             t += dt
 
 
-class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                              argparse.RawDescriptionHelpFormatter):
     """
     Custom class for `argparse` that combines two `formatter_class` classes.
     """
