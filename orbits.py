@@ -141,9 +141,6 @@ class MoonOrbit(Orbit):
     period: float = period_days * HRS_IN_DAY * SECS_IN_HR
     direction: OrbitDirection = OrbitDirection.COUNTER_CLOCKWISE
 
-    def __init__(self, dist_scale_factor: float = 1):
-        super().__init__(dist_scale_factor)
-
 
 class CelestialBody(ABC):
     def __init__(self, position=vp.vector(0, 0, 0)):
@@ -205,9 +202,6 @@ class Earth(CelestialBody):
     sidereal_day: float = HRS_IN_DAY  # hours
     rotation_period: float = sidereal_day * SECS_IN_HR  # seconds
     texture: object = vp.textures.earth
-
-    def __init__(self):
-        super().__init__()
 
 
 class Moon(CelestialBody):
