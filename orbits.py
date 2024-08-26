@@ -1,9 +1,34 @@
+#!/usr/bin/env python
 """
-FIXME
+Welcome to the Orbit Simulator.
+
+This program simulates the rotation and orbital physics of celestial bodies.  For each celestial
+body, the following are visualized:
+    - Rotation period around its axis
+    - Axial tilt with respect to its orbit
+    - Orbital inclination
+    - Orbital period
+    - Orbital radius
+    - Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
+
+To ease visualizing the simulation, there are two scaling factors that can *optionally* be used
+when running this program:
+
+time_scale_factor: This factor increases the simulation's time reference vs. real-time.
+                   This allows the simulation to progress faster than reality so
+                   that observing rotations and orbits is possible.
+
+dist_scale_factor: This factor decreases the orbital distance vs. the actual distance.
+                   This allows easier viewing of the planets. Without this scaling, planets
+                   are generally too small to view because orbital distances are relatively
+                   much larger than the planet sizes.
 """
+import os
+import sys
 import math
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+import argparse
 import vpython as vp
 
 # Constants
@@ -12,6 +37,9 @@ HRS_IN_DAY: float = 23.9344696
 
 
 class OrbitDirection(Enum):
+    """
+    Enum for orbit direction
+    """
     CLOCKWISE = auto()
     COUNTER_CLOCKWISE = auto()
 
@@ -28,11 +56,6 @@ class Orbit(ABC):
 
     @property
     @abstractmethod
-    def direction(self) -> OrbitDirection:
-        ...
-
-    @property
-    @abstractmethod
     def semi_major_axis(self) -> float:
         ...
 
@@ -43,13 +66,22 @@ class Orbit(ABC):
 
     @property
     @abstractmethod
-    def inclination(self) -> float:
+    def inclination_degrees(self) -> float:
         ...
 
     @property
     @abstractmethod
     def period(self) -> float:
         ...
+
+    @property
+    @abstractmethod
+    def direction(self) -> OrbitDirection:
+        ...
+
+    @property
+    def inclination(self) -> float:
+        return math.radians(self.inclination_degrees)
 
     @property
     def orbit_mag(self) -> float:
@@ -76,7 +108,7 @@ class Orbit(ABC):
             av = -av
 
         return av
-    
+
     def calculate_next_point_on_path(self, angle: float) -> vp.vector:
         # Calculate the radial distance for this angle
         r = self.a * (1 - self.eccentricity**2) / (1 + self.eccentricity * math.cos(angle))
@@ -105,7 +137,6 @@ class MoonOrbit(Orbit):
     semi_major_axis: float = 384405  # km
     eccentricity: float = 0.0549
     inclination_degrees: float = 5.145  # degrees
-    inclination: float = math.radians(inclination_degrees)  # radians
     period_days: float = 27.321661  # sidereal month
     period: float = period_days * HRS_IN_DAY * SECS_IN_HR
     direction: OrbitDirection = OrbitDirection.COUNTER_CLOCKWISE
@@ -218,30 +249,44 @@ class Moon(CelestialBody):
         self.arrow.axis = vp.norm(-self.sphere.pos) * self.arrow.axis.mag
 
 
-class Simulation:
+class OrbitSimulator:
+    """
+    This class is the primary class for setting up and running the Orbit Simulator.
+    """
     DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY
-    """
-    Determines how sped up the simulation is vs. real-time.
-    """
+    """The default value for the time_scale_factor."""
 
     DEFAULT_DIST_SCALE_FACTOR: float = 0.1
-    """
-    This will reduce the orbit distance by this scale
-    """
+    """The default value for the dist_scale_factor."""
+
+    MAX_TIME_SCALE_FACTOR: float = 1_000_000
+    """The max value allowed for the time_scale_factor."""
+
+    MIN_DIST_SCALE_FACTOR: float = 0.1
+    """The min value allowed for the dist_scale_factor."""
 
     def __init__(self,
                  time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR,
                  dist_scale_factor: float = DEFAULT_DIST_SCALE_FACTOR):
+        """
+        Args:
+            time_scale_factor (float): How much to scale up the sense of time.
+            dist_scale_factor (float): How much to scale down the orbital distances.
+        """
+        if not 1 <= time_scale_factor <= self.MAX_TIME_SCALE_FACTOR:
+            raise ValueError(f'time_scale_factor must be between 1 and {self.MAX_TIME_SCALE_FACTOR}')
+        if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
+            raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
+
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
-
-        self._canvas: vp.canvas = vp.canvas(title='Moon Orbiting Earth',
+        self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
                                             width=1600,
                                             height=1000,
                                             align='left')
 
-        self.earth = Earth()
-        self.moon = Moon(dist_scale_factor)
+        self._earth = Earth()
+        self._moon = Moon(dist_scale_factor)
 
         self._create_orientation_figure()
         self._info_canvas: vp.canvas
@@ -252,20 +297,44 @@ class Simulation:
     def _create_orientation_figure(self) -> None:
         # Define orientation figure size and position using the largest object on the scene
         # Currently this is the Moon's orbit, be will change. FIXME
-        canvas_mag: float = self.moon.orbit.orbit_mag
+        canvas_mag: float = self._moon.orbit.orbit_mag
         orient_size: float = canvas_mag/8
         orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
 
         # Create the arrows in each direction of x,y,z axis
-        vp.arrow(pos=orient_pos, axis=vp.vector(orient_size, 0, 0), color=vp.color.red, round=True, emissive=True)
-        vp.arrow(pos=orient_pos, axis=vp.vector(0, orient_size, 0), color=vp.color.green, round=True, emissive=True)
-        vp.arrow(pos=orient_pos, axis=vp.vector(0, 0, orient_size), color=vp.color.yellow, round=True, emissive=True)
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(orient_size, 0, 0),
+                 color=vp.color.red,
+                 round=True,
+                 emissive=True)
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(0, orient_size, 0),
+                 color=vp.color.green,
+                 round=True,
+                 emissive=True)
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(0, 0, orient_size),
+                 color=vp.color.yellow,
+                 round=True,
+                 emissive=True)
 
         # Label the arrows
         label_distance = orient_size * 1.1
-        vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0), text='X', color=vp.color.red, box=False)
-        vp.label(pos=orient_pos + vp.vector(0, label_distance, 0), text='Y', color=vp.color.green, box=False)
-        vp.label(pos=orient_pos + vp.vector(0, 0, label_distance), text='Z', color=vp.color.yellow, box=False)
+        vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
+                 text='X',
+                 color=vp.color.red,
+                 opacity=0,
+                 box=False)
+        vp.label(pos=orient_pos + vp.vector(0, label_distance, 0),
+                 text='Y',
+                 color=vp.color.green,
+                 opacity=0,
+                 box=False)
+        vp.label(pos=orient_pos + vp.vector(0, 0, label_distance),
+                 text='Z',
+                 color=vp.color.yellow,
+                 opacity=0,
+                 box=False)
 
     def _setup_info_canvas(self) -> None:
         # Create canvas and configure
@@ -307,25 +376,56 @@ class Simulation:
         """
         FIXME
         """
+
+        # rotate camera around the x axis to see the orbit better (not straight on)
+        camera_rotate_angle = 2  # degrees
+        self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+
+        # Initialize simulation loop time variables
         t = 0
         dt = 0.01 * self._time_scale_factor
 
         while True:
             vp.rate(100)
-            
+
             # Update moon's position based on total time elapsed
-            self.moon.update_position(t)
-            
+            self._moon.update_position(t)
+
             # Rotate the moon and earth based on the small time step and their respective angular velocities
-            self.earth.rotate(dt)
-            self.moon.rotate(dt)
-            
+            self._earth.rotate(dt)
+            self._moon.rotate(dt)
+
             t += dt
 
 
+class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+    """
+    Custom class for `argparse` that combines two `formatter_class` classes.
+    """
+    ...
+
+
 def main():
-    simulation = Simulation(time_scale_factor=50000, dist_scale_factor=0.1)
-    simulation.run()
+    parser = argparse.ArgumentParser(prog=os.path.basename(__file__),
+                                     formatter_class=CustomArgparseFormatter,
+                                     description=__doc__)
+    parser.add_argument('-t', '--time-scale-factor',
+                        type=float,
+                        default=int(OrbitSimulator.DEFAULT_TIME_SCALE_FACTOR),
+                        help='How much to scale up the sense of time.')
+    parser.add_argument('-d', '--dist-scale-factor',
+                        type=float,
+                        default=OrbitSimulator.DEFAULT_DIST_SCALE_FACTOR,
+                        help='How much to scale down the orbital distances.')
+    args = parser.parse_args()
+
+    try:
+        simulation = OrbitSimulator(time_scale_factor=args.time_scale_factor,
+                                    dist_scale_factor=args.dist_scale_factor)
+        simulation.run()
+    except ValueError as e:
+        print(f'Error: {e}')
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
