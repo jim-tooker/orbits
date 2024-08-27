@@ -226,6 +226,7 @@ class OrbitSimulator:
         vp.button(pos=self._info_canvas.title_anchor,
                   text='                                Quit Simulation                                ',
                   color=vp.color.red,
+                  background=vp.color.gray(0.9),
                   bind=self._handle_quit_button)
 
         # Set default canvas back to normal canvas
