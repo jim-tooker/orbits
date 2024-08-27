@@ -60,6 +60,8 @@ class OrbitSimulator:
         if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
             raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
 
+        self._quit_simulation = False
+
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
         self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
@@ -77,6 +79,20 @@ class OrbitSimulator:
         # rotate camera around the x axis to see the orbits better (not straight on)
         camera_rotate_angle = 2  # degrees
         self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+
+    def __del__(self) -> None:
+        """
+        Deletes the canvases and sets the reference to None to allow canvases to disappear from GUI
+        """
+        if self._canvas:
+            self._canvas.delete()
+
+        if self._info_canvas:
+            self._info_canvas.delete()
+
+    def quit_simulation(self) -> None:
+        """Stops the VPython server."""
+        self._quit_simulation = True
 
     def _create_orientation_figure(self) -> None:
         """Create orientation arrows and labels to show the x, y, and z axes."""
@@ -139,6 +155,17 @@ class OrbitSimulator:
                                       align='left',
                                       box=False)
 
+    def _handle_quit_button(self, button: vp.button) -> None:
+        """Handles quit simulation button"""
+        self.quit_simulation()
+
+    def _stop_vp_server(self) -> None:
+        """Stops the VPython server."""
+        # We don't import vp_services until needed, because importing it will start
+        # the server, if not started already.
+        import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
+        vp_services.stop_server()
+    
     def _setup_info_canvas(self) -> None:
         """
         Set up the information canvas with labels displaying simulation details.
@@ -149,7 +176,8 @@ class OrbitSimulator:
         """
         # Create canvas and configure
         width = 400
-        height = 1000
+        height_of_quit_button = 25
+        height = 1000 - height_of_quit_button
         self._info_canvas = vp.canvas(width=width, height=height, align='left')
         self._info_canvas.range = 10
         self._info_canvas.userzoom = False
@@ -194,6 +222,12 @@ class OrbitSimulator:
                                 left_margin, line_number)
         line_number -= 6
 
+        # Add the Quit simulation button, and bind it to _handle_quit_button()
+        vp.button(pos=self._info_canvas.title_anchor,
+                  text='                                Quit Simulation                                ',
+                  color=vp.color.red,
+                  bind=self._handle_quit_button)
+
         # Set default canvas back to normal canvas
         self._canvas.select()
 
@@ -208,7 +242,7 @@ class OrbitSimulator:
         t: float = 0
         dt: float = 0.01 * self._time_scale_factor
 
-        while True:
+        while self._quit_simulation is False:
             vp.rate(100)
 
             # Update Moon's position based on total time elapsed
@@ -219,6 +253,9 @@ class OrbitSimulator:
             self._moon.rotate(dt)
 
             t += dt
+
+        # Exit simulation
+        self._stop_vp_server()
 
 
 class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
@@ -237,7 +274,7 @@ def main() -> None:
     Raises:
         SystemExit: If there's a ValueError during OrbitSimulator initialization.
     """
-    parser = argparse.ArgumentParser(prog=os.path.basename(__file__),
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(prog=os.path.basename(__file__),
                                      formatter_class=CustomArgparseFormatter,
                                      description=__doc__)
     parser.add_argument('-t', '--time-scale-factor',
@@ -251,12 +288,13 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        simulation = OrbitSimulator(time_scale_factor=args.time_scale_factor,
+        simulation: OrbitSimulator = OrbitSimulator(time_scale_factor=args.time_scale_factor,
                                     dist_scale_factor=args.dist_scale_factor)
         simulation.run()
     except ValueError as e:
         print(f'Error: {e}')
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
