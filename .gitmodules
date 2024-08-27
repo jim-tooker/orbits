@@ -1,0 +1,3 @@
+[submodule "vpython-stubs"]
+	path = vpython-stubs
+	url = https://github.com/jim-tooker/vpython-stubs.git

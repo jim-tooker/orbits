@@ -1,5 +1,5 @@
-## Orbit Simulator
-(Package `orbits`)
+"""
+Welcome to the Orbit Simulator.
 
 This program simulates the rotation and orbital physics of celestial bodies.  For each celestial
 body, the following are visualized:
@@ -21,16 +21,6 @@ when running this program:
                    This allows easier viewing of the planets. Without this scaling, planets  
                    are generally too small to view because orbital distances are relatively  
                    much larger than the planet sizes.  
+"""
 
-## Modules:
-- `orbit_simulator`: Main module responsible for setting up and running the orbit simulation
-- `celestial_body`: Defines classes and data structures for representing celestial bodies
-- `orbit`: Defines classes and data structures for representing orbits
-- `constants`: Constants for the orbits package
-
-## Documentation
-For detailed API documentation, see:
-[Orbit Simulator API Documentation](https://jim-tooker.github.io/orbits/docs/orbits/index.html)
-
-## Sample Screenshot
--add screenshot-
+__author__ = "Jim Tooker"
