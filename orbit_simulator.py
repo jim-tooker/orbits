@@ -14,21 +14,21 @@ body, the following are visualized:
 To ease visualizing the simulation, there are two scaling factors that can *optionally* be used
 when running this program:
 
-time_scale_factor: This factor increases the simulation's time reference vs. real-time.
-                   This allows the simulation to progress faster than reality so
-                   that observing rotations and orbits is possible.
+time_scale_factor: This factor increases the simulation's time reference vs. real-time.  
+                   This allows the simulation to progress faster than reality so  
+                   that observing rotations and orbits is possible.  
 
-dist_scale_factor: This factor decreases the orbital distance vs. the actual distance.
-                   This allows easier viewing of the planets. Without this scaling, planets
-                   are generally too small to view because orbital distances are relatively
-                   much larger than the planet sizes.
+dist_scale_factor: This factor decreases the orbital distance vs. the actual distance.  
+                   This allows easier viewing of the planets. Without this scaling, planets  
+                   are generally too small to view because orbital distances are relatively  
+                   much larger than the planet sizes.  
 """
 import os
 import sys
 import math
 import argparse
 import vpython as vp
-from orbits.celestial_bodies import Earth, Moon
+from orbits.celestial_body import Earth, Moon
 from orbits.constants import HRS_IN_DAY, SECS_IN_HR
 
 
@@ -79,7 +79,7 @@ class OrbitSimulator:
         self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
 
     def _create_orientation_figure(self) -> None:
-        """FIXME"""
+        """Create orientation arrows and labels to show the x, y, and z axes."""
         # Define orientation figure size and position using the largest object on the canvas.
         # Currently this is the Moon's orbit.  This will need to change when adding more orbits.
         canvas_mag: float = self._moon.orbit.orbit_mag
@@ -122,7 +122,17 @@ class OrbitSimulator:
                  box=False)
 
     def _create_info_label(self, text: str, left_margin: int, line_number: int) -> vp.label:
-        """FIXME"""
+        """
+        Create a label with given text at specified position on the info canvas.
+
+        Args:
+            text (str): The text to display on the label.
+            left_margin (int): The left margin position for the label.
+            line_number (int): The vertical position (line number) for the label.
+
+        Returns:
+            vp.label: The created label object.
+        """
         return vp.label(pos=vp.vector(left_margin, line_number, 0),
                                       text=text,
                                       height=16,
@@ -130,7 +140,13 @@ class OrbitSimulator:
                                       box=False)
 
     def _setup_info_canvas(self) -> None:
-        """FIXME"""
+        """
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the Earth and Moon.
+        """
         # Create canvas and configure
         width = 400
         height = 1000
@@ -181,9 +197,13 @@ class OrbitSimulator:
         # Set default canvas back to normal canvas
         self._canvas.select()
 
-    def run(self):
-        """Execute the main simulation loop, updating positions of celestial bodies"""
+    def run(self) -> None:
+        """
+        Execute the main simulation loop, updating positions of celestial bodies.
 
+        This method runs indefinitely, updating the positions and rotations of
+        the Earth and Moon based on the elapsed simulation time.
+        """
         # Initialize simulation loop time variables
         t: float = 0
         dt: float = 0.01 * self._time_scale_factor
@@ -207,8 +227,16 @@ class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
     ...
 
 
-def main():
-    """FIXME"""
+def main() -> None:
+    """
+    Parse command-line arguments and run the orbit simulation.
+
+    This function creates an OrbitSimulator instance with the specified
+    parameters, and runs the simulation.
+
+    Raises:
+        SystemExit: If there's a ValueError during OrbitSimulator initialization.
+    """
     parser = argparse.ArgumentParser(prog=os.path.basename(__file__),
                                      formatter_class=CustomArgparseFormatter,
                                      description=__doc__)
