@@ -33,4 +33,6 @@ For detailed API documentation, see:
 [Orbit Simulator API Documentation](https://jim-tooker.github.io/orbits/docs/orbits/index.html)
 
 ## Sample Screenshot
--add screenshot-
+<img width="1509" alt="orbits-screenshot" src="https://github.com/user-attachments/assets/abca1b0c-a3c6-4a7e-9778-f43632b80673">
+
+
