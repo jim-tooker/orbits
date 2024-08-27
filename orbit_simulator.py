@@ -60,7 +60,7 @@ class OrbitSimulator:
         if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
             raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
 
-        self._quit_simulation = False
+        self._quit_simulation: bool = False
 
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
@@ -69,15 +69,15 @@ class OrbitSimulator:
                                             height=1000,
                                             align='left')
 
-        self._earth = Earth()
-        self._moon = Moon(dist_scale_factor)
+        self._earth: Earth = Earth()
+        self._moon: Moon = Moon(dist_scale_factor)
 
         self._create_orientation_figure()
         self._info_canvas: vp.canvas
         self._setup_info_canvas()
 
         # rotate camera around the x axis to see the orbits better (not straight on)
-        camera_rotate_angle = 2  # degrees
+        camera_rotate_angle: float = 2  # degrees
         self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
 
     def __del__(self) -> None:
@@ -120,7 +120,7 @@ class OrbitSimulator:
                  emissive=True)
 
         # Label the arrows
-        label_distance = orient_size * 1.1
+        label_distance: float = orient_size * 1.1
         vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
                  text='X',
                  color=vp.color.red,
@@ -175,9 +175,9 @@ class OrbitSimulator:
         the Earth and Moon.
         """
         # Create canvas and configure
-        width = 400
-        height_of_quit_button = 25
-        height = 1000 - height_of_quit_button
+        width: int = 400
+        height_of_quit_button: int = 25
+        height: int = 1000 - height_of_quit_button
         self._info_canvas = vp.canvas(width=width, height=height, align='left')
         self._info_canvas.range = 10
         self._info_canvas.userzoom = False

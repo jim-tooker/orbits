@@ -42,12 +42,17 @@ class CelestialBodyParams:
 
 
 class CelestialBody(ABC):
-    """Abstract base class for visualizing and animating celestial bodies"""
+    """
+    Abstract base class for visualizing and animating celestial bodies
+    
+    Attributes:
+        params (CelestialBodyParams): Parameters defining the celestial body.
+    """
     def __init__(self, params: CelestialBodyParams, position: vp.vector = vp.vector(0, 0, 0)):
-        self.params = params
-        self.sphere = vp.sphere(pos=position, radius=self.params.radius, texture=self.params.texture)
-        self.axis = self._calculate_axis()
-        self.axis_line = self._create_axis_line()
+        self.params: CelestialBodyParams = params
+        self._sphere: vp.sphere = vp.sphere(pos=position, radius=self.params.radius, texture=self.params.texture)
+        self._axis: vp.vector = self._calculate_axis()
+        self._axis_line: vp.cylinder = self._create_axis_line()
 
     @property
     def angular_velocity(self) -> float:
@@ -75,9 +80,9 @@ class CelestialBody(ABC):
         Returns:
             vp.cylinder: A cylinder object representing the axis.
         """
-        axis_length = self.params.radius * 3
-        return vp.cylinder(pos=self.sphere.pos - axis_length/2 * self.axis,
-                           axis=axis_length * self.axis,
+        axis_length: float = self.params.radius * 3
+        return vp.cylinder(pos=self._sphere.pos - axis_length/2 * self._axis,
+                           axis=axis_length * self._axis,
                            radius=self.params.radius/50,
                            color=vp.color.white)
 
@@ -88,8 +93,8 @@ class CelestialBody(ABC):
         Args:
             dt (float): The small time increment (seconds) to rotate by.
         """
-        self.sphere.rotate(angle=self.angular_velocity * dt, axis=self.axis, origin=self.sphere.pos)
-        self.axis_line.rotate(angle=self.angular_velocity * dt, axis=self.axis, origin=self.sphere.pos)
+        self._sphere.rotate(angle=self.angular_velocity * dt, axis=self._axis, origin=self._sphere.pos)
+        self._axis_line.rotate(angle=self.angular_velocity * dt, axis=self._axis, origin=self._sphere.pos)
 
 
 class Earth(CelestialBody):
@@ -141,9 +146,9 @@ class Moon(CelestialBody):
         Args:
             dist_scale_factor (float): Factor to scale down the orbital distances
         """
-        self.orbit = MoonOrbit(dist_scale_factor)
+        self.orbit: MoonOrbit = MoonOrbit(dist_scale_factor)
         super().__init__(params=self.params, position=vp.vector(self.orbit.a, 0, 0))
-        self.arrow = self._create_arrow()
+        self.arrow: vp.arrow = self._create_arrow()
 
     def _create_arrow(self) -> vp.arrow:
         """
@@ -152,8 +157,8 @@ class Moon(CelestialBody):
         Returns:
             vp.arrow: An arrow object pointing towards Earth.
         """
-        arrow_length = self.params.radius * 2
-        return vp.arrow(pos=self.sphere.pos,
+        arrow_length: float = self.params.radius * 2
+        return vp.arrow(pos=self._sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,
                         round=True)
@@ -165,15 +170,15 @@ class Moon(CelestialBody):
         Args:
             t (float): The current simulation time.
         """
-        theta = self.orbit.angular_velocity * t
+        theta: float = self.orbit.angular_velocity * t
 
         # Update the position with the rotated values
-        next_point = self.orbit.calculate_next_point_on_path(theta)
-        self.sphere.pos = next_point
+        next_point: vp.vector = self.orbit.calculate_next_point_on_path(theta)
+        self._sphere.pos = next_point
 
         # Update axis line and arrow positions
-        self.axis_line.pos = self.sphere.pos - self.axis_line.axis/2
-        self.arrow.pos = self.sphere.pos
+        self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
+        self.arrow.pos = self._sphere.pos
 
     def rotate(self, dt: float) -> None:
         """
@@ -186,4 +191,4 @@ class Moon(CelestialBody):
 
         # Axis of arrow should be a normalized vector pointing to Earth multiplied by
         # the magnitude of the arrow's axis vector
-        self.arrow.axis = vp.norm(-self.sphere.pos) * self.arrow.axis.mag
+        self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag

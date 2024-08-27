@@ -73,17 +73,16 @@ class Orbit(ABC):
     Abstract base class that defines common properties and methods for all orbits.
     
     Attributes:
-        params (OrbitParams): Parameters defining the orbit
-        dist_scale_factor (float): Scaling factor to adjust the displayed orbital distance.
+        params (OrbitParams): Parameters defining the orbit.
     """
     def __init__(self, params: OrbitParams, dist_scale_factor: float = 1):
         """
         Args:
             params (OrbitParams): Parameters defining the orbit
-            dist_scale_factor (float, optional): Scaling factor for orbital distance. Defaults to 1.
+            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         self.params: OrbitParams = params
-        self.dist_scale_factor: float = dist_scale_factor
+        self.__dist_scale_factor: float = dist_scale_factor
         self.__orbit_mag: float = 1
         self.__create_path()
 
@@ -95,7 +94,7 @@ class Orbit(ABC):
         Returns:
             float: Scaled semi-major axis
         """
-        return self.params.semi_major_axis * self.dist_scale_factor
+        return self.params.semi_major_axis * self.__dist_scale_factor
 
     @property
     def b(self) -> float:
@@ -142,26 +141,26 @@ class Orbit(ABC):
             vp.vector: The 3D position of the body on the orbit
         """
         # Calculate the radial distance for this angle
-        r = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
+        r: float = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
 
         # Calculate position in the x-y-z plane
-        x_zero_inclination = r * math.cos(angle)  # length of max x with no inclination
-        x = x_zero_inclination * math.cos(self.params.inclination)
-        z = r * math.sin(angle)
-        y = x_zero_inclination * math.sin(self.params.inclination)
+        x_zero_inclination: float = r * math.cos(angle)  # length of max x with no inclination
+        x: float = x_zero_inclination * math.cos(self.params.inclination)
+        z: float = r * math.sin(angle)
+        y: float = x_zero_inclination * math.sin(self.params.inclination)
 
-        next_point = vp.vector(x,y,z)
+        next_point: vp.vector = vp.vector(x,y,z)
         self.__orbit_mag = next_point.mag
 
         return next_point
 
     def __create_path(self) -> None:
         """Create the visual representation of the orbit path."""
-        orbit_ellipse = vp.curve(color=vp.color.gray(0.5))
+        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5))
 
         for theta in range(0, 360+1):
-            theta_rad = math.radians(theta)
-            next_point = self.calculate_next_point_on_path(theta_rad)
+            theta_rad: float = math.radians(theta)
+            next_point: vp.vector = self.calculate_next_point_on_path(theta_rad)
             orbit_ellipse.append(next_point)
 
 
@@ -184,6 +183,6 @@ class MoonOrbit(Orbit):
     def __init__(self, dist_scale_factor: float = 1):
         """
         Args:
-            dist_scale_factor (float, optional): Scaling factor for orbital distance. Defaults to 1.
+            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
