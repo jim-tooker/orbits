@@ -7,17 +7,25 @@ for Earth and Moon, along with their physical parameters and visualization prope
 """
 from abc import ABC
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import Any, Optional
 import math
 import vpython as vp
 from orbits.orbit import Orbit, MoonOrbit
-from orbits.constants import HRS_IN_DAY, SECS_IN_HR
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+
+
+class MotionType(Enum):
+    """Enum for different types of motions we track."""
+    EARTH_ROTATION = auto()
+    MOON_ROTATION = auto()
+    MOON_ORBIT = auto()
 
 
 @dataclass
 class CelestialBodyParams:
     """
-    Data class to encapsulate the key parameters of a celestial body
+    Data class to encapsulate the key parameters of a celestial body.
     
     Attributes:
         radius (float): Radius of the celestial body in km
@@ -42,6 +50,25 @@ class CelestialBodyParams:
         """
         return math.degrees(self.tilt)
 
+    @property
+    def rotation_period_hrs(self) -> float:
+        """
+        Convert the period from seconds to hours.
+
+        Returns:
+            float: Period in hours
+        """
+        return self.rotation_period / SECS_IN_HR
+
+    @property
+    def rotation_period_days(self) -> float:
+        """
+        Convert the period from seconds to days.
+
+        Returns:
+            float: Period in days
+        """
+        return self.rotation_period_hrs / HRS_IN_DAY
 
 class CelestialBody(ABC):
     """
@@ -72,7 +99,7 @@ class CelestialBody(ABC):
         Returns:
             float: Angular velocity in radians per second.
         """
-        return 2 * math.pi / self.params.rotation_period
+        return FULL_ANGLE / self.params.rotation_period
 
     def angle(self, t: float) -> float:
         """

@@ -27,9 +27,17 @@ import os
 import sys
 import math
 import argparse
+from dataclasses import dataclass, field
 import vpython as vp
-from orbits.celestial_body import Earth, Moon
-from orbits.constants import HRS_IN_DAY, SECS_IN_HR
+from orbits.celestial_body import Earth, Moon, MotionType
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+
+@dataclass
+class MotionTracker:
+    """Data class to hold the times and angles for objects we track."""
+    times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    angles: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    totals: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
 
 
 class OrbitSimulator:
@@ -40,9 +48,11 @@ class OrbitSimulator:
         earth (Earth): Representation of the Earth.
         moon (Moon): Representation of the Moon.
         sim_moon_orbit_time (float): The simulation's calculated Moon's orbit time.
+        sim_earth_rotation_time (float): The simulation's calculated Earth's rotation time.
+        sim_moon_rotation_time (float): The simulation's calculated Moon's rotation time.
     """
 
-    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY
+    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY  # 86,400
     """The default value for the time_scale_factor."""
 
     DEFAULT_DIST_SCALE_FACTOR: float = 0.1
@@ -70,10 +80,16 @@ class OrbitSimulator:
         if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
             raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
 
+        self.sim_moon_orbit_time: float = 0
+        self.sim_earth_rotation_time: float = 0
+        self.sim_moon_rotation_time: float = 0
+
         self._exit_sim: bool = False
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
-        self.sim_moon_orbit_time: float = 0
+
+        # Create self.tracker so we can monitor times and angles of objects
+        self.tracker: MotionTracker = MotionTracker()
 
         if OrbitSimulator._no_gui is False:
             self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
@@ -262,6 +278,36 @@ class OrbitSimulator:
 
         return info_canvas
 
+    def _check_for_full_angle(self, t: float) -> None:
+        # If the Earth has rotated 360°, store rotation time
+        if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) >= FULL_ANGLE:
+            self.sim_earth_rotation_time = t - self.tracker.times[MotionType.EARTH_ROTATION]
+            self.tracker.times[MotionType.EARTH_ROTATION] = t
+            self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
+            self.tracker.totals[MotionType.EARTH_ROTATION] += 1
+            print(f'Sim Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
+                self.sim_earth_rotation_time/(SECS_IN_HR):.2f} hours')
+
+        # If the Moon has orbited 360°, store the orbit time
+        if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) >= FULL_ANGLE:
+            self.sim_moon_orbit_time = t - self.tracker.times[MotionType.MOON_ORBIT]
+            self.tracker.times[MotionType.MOON_ORBIT] = t
+            self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
+            self.tracker.totals[MotionType.MOON_ORBIT] += 1
+            print(f'Sim Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
+                self.sim_moon_orbit_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+            print(f'There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
+                self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.')
+
+        # If the Moon has rotated 360°, store rotation time
+        if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) >= FULL_ANGLE:
+            self.sim_moon_rotation_time = t - self.tracker.times[MotionType.MOON_ROTATION]
+            self.tracker.times[MotionType.MOON_ROTATION] = t
+            self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
+            self.tracker.totals[MotionType.MOON_ROTATION] += 1
+            print(f'Sim Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
+                self.sim_moon_rotation_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+
     def run(self, runtime: float = 0) -> None:
         """
         Execute the main simulation loop, updating positions of celestial bodies.
@@ -276,18 +322,11 @@ class OrbitSimulator:
         # Initialize simulation loop time variables
         t: float = 0
         t_prime: float = 0
-        time_at_last_orbit: float = 0
         dt: float = 0.01
         dt_prime: float = dt * self._time_scale_factor
 
-        # Track orbit and rotation times
-        self.sim_moon_orbit_time = 0
-        self._earth_sim_rotation_time = 0
-        
-        # Track initial angles for comparing later
-        init_moon_orbit_angle: float = 0
-        self._earth_init_rotation_angle = 0
-        
+        print()
+
         while self._exit_sim is False and True if runtime == 0 else t < runtime:
             vp.rate(100)
 
@@ -299,12 +338,8 @@ class OrbitSimulator:
                 self.earth.rotate(dt_prime)
                 self.moon.rotate(dt_prime)
 
-            # If Moon has orbited 360°, store the orbit time
-            if abs(self.moon.orbit.angle(t_prime) - init_moon_orbit_angle) >= 2 * math.pi:
-                self.sim_moon_orbit_time = t_prime - time_at_last_orbit
-                time_at_last_orbit = t_prime
-                print(f'Simulation Moon orbit time: {self.sim_moon_orbit_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
-                init_moon_orbit_angle = self.moon.orbit.angle(t_prime)
+            # Check the objects we're tracking for full angles
+            self._check_for_full_angle(t_prime)
 
             t += dt
             t_prime += dt_prime
@@ -346,7 +381,7 @@ def main() -> None:
 
     try:
         simulation: OrbitSimulator = OrbitSimulator(time_scale_factor=args.time_scale_factor,
-                                    dist_scale_factor=args.dist_scale_factor)
+                                                    dist_scale_factor=args.dist_scale_factor)
         simulation.run()
     except ValueError as e:
         print(f'Error: {e}')

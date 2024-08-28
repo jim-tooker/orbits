@@ -11,7 +11,7 @@ from abc import ABC
 from dataclasses import dataclass
 import math
 import vpython as vp
-from orbits.constants import HRS_IN_DAY, SECS_IN_HR
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 class OrbitDirection(Enum):
     """Enum to represent the direction of an orbit (clockwise or counter-clockwise)."""
@@ -118,7 +118,7 @@ class Orbit(ABC):
         Returns:
             float: Angular velocity in radians per second
         """
-        av: float = 2 * math.pi / self.params.period
+        av: float = FULL_ANGLE / self.params.period
         if self.params.direction == OrbitDirection.COUNTER_CLOCKWISE:
             av = -av
 
