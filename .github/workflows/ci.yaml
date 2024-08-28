@@ -39,4 +39,4 @@ jobs:
     - name: Test
       run: |
         export PYTHONPATH=$PYTHONPATH:.:/home/runner/work/orbits
-        python tests/test_orbit_simulator.py
+        python tests/test_orbit_simulator.py --no_gui

@@ -2,6 +2,7 @@
 Tests for Orbit Simulator
 """
 import sys
+import argparse
 import pytest
 from orbits.orbit_simulator import OrbitSimulator
 
@@ -40,11 +41,20 @@ class TestOrbitSimulation:
         assert simulator.sim_moon_orbit_time == pytest.approx(simulator.moon.orbit.params.period, rel=self.tolerance)
 
 
-def main() -> int:
-    result = pytest.main()
-    print(result)
-    OrbitSimulator._stop_vp_server()
-    sys.exit(result)
+def main() -> None:
+    parser = argparse.ArgumentParser(description='Orbit Simulator Tester')
+    parser.add_argument('--no_gui', action='store_true', help='Run without GUI')
+    args = parser.parse_args()
+
+    if args.no_gui:
+        OrbitSimulator.disable_gui(True)
+
+    result = pytest.main(["tests/test_orbit_simulator.py"])
+
+    if args.no_gui:
+        sys.exit(result)
+    else:
+        OrbitSimulator.quit_simulation()
 
 if __name__ == '__main__':
     main()

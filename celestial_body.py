@@ -59,11 +59,12 @@ class CelestialBody(ABC):
         self.angle: float = 0
         self.orbit: Optional[Orbit] = None
 
-        self._sphere: vp.sphere = vp.sphere(pos=position,
-                                            radius=self.params.radius,
-                                            texture=self.params.texture)
-        self._axis: vp.vector = self._calculate_axis()
-        self._axis_line: vp.cylinder = self._create_axis_line()
+        if self.params.no_gui is False:
+            self._sphere: vp.sphere = vp.sphere(pos=position,
+                                                radius=self.params.radius,
+                                                texture=self.params.texture)
+            self._axis: vp.vector = self._calculate_axis()
+            self._axis_line: vp.cylinder = self._create_axis_line()
 
     @property
     def angular_velocity(self) -> float:
@@ -95,8 +96,7 @@ class CelestialBody(ABC):
         return vp.cylinder(pos=self._sphere.pos - axis_length/2 * self._axis,
                            axis=axis_length * self._axis,
                            radius=self.params.radius/50,
-                           color=vp.color.white,
-                           visible=not self.params.no_gui)
+                           color=vp.color.white)
 
     def update_position(self, t: float) -> None:
         """
@@ -106,11 +106,11 @@ class CelestialBody(ABC):
             t (float): The current simulation time.
         """
         # Update the position with the rotated values
-        if self.orbit:
-            next_point: vp.vector = self.orbit.update_position(t)
+        assert self.orbit
+        next_point: vp.vector = self.orbit.update_position(t)
 
-            if self.params.no_gui is False:
-                self._sphere.pos = next_point
+        if self.params.no_gui is False:
+            self._sphere.pos = next_point
 
     def rotate(self, dt: float) -> None:
         """
@@ -122,8 +122,9 @@ class CelestialBody(ABC):
         # Keep track of total rotation angle
         self.angle = self.angular_velocity * dt
 
-        self._sphere.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
-        self._axis_line.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
+        if self.params.no_gui is False:
+            self._sphere.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
+            self._axis_line.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
 
 
 class Earth(CelestialBody):
@@ -187,8 +188,9 @@ class Moon(CelestialBody):
         # Override base class orbit with MoonOrbit type
         self.orbit: MoonOrbit = orbit
 
-        # Create arrow for Moon that points to Earth
-        self.arrow: vp.arrow = self._create_arrow()
+        if self.params.no_gui is False:
+            # Create arrow for Moon that points to Earth
+            self.arrow: vp.arrow = self._create_arrow()
 
     def _create_arrow(self) -> vp.arrow:
         """
@@ -201,8 +203,7 @@ class Moon(CelestialBody):
         return vp.arrow(pos=self._sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,
-                        round=True,
-                        visible=not self.params.no_gui)
+                        round=True)
 
     def update_position(self, t: float) -> None:
         """
@@ -212,10 +213,11 @@ class Moon(CelestialBody):
             t (float): The current simulation time.
         """
         super().update_position(t)
- 
-        # Update axis line and arrow positions
-        self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
-        self.arrow.pos = self._sphere.pos
+
+        if self.params.no_gui is False:
+            # Update axis line and arrow positions
+            self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
+            self.arrow.pos = self._sphere.pos
 
     def rotate(self, dt: float) -> None:
         """
@@ -226,6 +228,7 @@ class Moon(CelestialBody):
         """
         super().rotate(dt)
 
-        # Axis of arrow should be a normalized vector pointing to Earth multiplied by
-        # the magnitude of the arrow's axis vector
-        self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag
+        if self.params.no_gui is False:
+            # Axis of arrow should be a normalized vector pointing to Earth multiplied by
+            # the magnitude of the arrow's axis vector
+            self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag

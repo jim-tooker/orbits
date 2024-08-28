@@ -86,7 +86,9 @@ class Orbit(ABC):
         self.params: OrbitParams = params
         self.__dist_scale_factor: float = dist_scale_factor
         self.__orbit_mag: float = 1
-        self.__create_path()
+
+        if self.params.no_gui is False:
+            self.__create_path()
 
     @property
     def a(self) -> float:
