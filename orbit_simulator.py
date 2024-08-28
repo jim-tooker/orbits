@@ -27,15 +27,31 @@ import os
 import sys
 import math
 import argparse
+from dataclasses import dataclass, field
 import vpython as vp
-from orbits.celestial_body import Earth, Moon
-from orbits.constants import HRS_IN_DAY, SECS_IN_HR
+from orbits.celestial_body import Earth, Moon, MotionType
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+
+@dataclass
+class MotionTracker:
+    """Data class to hold the times and angles for objects we track."""
+    last_event_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    full_angle_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    angles: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    totals: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
 
 
 class OrbitSimulator:
-    """Main class responsible for setting up and running the orbit simulation"""
+    """
+    Main class responsible for setting up and running the orbit simulation.
 
-    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY
+    Attributes:
+        earth (Earth): Representation of the Earth.
+        moon (Moon): Representation of the Moon.
+        tracker (MotionTracker): Tracker to keep track of simulation object's angles and times
+    """
+
+    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY  # 86,400
     """The default value for the time_scale_factor."""
 
     DEFAULT_DIST_SCALE_FACTOR: float = 0.1
@@ -46,6 +62,9 @@ class OrbitSimulator:
 
     MIN_DIST_SCALE_FACTOR: float = 0.1
     """The min value allowed for the dist_scale_factor."""
+
+   # Flag to indicate whether the GUI should be disabled (True = no GUI)
+    _no_gui: bool = False
 
     def __init__(self,
                  time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR,
@@ -60,45 +79,60 @@ class OrbitSimulator:
         if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
             raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
 
-        self._quit_simulation = False
-
+        self._exit_sim: bool = False
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
-        self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
-                                            width=1600,
-                                            height=1000,
-                                            align='left')
 
-        self._earth = Earth()
-        self._moon = Moon(dist_scale_factor)
+        # Create self.tracker so we can monitor times and angles of objects
+        self.tracker: MotionTracker = MotionTracker()
 
-        self._create_orientation_figure()
-        self._info_canvas: vp.canvas
-        self._setup_info_canvas()
+        if OrbitSimulator._no_gui is False:
+            self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
+                                                width=1500,
+                                                height=1000,
+                                                align='left')
 
-        # rotate camera around the x axis to see the orbits better (not straight on)
-        camera_rotate_angle = 2  # degrees
-        self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+        self.earth: Earth = Earth(no_gui=OrbitSimulator._no_gui)
+        self.moon: Moon = Moon(no_gui=OrbitSimulator._no_gui,
+                               dist_scale_factor=dist_scale_factor)
+
+        if OrbitSimulator._no_gui is False:
+            self._create_orientation_figure()
+            self._info_canvas: vp.canvas = self._setup_info_canvas()
+
+            # rotate camera around the x axis to see the orbits better (not straight on)
+            camera_rotate_angle: float = 2  # degrees
+            self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
 
     def __del__(self) -> None:
         """
         Deletes the canvases and sets the reference to None to allow canvases to disappear from GUI
         """
-        if self._canvas:
+        if hasattr(self, '_canvas') and self._canvas:
             self._canvas.delete()
 
-        if self._info_canvas:
+        if hasattr(self, '_info_canvas') and self._info_canvas:
             self._info_canvas.delete()
 
-    def quit_simulation(self) -> None:
-        """Stops the VPython server."""
-        self._quit_simulation = True
+    @classmethod
+    def disable_gui(cls, no_gui: bool) -> None:
+        """
+        Enables or disables the GUI.
+
+        Args:
+            no_gui (bool): Flag to indicate where GUI should be disabled (True = disable GUI).
+        """
+        cls._no_gui = no_gui
+
+    def _exit_sim_loop(self) -> None:
+        """Causes the sim loop to exit."""
+        self._exit_sim = True
 
     def _create_orientation_figure(self) -> None:
         """Create orientation arrows and labels to show the x, y, and z axes."""
         # Define orientation figure size and position using the largest object on the canvas.
         # Currently this is the Moon's orbit.  This will need to change when adding more orbits.
-        canvas_mag: float = self._moon.orbit.orbit_mag
+        canvas_mag: float = self.moon.orbit.orbit_mag
         orient_size: float = canvas_mag/8
         orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
 
@@ -120,7 +154,7 @@ class OrbitSimulator:
                  emissive=True)
 
         # Label the arrows
-        label_distance = orient_size * 1.1
+        label_distance: float = orient_size * 1.1
         vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
                  text='X',
                  color=vp.color.red,
@@ -157,38 +191,43 @@ class OrbitSimulator:
 
     def _handle_quit_button(self, button: vp.button) -> None:
         """Handles quit simulation button"""
-        self.quit_simulation()
+        self._exit_sim_loop()
 
-    def _stop_vp_server(self) -> None:
+    @staticmethod
+    def quit_simulation() -> None:
         """Stops the VPython server."""
-        # We don't import vp_services until needed, because importing it will start
-        # the server, if not started already.
-        import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
-        vp_services.stop_server()
-    
-    def _setup_info_canvas(self) -> None:
+        if OrbitSimulator._no_gui is False:
+            # We don't import vp_services until needed, because importing it will start
+            # the server, if not started already.
+            import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
+            vp_services.stop_server()
+
+    def _setup_info_canvas(self) -> vp.canvas:
         """
         Set up the information canvas with labels displaying simulation details.
 
         This method creates a separate canvas for displaying information about
         the simulation, including time and distance scales, and details about
         the Earth and Moon.
+
+        Returns:
+            vp.canvas: The create info canvas
         """
         # Create canvas and configure
-        width = 400
-        height_of_quit_button = 25
-        height = 1000 - height_of_quit_button
-        self._info_canvas = vp.canvas(width=width, height=height, align='left')
-        self._info_canvas.range = 10
-        self._info_canvas.userzoom = False
-        self._info_canvas.userspin = False
-        self._info_canvas.userpan = False
+        width: int = 400
+        height_of_quit_button: int = 25
+        height: int = 1000 - height_of_quit_button
+        info_canvas: vp.canvas = vp.canvas(width=width, height=height, align='left')
+        info_canvas.range = 10
+        info_canvas.userzoom = False
+        info_canvas.userspin = False
+        info_canvas.userpan = False
 
         # Start labels 1 over from left margin (range -10 to 10)
-        left_margin: int = -self._info_canvas.range + 1
+        left_margin: int = -info_canvas.range + 1
 
         # Start lines at the top minus 1
-        line_number: int = int(self._info_canvas.range * height/width - 1)
+        line_number: int = int(info_canvas.range * height/width - 1)
 
         # Create time scale label
         self._create_info_label(f'Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
@@ -202,61 +241,105 @@ class OrbitSimulator:
         line_number -= 2
 
         # Create Earth info label
-        self._create_info_label(f'Earth Info:\n  Radius: {self._earth.params.radius:,.0f} km\n  Tilt: {
-            self._earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self._earth.sidereal_day:.2f} hrs',
+        self._create_info_label(f'Earth Info:\n  Radius: {self.earth.params.radius:,.0f} km\n  Tilt: {
+            self.earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self.earth.sidereal_day:.2f} hrs',
                                 left_margin, line_number)
         line_number -= 5
 
         # Create Moon info label
-        self._create_info_label(f'Moon Info:\n  Radius: {self._moon.params.radius:,.0f} km\n  Tilt: {
-            self._moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self._moon.sidereal_month:.2f} days',
+        self._create_info_label(f'Moon Info:\n  Radius: {self.moon.params.radius:,.0f} km\n  Tilt: {
+            self.moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self.moon.sidereal_month:.2f} days',
                                 left_margin, line_number)
         line_number -= 5
 
         # Create Moon's Orbit info label
         self._create_info_label(f"Moon's Orbit Info:\n  Semi-major axis: {
-            self._moon.orbit.params.semi_major_axis:,.0f} km\n  Eccentricity: {
-            self._moon.orbit.params.eccentricity:.3f}\n  Inclination: {
-            self._moon.orbit.params.inclination_degs:.2f}°\n  Period: {
-            self._moon.orbit.params.period_days:.2f} days",
+            self.moon.orbit.params.semi_major_axis:,.0f} km\n  Eccentricity: {
+            self.moon.orbit.params.eccentricity:.3f}\n  Inclination: {
+            self.moon.orbit.params.inclination_degs:.2f}°\n  Period: {
+            self.moon.orbit.params.period_days:.2f} days",
                                 left_margin, line_number)
         line_number -= 6
 
         # Add the Quit simulation button, and bind it to _handle_quit_button()
-        vp.button(pos=self._info_canvas.title_anchor,
+        vp.button(pos=info_canvas.title_anchor,
                   text='                                Quit Simulation                                ',
                   color=vp.color.red,
-                  background=vp.color.gray(0.9),
+                  background=vp.color.gray(0.8),
                   bind=self._handle_quit_button)
 
         # Set default canvas back to normal canvas
         self._canvas.select()
 
-    def run(self) -> None:
+        return info_canvas
+
+    def _check_for_full_angle(self, t: float) -> None:
+        # If the Earth has rotated 360°, store rotation time
+        if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) >= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.EARTH_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ROTATION]
+            self.tracker.last_event_times[MotionType.EARTH_ROTATION] = t
+            self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
+            self.tracker.totals[MotionType.EARTH_ROTATION] += 1
+            print(f'Sim Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours')
+
+        # If the Moon has orbited 360°, store the orbit time
+        if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) >= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ORBIT]
+            self.tracker.last_event_times[MotionType.MOON_ORBIT] = t
+            self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
+            self.tracker.totals[MotionType.MOON_ORBIT] += 1
+            print(f'Sim Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+            print(f'There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
+                self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.')
+
+        # If the Moon has rotated 360°, store rotation time
+        if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) >= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ROTATION]
+            self.tracker.last_event_times[MotionType.MOON_ROTATION] = t
+            self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
+            self.tracker.totals[MotionType.MOON_ROTATION] += 1
+            print(f'Sim Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+
+    def run(self, runtime: float = 0) -> None:
         """
         Execute the main simulation loop, updating positions of celestial bodies.
 
-        This method runs indefinitely, updating the positions and rotations of
-        the Earth and Moon based on the elapsed simulation time.
+        This method runs as long as `runtime` specifies, or indefinitely if `runtime=0`.
+        It updates the positions and rotations of the celestial bodies based on the elapsed simulation time.
+
+        Args:
+            runtime (float): How long to run the simulation (s).  Defaults to 0 (indefinite runtime)
         """
         # Initialize simulation loop time variables
         t: float = 0
-        dt: float = 0.01 * self._time_scale_factor
+        t_prime: float = 0
+        dt: float = 0.01
+        dt_prime: float = dt * self._time_scale_factor
 
-        while self._quit_simulation is False:
+        print()
+
+        while self._exit_sim is False and True if runtime == 0 else t < runtime:
             vp.rate(100)
 
-            # Update Moon's position based on total time elapsed
-            self._moon.update_position(t)
+            if OrbitSimulator._no_gui is False:
+                # Update Moon's position based on total time elapsed
+                self.moon.update_position(t_prime)
 
-            # Rotate the moon and earth based on the small time step and their respective angular velocities
-            self._earth.rotate(dt)
-            self._moon.rotate(dt)
+                # Rotate the moon and earth based on the small time step and their respective angular velocities
+                self.earth.rotate(dt_prime)
+                self.moon.rotate(dt_prime)
+
+            # Check the objects we're tracking for full angles
+            self._check_for_full_angle(t_prime)
 
             t += dt
-
-        # Exit simulation
-        self._stop_vp_server()
+            t_prime += dt_prime
 
 
 class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
@@ -286,15 +369,23 @@ def main() -> None:
                         type=float,
                         default=OrbitSimulator.DEFAULT_DIST_SCALE_FACTOR,
                         help='How much to scale down the orbital distances.')
+    parser.add_argument('--no_gui', action='store_true', help='Run without GUI')
     args = parser.parse_args()
+
+    if args.no_gui is True:
+        OrbitSimulator.disable_gui(True)
+        print('Hit Ctrl-C to exit.')
 
     try:
         simulation: OrbitSimulator = OrbitSimulator(time_scale_factor=args.time_scale_factor,
-                                    dist_scale_factor=args.dist_scale_factor)
+                                                    dist_scale_factor=args.dist_scale_factor)
         simulation.run()
     except ValueError as e:
         print(f'Error: {e}')
         sys.exit(1)
+
+    # Quit simulation
+    simulation.quit_simulation()
 
 
 if __name__ == '__main__':
