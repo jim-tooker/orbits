@@ -30,12 +30,14 @@ class OrbitParams:
         inclination (float): The inclination of the orbit in radians
         period (float): The orbital period in seconds
         direction (OrbitDirection): The direction of the orbit (clockwise or counter-clockwise)
-    """
+        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
+"""
     semi_major_axis: float
     eccentricity: float
     inclination: float
     period: float
-    direction: OrbitDirection = OrbitDirection.COUNTER_CLOCKWISE
+    direction: OrbitDirection
+    no_gui: bool = False
 
     @property
     def inclination_degs(self) -> float:
@@ -130,7 +132,19 @@ class Orbit(ABC):
         """
         return self.__orbit_mag
 
-    def calculate_next_point_on_path(self, angle: float) -> vp.vector:
+    def angle(self, t: float) -> float:
+        """
+        Calculates the current angle of the orbit based on the given time.
+
+        Args:
+            t (float): The current time.
+
+        Returns:
+            float: Current orbit angle
+        """
+        return self.angular_velocity * t
+
+    def _calculate_next_point_on_path(self, angle: float) -> vp.vector:
         """
         Calculate the next point on the orbit path at the given angle.
         
@@ -156,12 +170,21 @@ class Orbit(ABC):
 
     def __create_path(self) -> None:
         """Create the visual representation of the orbit path."""
-        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5))
+        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5), visible=not self.params.no_gui)
 
         for theta in range(0, 360+1):
             theta_rad: float = math.radians(theta)
-            next_point: vp.vector = self.calculate_next_point_on_path(theta_rad)
+            next_point: vp.vector = self._calculate_next_point_on_path(theta_rad)
             orbit_ellipse.append(next_point)
+
+    def update_position(self, t: float) -> vp.vector:
+        """
+        Compute position in the orbital plane based on the given time.
+
+        Args:
+            t (float): The current simulation time.
+        """
+        return self._calculate_next_point_on_path(self.angle(t))
 
 
 class MoonOrbit(Orbit):
@@ -180,9 +203,10 @@ class MoonOrbit(Orbit):
         period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self, dist_scale_factor: float = 1):
+    def __init__(self, dist_scale_factor: float = 1, no_gui: bool = False):
         """
         Args:
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
+        self.params.no_gui = no_gui
         super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
