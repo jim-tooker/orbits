@@ -27,7 +27,6 @@ import os
 import sys
 import math
 import argparse
-from typing import Optional
 import vpython as vp
 from orbits.celestial_body import Earth, Moon
 from orbits.constants import HRS_IN_DAY, SECS_IN_HR
@@ -207,7 +206,7 @@ class OrbitSimulator:
         width: int = 400
         height_of_quit_button: int = 25
         height: int = 1000 - height_of_quit_button
-        info_canvas = vp.canvas(width=width, height=height, align='left')
+        info_canvas: vp.canvas = vp.canvas(width=width, height=height, align='left')
         info_canvas.range = 10
         info_canvas.userzoom = False
         info_canvas.userspin = False
@@ -263,7 +262,7 @@ class OrbitSimulator:
 
         return info_canvas
 
-    def run(self, runtime: Optional[float] = None) -> None:
+    def run(self, runtime: float = 0) -> None:
         """
         Execute the main simulation loop, updating positions of celestial bodies.
 
@@ -271,12 +270,13 @@ class OrbitSimulator:
         the Earth and Moon based on the elapsed simulation time.
 
         Args:
-            runtime (Optional[float]): How long to run the simulation (s).
+            runtime (float): How long to run the simulation (s).
             If not specified, it will run indefinitely.
         """
         # Initialize simulation loop time variables
         t: float = 0
         t_prime: float = 0
+        time_at_last_orbit: float = 0
         dt: float = 0.01
         dt_prime: float = dt * self._time_scale_factor
 
@@ -288,21 +288,23 @@ class OrbitSimulator:
         init_moon_orbit_angle: float = 0
         self._earth_init_rotation_angle = 0
         
-        while self._exit_sim is False and True if runtime is None else t < runtime:
+        while self._exit_sim is False and True if runtime == 0 else t < runtime:
             vp.rate(100)
 
-            # Update Moon's position based on total time elapsed
-            self.moon.update_position(t_prime)
+            if OrbitSimulator._no_gui is False:
+                # Update Moon's position based on total time elapsed
+                self.moon.update_position(t_prime)
+
+                # Rotate the moon and earth based on the small time step and their respective angular velocities
+                self.earth.rotate(dt_prime)
+                self.moon.rotate(dt_prime)
 
             # If Moon has orbited 360°, store the orbit time
             if abs(self.moon.orbit.angle(t_prime) - init_moon_orbit_angle) >= 2 * math.pi:
-                self.sim_moon_orbit_time = t_prime - self.sim_moon_orbit_time
+                self.sim_moon_orbit_time = t_prime - time_at_last_orbit
+                time_at_last_orbit = t_prime
                 print(f'Simulation Moon orbit time: {self.sim_moon_orbit_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
                 init_moon_orbit_angle = self.moon.orbit.angle(t_prime)
-
-            # Rotate the moon and earth based on the small time step and their respective angular velocities
-            self.earth.rotate(dt_prime)
-            self.moon.rotate(dt_prime)
 
             t += dt
             t_prime += dt_prime

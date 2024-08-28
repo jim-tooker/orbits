@@ -84,8 +84,8 @@ class Orbit(ABC):
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         self.params: OrbitParams = params
-        self.__dist_scale_factor: float = dist_scale_factor
-        self.__orbit_mag: float = 1
+        self._dist_scale_factor: float = dist_scale_factor
+        self._orbit_mag: float = 1
 
         if self.params.no_gui is False:
             self.__create_path()
@@ -98,7 +98,7 @@ class Orbit(ABC):
         Returns:
             float: Scaled semi-major axis
         """
-        return self.params.semi_major_axis * self.__dist_scale_factor
+        return self.params.semi_major_axis * self._dist_scale_factor
 
     @property
     def b(self) -> float:
@@ -132,7 +132,7 @@ class Orbit(ABC):
         Returns:
             float: Orbit magnitude
         """
-        return self.__orbit_mag
+        return self._orbit_mag
 
     def angle(self, t: float) -> float:
         """
@@ -166,7 +166,7 @@ class Orbit(ABC):
         y: float = x_zero_inclination * math.sin(self.params.inclination)
 
         next_point: vp.vector = vp.vector(x,y,z)
-        self.__orbit_mag = next_point.mag
+        self._orbit_mag = next_point.mag
 
         return next_point
 

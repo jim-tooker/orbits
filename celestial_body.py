@@ -49,14 +49,12 @@ class CelestialBody(ABC):
     
     Attributes:
         params (CelestialBodyParams): Parameters defining the celestial body.
-        angle (float): Current rotational angle
         orbit (Optional[Orbit]): Orbit of the celestial body. Optional because not  
                                  all bodies will have orbits.  Must be overridden in  
                                  subclass.
     """
     def __init__(self, params: CelestialBodyParams, position: vp.vector = vp.vector(0, 0, 0)):
         self.params: CelestialBodyParams = params
-        self.angle: float = 0
         self.orbit: Optional[Orbit] = None
 
         if self.params.no_gui is False:
@@ -75,6 +73,18 @@ class CelestialBody(ABC):
             float: Angular velocity in radians per second.
         """
         return 2 * math.pi / self.params.rotation_period
+
+    def angle(self, t: float) -> float:
+        """
+        Calculates the current rotational angle of the celestial body based on the given time.
+
+        Args:
+            t (float): The current time.
+
+        Returns:
+            float: Current orbit angle
+        """
+        return self.angular_velocity * t
 
     def _calculate_axis(self) -> vp.vector:
         """
@@ -108,9 +118,7 @@ class CelestialBody(ABC):
         # Update the position with the rotated values
         assert self.orbit
         next_point: vp.vector = self.orbit.update_position(t)
-
-        if self.params.no_gui is False:
-            self._sphere.pos = next_point
+        self._sphere.pos = next_point
 
     def rotate(self, dt: float) -> None:
         """
@@ -119,12 +127,9 @@ class CelestialBody(ABC):
         Args:
             dt (float): The small time increment (seconds) to rotate by.
         """
-        # Keep track of total rotation angle
-        self.angle = self.angular_velocity * dt
-
-        if self.params.no_gui is False:
-            self._sphere.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
-            self._axis_line.rotate(angle=self.angle, axis=self._axis, origin=self._sphere.pos)
+        angle: float = self.angle(dt)
+        self._sphere.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
+        self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
 
 
 class Earth(CelestialBody):
@@ -176,8 +181,6 @@ class Moon(CelestialBody):
                  dist_scale_factor: float = 1,
                  no_gui: bool = False):
         """
-        Initialize the Moon object with optional distance scaling factor.
-        
         Args:
             dist_scale_factor (float): Factor to scale down the orbital distances
         """
@@ -214,10 +217,9 @@ class Moon(CelestialBody):
         """
         super().update_position(t)
 
-        if self.params.no_gui is False:
-            # Update axis line and arrow positions
-            self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
-            self.arrow.pos = self._sphere.pos
+        # Update axis line and arrow positions
+        self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
+        self.arrow.pos = self._sphere.pos
 
     def rotate(self, dt: float) -> None:
         """
@@ -228,7 +230,6 @@ class Moon(CelestialBody):
         """
         super().rotate(dt)
 
-        if self.params.no_gui is False:
-            # Axis of arrow should be a normalized vector pointing to Earth multiplied by
-            # the magnitude of the arrow's axis vector
-            self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag
+        # Axis of arrow should be a normalized vector pointing to Earth multiplied by
+        # the magnitude of the arrow's axis vector
+        self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag
