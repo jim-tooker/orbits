@@ -40,8 +40,7 @@ class TestOrbitSimulation:
         assert simulator.sim_moon_orbit_time == pytest.approx(simulator.moon.orbit.params.period, rel=self.tolerance)
 
 
-def main():
-    #result = pytest.main(["tests/test_orbit_simulator.py"])
+def main() -> int:
     result = pytest.main()
     print(result)
     OrbitSimulator._stop_vp_server()

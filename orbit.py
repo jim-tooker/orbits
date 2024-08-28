@@ -170,7 +170,7 @@ class Orbit(ABC):
 
     def __create_path(self) -> None:
         """Create the visual representation of the orbit path."""
-        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5), visible=not self.params.no_gui)
+        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5))
 
         for theta in range(0, 360+1):
             theta_rad: float = math.radians(theta)
