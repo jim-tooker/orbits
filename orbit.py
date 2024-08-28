@@ -11,7 +11,7 @@ from abc import ABC
 from dataclasses import dataclass
 import math
 import vpython as vp
-from orbits.constants import HRS_IN_DAY, SECS_IN_HR
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 class OrbitDirection(Enum):
     """Enum to represent the direction of an orbit (clockwise or counter-clockwise)."""
@@ -84,9 +84,11 @@ class Orbit(ABC):
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         self.params: OrbitParams = params
-        self.__dist_scale_factor: float = dist_scale_factor
-        self.__orbit_mag: float = 1
-        self.__create_path()
+        self._dist_scale_factor: float = dist_scale_factor
+        self._orbit_mag: float = 1
+
+        if self.params.no_gui is False:
+            self.__create_path()
 
     @property
     def a(self) -> float:
@@ -96,7 +98,7 @@ class Orbit(ABC):
         Returns:
             float: Scaled semi-major axis
         """
-        return self.params.semi_major_axis * self.__dist_scale_factor
+        return self.params.semi_major_axis * self._dist_scale_factor
 
     @property
     def b(self) -> float:
@@ -116,7 +118,7 @@ class Orbit(ABC):
         Returns:
             float: Angular velocity in radians per second
         """
-        av: float = 2 * math.pi / self.params.period
+        av: float = FULL_ANGLE / self.params.period
         if self.params.direction == OrbitDirection.COUNTER_CLOCKWISE:
             av = -av
 
@@ -130,7 +132,7 @@ class Orbit(ABC):
         Returns:
             float: Orbit magnitude
         """
-        return self.__orbit_mag
+        return self._orbit_mag
 
     def angle(self, t: float) -> float:
         """
@@ -164,7 +166,7 @@ class Orbit(ABC):
         y: float = x_zero_inclination * math.sin(self.params.inclination)
 
         next_point: vp.vector = vp.vector(x,y,z)
-        self.__orbit_mag = next_point.mag
+        self._orbit_mag = next_point.mag
 
         return next_point
 
@@ -207,6 +209,7 @@ class MoonOrbit(Orbit):
         """
         Args:
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
+            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
         """
         self.params.no_gui = no_gui
         super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
