@@ -35,7 +35,8 @@ from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 @dataclass
 class MotionTracker:
     """Data class to hold the times and angles for objects we track."""
-    times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    last_event_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    full_angle_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
     angles: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
     totals: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
 
@@ -47,9 +48,7 @@ class OrbitSimulator:
     Attributes:
         earth (Earth): Representation of the Earth.
         moon (Moon): Representation of the Moon.
-        sim_moon_orbit_time (float): The simulation's calculated Moon's orbit time.
-        sim_earth_rotation_time (float): The simulation's calculated Earth's rotation time.
-        sim_moon_rotation_time (float): The simulation's calculated Moon's rotation time.
+        tracker (MotionTracker): Tracker to keep track of simulation object's angles and times
     """
 
     DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY  # 86,400
@@ -79,10 +78,6 @@ class OrbitSimulator:
             raise ValueError(f'time_scale_factor must be between 1 and {self.MAX_TIME_SCALE_FACTOR}')
         if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
             raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
-
-        self.sim_moon_orbit_time: float = 0
-        self.sim_earth_rotation_time: float = 0
-        self.sim_moon_rotation_time: float = 0
 
         self._exit_sim: bool = False
         self._time_scale_factor: float = time_scale_factor
@@ -129,7 +124,7 @@ class OrbitSimulator:
         """
         cls._no_gui = no_gui
 
-    def exit_sim_loop(self) -> None:
+    def _exit_sim_loop(self) -> None:
         """Causes the sim loop to exit."""
         self._exit_sim = True
 
@@ -196,7 +191,7 @@ class OrbitSimulator:
 
     def _handle_quit_button(self, button: vp.button) -> None:
         """Handles quit simulation button"""
-        self.exit_sim_loop()
+        self._exit_sim_loop()
 
     @staticmethod
     def quit_simulation() -> None:
@@ -270,7 +265,7 @@ class OrbitSimulator:
         vp.button(pos=info_canvas.title_anchor,
                   text='                                Quit Simulation                                ',
                   color=vp.color.red,
-                  background=vp.color.gray(0.9),
+                  background=vp.color.gray(0.8),
                   bind=self._handle_quit_button)
 
         # Set default canvas back to normal canvas
@@ -281,43 +276,45 @@ class OrbitSimulator:
     def _check_for_full_angle(self, t: float) -> None:
         # If the Earth has rotated 360°, store rotation time
         if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) >= FULL_ANGLE:
-            self.sim_earth_rotation_time = t - self.tracker.times[MotionType.EARTH_ROTATION]
-            self.tracker.times[MotionType.EARTH_ROTATION] = t
+            self.tracker.full_angle_times[MotionType.EARTH_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ROTATION]
+            self.tracker.last_event_times[MotionType.EARTH_ROTATION] = t
             self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
             self.tracker.totals[MotionType.EARTH_ROTATION] += 1
             print(f'Sim Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
-                self.sim_earth_rotation_time/(SECS_IN_HR):.2f} hours')
+                self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours')
 
         # If the Moon has orbited 360°, store the orbit time
         if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) >= FULL_ANGLE:
-            self.sim_moon_orbit_time = t - self.tracker.times[MotionType.MOON_ORBIT]
-            self.tracker.times[MotionType.MOON_ORBIT] = t
+            self.tracker.full_angle_times[MotionType.MOON_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ORBIT]
+            self.tracker.last_event_times[MotionType.MOON_ORBIT] = t
             self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
             self.tracker.totals[MotionType.MOON_ORBIT] += 1
             print(f'Sim Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
-                self.sim_moon_orbit_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+                self.tracker.full_angle_times[MotionType.MOON_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
             print(f'There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
                 self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.')
 
         # If the Moon has rotated 360°, store rotation time
         if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) >= FULL_ANGLE:
-            self.sim_moon_rotation_time = t - self.tracker.times[MotionType.MOON_ROTATION]
-            self.tracker.times[MotionType.MOON_ROTATION] = t
+            self.tracker.full_angle_times[MotionType.MOON_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ROTATION]
+            self.tracker.last_event_times[MotionType.MOON_ROTATION] = t
             self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
             self.tracker.totals[MotionType.MOON_ROTATION] += 1
             print(f'Sim Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
-                self.sim_moon_rotation_time/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+                self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
 
     def run(self, runtime: float = 0) -> None:
         """
         Execute the main simulation loop, updating positions of celestial bodies.
 
-        This method runs indefinitely, updating the positions and rotations of
-        the Earth and Moon based on the elapsed simulation time.
+        This method runs as long as `runtime` specifies, or indefinitely if `runtime=0`.
+        It updates the positions and rotations of the celestial bodies based on the elapsed simulation time.
 
         Args:
-            runtime (float): How long to run the simulation (s).
-            If not specified, it will run indefinitely.
+            runtime (float): How long to run the simulation (s).  Defaults to 0 (indefinite runtime)
         """
         # Initialize simulation loop time variables
         t: float = 0

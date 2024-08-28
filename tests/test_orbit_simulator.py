@@ -12,7 +12,7 @@ class TestOrbitSimulation:
     """Class for `pytest` testing of Orbit Simulator."""
 
     def test_earth_rotation_period(self) -> None:
-        """Verify the Moon's orbital period matches the defined value."""
+        """Verify the Earth's rotational period matches the defined value."""
         # Relative tolerance for test results
         rel_tolerance = 0.001
 
@@ -29,11 +29,15 @@ class TestOrbitSimulation:
         sim.run(run_time)
 
         # Check if Earth's rotation time matches given rotation period parameters
-        assert sim.sim_earth_rotation_time == pytest.approx(sim.earth.params.rotation_period,
-                                                            rel=rel_tolerance)
+        assert sim.tracker.full_angle_times[MotionType.EARTH_ROTATION] == \
+            pytest.approx(sim.earth.params.rotation_period, rel=rel_tolerance)
 
     def test_moon_orbital_and_rotation_period(self) -> None:
-        """Verify the Moon's orbital period matches the defined value."""
+        """
+        Verify the Moon's orbital period matches the defined value.  
+        Verify the Moon's rotational period matches the defined value.  
+        Verify the number of Earth's rotations within one Moon's orbit matches the defined value.  
+        """
         # Relative tolerance for test results
         rel_tolerance = 0.1
 
@@ -49,16 +53,16 @@ class TestOrbitSimulation:
         sim.run(run_time)
 
         # Check if Moon's orbit time matches given orbit time parameters
-        assert sim.sim_moon_orbit_time == pytest.approx(sim.moon.orbit.params.period,
-                                                        rel=rel_tolerance)
+        assert sim.tracker.full_angle_times[MotionType.MOON_ORBIT] == \
+            pytest.approx(sim.moon.orbit.params.period, rel=rel_tolerance)
 
         # Check if Moon's rotation time matches given rotation period parameters
-        assert sim.sim_moon_rotation_time == pytest.approx(sim.moon.params.rotation_period,
-                                                           rel=rel_tolerance)
+        assert sim.tracker.full_angle_times[MotionType.MOON_ROTATION] == \
+            pytest.approx(sim.moon.params.rotation_period, rel=rel_tolerance)
 
         # Check if the number of Earth's revolutions during one Moon's orbit matches given parameters
-        assert sim.tracker.totals[MotionType.EARTH_ROTATION] == pytest.approx(sim.moon.orbit.params.period_days,
-                                                                              rel=rel_tolerance)
+        assert sim.tracker.totals[MotionType.EARTH_ROTATION] == \
+            pytest.approx(sim.moon.orbit.params.period_days, rel=rel_tolerance)
 
 
 def main() -> None:

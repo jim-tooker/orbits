@@ -81,6 +81,11 @@ class CelestialBody(ABC):
                                  subclass.
     """
     def __init__(self, params: CelestialBodyParams, position: vp.vector = vp.vector(0, 0, 0)):
+        """
+        Args:
+            params (CelestialBodyParams): Parameters defining the celestial body.
+            position (vp.vector): Initial position of Earth. Defaults to (0, 0, 0).
+        """
         self.params: CelestialBodyParams = params
         self.orbit: Optional[Orbit] = None
 
@@ -181,6 +186,8 @@ class Earth(CelestialBody):
         """
         Args:
             position (vp.vector): Initial position of Earth. Defaults to (0, 0, 0).
+            dist_scale_factor (float): How much to scale down the orbital distances.
+            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
         super().__init__(params=self.params, position=position)
@@ -192,7 +199,6 @@ class Moon(CelestialBody):
     
     Attributes:
         sidereal_month (float): The sidereal month duration in days.
-        params (CelestialBodyParams): Parameters defining the Moon's physical properties.
         orbit (MoonOrbit): Object handling the moon's orbital mechanics.
         arrow (vp.arrow): Visual indicator of moon's orientation.
     """
@@ -209,7 +215,8 @@ class Moon(CelestialBody):
                  no_gui: bool = False):
         """
         Args:
-            dist_scale_factor (float): Factor to scale down the orbital distances
+            dist_scale_factor (float): Factor to scale down the orbital distances.
+            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         orbit: MoonOrbit = MoonOrbit(dist_scale_factor=dist_scale_factor, no_gui=no_gui)
         self.params.no_gui = no_gui

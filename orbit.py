@@ -209,6 +209,7 @@ class MoonOrbit(Orbit):
         """
         Args:
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
+            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
         """
         self.params.no_gui = no_gui
         super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)

@@ -99,12 +99,59 @@ parameters, and runs the simulation.</p>
 <li>argparse.HelpFormatter</li>
 </ul>
 </dd>
+<dt id="orbits.orbit_simulator.MotionTracker"><code class="flex name class">
+<span>class <span class="ident">MotionTracker</span></span>
+<span>(</span><span>last_event_times: dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float] = &lt;factory&gt;, full_angle_times: dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float] = &lt;factory&gt;, angles: dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float] = &lt;factory&gt;, totals: dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data class to hold the times and angles for objects we track.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class MotionTracker:
+    &#34;&#34;&#34;Data class to hold the times and angles for objects we track.&#34;&#34;&#34;
+    last_event_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    full_angle_times: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    angles: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})
+    totals: dict[MotionType, float] = field(default_factory=lambda: {body: 0.0 for body in MotionType})</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.orbit_simulator.MotionTracker.angles"><code class="name">var <span class="ident">angles</span> : dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit_simulator.MotionTracker.full_angle_times"><code class="name">var <span class="ident">full_angle_times</span> : dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit_simulator.MotionTracker.last_event_times"><code class="name">var <span class="ident">last_event_times</span> : dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit_simulator.MotionTracker.totals"><code class="name">var <span class="ident">totals</span> : dict[<a title="orbits.celestial_body.MotionType" href="celestial_body.html#orbits.celestial_body.MotionType">MotionType</a>, float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="orbits.orbit_simulator.OrbitSimulator"><code class="flex name class">
 <span>class <span class="ident">OrbitSimulator</span></span>
 <span>(</span><span>time_scale_factor: float = 86400, dist_scale_factor: float = 0.1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Main class responsible for setting up and running the orbit simulation</p>
+<div class="desc"><p>Main class responsible for setting up and running the orbit simulation.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>earth</code></strong> :&ensp;<code>Earth</code></dt>
+<dd>Representation of the Earth.</dd>
+<dt><strong><code>moon</code></strong> :&ensp;<code>Moon</code></dt>
+<dd>Representation of the Moon.</dd>
+<dt><strong><code>tracker</code></strong> :&ensp;<code><a title="orbits.orbit_simulator.MotionTracker" href="#orbits.orbit_simulator.MotionTracker">MotionTracker</a></code></dt>
+<dd>Tracker to keep track of simulation object's angles and times</dd>
+</dl>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>time_scale_factor</code></strong> :&ensp;<code>float</code></dt>
@@ -117,9 +164,16 @@ parameters, and runs the simulation.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class OrbitSimulator:
-    &#34;&#34;&#34;Main class responsible for setting up and running the orbit simulation&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Main class responsible for setting up and running the orbit simulation.
 
-    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY
+    Attributes:
+        earth (Earth): Representation of the Earth.
+        moon (Moon): Representation of the Moon.
+        tracker (MotionTracker): Tracker to keep track of simulation object&#39;s angles and times
+    &#34;&#34;&#34;
+
+    DEFAULT_TIME_SCALE_FACTOR: float = SECS_IN_HR * HRS_IN_DAY  # 86,400
     &#34;&#34;&#34;The default value for the time_scale_factor.&#34;&#34;&#34;
 
     DEFAULT_DIST_SCALE_FACTOR: float = 0.1
@@ -130,6 +184,9 @@ parameters, and runs the simulation.</p>
 
     MIN_DIST_SCALE_FACTOR: float = 0.1
     &#34;&#34;&#34;The min value allowed for the dist_scale_factor.&#34;&#34;&#34;
+
+   # Flag to indicate whether the GUI should be disabled (True = no GUI)
+    _no_gui: bool = False
 
     def __init__(self,
                  time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR,
@@ -144,29 +201,60 @@ parameters, and runs the simulation.</p>
         if not self.MIN_DIST_SCALE_FACTOR &lt;= dist_scale_factor &lt;= 1:
             raise ValueError(f&#39;dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1&#39;)
 
+        self._exit_sim: bool = False
         self._time_scale_factor: float = time_scale_factor
         self._dist_scale_factor: float = dist_scale_factor
-        self._canvas: vp.canvas = vp.canvas(title=&#39;Orbit Simulator&#39;,
-                                            width=1600,
-                                            height=1000,
-                                            align=&#39;left&#39;)
 
-        self._earth = Earth()
-        self._moon = Moon(dist_scale_factor)
+        # Create self.tracker so we can monitor times and angles of objects
+        self.tracker: MotionTracker = MotionTracker()
 
-        self._create_orientation_figure()
-        self._info_canvas: vp.canvas
-        self._setup_info_canvas()
+        if OrbitSimulator._no_gui is False:
+            self._canvas: vp.canvas = vp.canvas(title=&#39;Orbit Simulator&#39;,
+                                                width=1500,
+                                                height=1000,
+                                                align=&#39;left&#39;)
 
-        # rotate camera around the x axis to see the orbits better (not straight on)
-        camera_rotate_angle = 2  # degrees
-        self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+        self.earth: Earth = Earth(no_gui=OrbitSimulator._no_gui)
+        self.moon: Moon = Moon(no_gui=OrbitSimulator._no_gui,
+                               dist_scale_factor=dist_scale_factor)
+
+        if OrbitSimulator._no_gui is False:
+            self._create_orientation_figure()
+            self._info_canvas: vp.canvas = self._setup_info_canvas()
+
+            # rotate camera around the x axis to see the orbits better (not straight on)
+            camera_rotate_angle: float = 2  # degrees
+            self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
+
+    def __del__(self) -&gt; None:
+        &#34;&#34;&#34;
+        Deletes the canvases and sets the reference to None to allow canvases to disappear from GUI
+        &#34;&#34;&#34;
+        if hasattr(self, &#39;_canvas&#39;) and self._canvas:
+            self._canvas.delete()
+
+        if hasattr(self, &#39;_info_canvas&#39;) and self._info_canvas:
+            self._info_canvas.delete()
+
+    @classmethod
+    def disable_gui(cls, no_gui: bool) -&gt; None:
+        &#34;&#34;&#34;
+        Enables or disables the GUI.
+
+        Args:
+            no_gui (bool): Flag to indicate where GUI should be disabled (True = disable GUI).
+        &#34;&#34;&#34;
+        cls._no_gui = no_gui
+
+    def _exit_sim_loop(self) -&gt; None:
+        &#34;&#34;&#34;Causes the sim loop to exit.&#34;&#34;&#34;
+        self._exit_sim = True
 
     def _create_orientation_figure(self) -&gt; None:
         &#34;&#34;&#34;Create orientation arrows and labels to show the x, y, and z axes.&#34;&#34;&#34;
         # Define orientation figure size and position using the largest object on the canvas.
         # Currently this is the Moon&#39;s orbit.  This will need to change when adding more orbits.
-        canvas_mag: float = self._moon.orbit.orbit_mag
+        canvas_mag: float = self.moon.orbit.orbit_mag
         orient_size: float = canvas_mag/8
         orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
 
@@ -188,7 +276,7 @@ parameters, and runs the simulation.</p>
                  emissive=True)
 
         # Label the arrows
-        label_distance = orient_size * 1.1
+        label_distance: float = orient_size * 1.1
         vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
                  text=&#39;X&#39;,
                  color=vp.color.red,
@@ -223,28 +311,45 @@ parameters, and runs the simulation.</p>
                                       align=&#39;left&#39;,
                                       box=False)
 
-    def _setup_info_canvas(self) -&gt; None:
+    def _handle_quit_button(self, button: vp.button) -&gt; None:
+        &#34;&#34;&#34;Handles quit simulation button&#34;&#34;&#34;
+        self._exit_sim_loop()
+
+    @staticmethod
+    def quit_simulation() -&gt; None:
+        &#34;&#34;&#34;Stops the VPython server.&#34;&#34;&#34;
+        if OrbitSimulator._no_gui is False:
+            # We don&#39;t import vp_services until needed, because importing it will start
+            # the server, if not started already.
+            import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
+            vp_services.stop_server()
+
+    def _setup_info_canvas(self) -&gt; vp.canvas:
         &#34;&#34;&#34;
         Set up the information canvas with labels displaying simulation details.
 
         This method creates a separate canvas for displaying information about
         the simulation, including time and distance scales, and details about
         the Earth and Moon.
+
+        Returns:
+            vp.canvas: The create info canvas
         &#34;&#34;&#34;
         # Create canvas and configure
-        width = 400
-        height = 1000
-        self._info_canvas = vp.canvas(width=width, height=height, align=&#39;left&#39;)
-        self._info_canvas.range = 10
-        self._info_canvas.userzoom = False
-        self._info_canvas.userspin = False
-        self._info_canvas.userpan = False
+        width: int = 400
+        height_of_quit_button: int = 25
+        height: int = 1000 - height_of_quit_button
+        info_canvas: vp.canvas = vp.canvas(width=width, height=height, align=&#39;left&#39;)
+        info_canvas.range = 10
+        info_canvas.userzoom = False
+        info_canvas.userspin = False
+        info_canvas.userpan = False
 
         # Start labels 1 over from left margin (range -10 to 10)
-        left_margin: int = -self._info_canvas.range + 1
+        left_margin: int = -info_canvas.range + 1
 
         # Start lines at the top minus 1
-        line_number: int = int(self._info_canvas.range * height/width - 1)
+        line_number: int = int(info_canvas.range * height/width - 1)
 
         # Create time scale label
         self._create_info_label(f&#39;Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
@@ -258,51 +363,105 @@ parameters, and runs the simulation.</p>
         line_number -= 2
 
         # Create Earth info label
-        self._create_info_label(f&#39;Earth Info:\n  Radius: {self._earth.params.radius:,.0f} km\n  Tilt: {
-            self._earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self._earth.sidereal_day:.2f} hrs&#39;,
+        self._create_info_label(f&#39;Earth Info:\n  Radius: {self.earth.params.radius:,.0f} km\n  Tilt: {
+            self.earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self.earth.sidereal_day:.2f} hrs&#39;,
                                 left_margin, line_number)
         line_number -= 5
 
         # Create Moon info label
-        self._create_info_label(f&#39;Moon Info:\n  Radius: {self._moon.params.radius:,.0f} km\n  Tilt: {
-            self._moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self._moon.sidereal_month:.2f} days&#39;,
+        self._create_info_label(f&#39;Moon Info:\n  Radius: {self.moon.params.radius:,.0f} km\n  Tilt: {
+            self.moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self.moon.sidereal_month:.2f} days&#39;,
                                 left_margin, line_number)
         line_number -= 5
 
         # Create Moon&#39;s Orbit info label
         self._create_info_label(f&#34;Moon&#39;s Orbit Info:\n  Semi-major axis: {
-            self._moon.orbit.params.semi_major_axis:,.0f} km\n  Eccentricity: {
-            self._moon.orbit.params.eccentricity:.3f}\n  Inclination: {
-            self._moon.orbit.params.inclination_degs:.2f}°\n  Period: {
-            self._moon.orbit.params.period_days:.2f} days&#34;,
+            self.moon.orbit.params.semi_major_axis:,.0f} km\n  Eccentricity: {
+            self.moon.orbit.params.eccentricity:.3f}\n  Inclination: {
+            self.moon.orbit.params.inclination_degs:.2f}°\n  Period: {
+            self.moon.orbit.params.period_days:.2f} days&#34;,
                                 left_margin, line_number)
         line_number -= 6
+
+        # Add the Quit simulation button, and bind it to _handle_quit_button()
+        vp.button(pos=info_canvas.title_anchor,
+                  text=&#39;                                Quit Simulation                                &#39;,
+                  color=vp.color.red,
+                  background=vp.color.gray(0.8),
+                  bind=self._handle_quit_button)
 
         # Set default canvas back to normal canvas
         self._canvas.select()
 
-    def run(self) -&gt; None:
+        return info_canvas
+
+    def _check_for_full_angle(self, t: float) -&gt; None:
+        # If the Earth has rotated 360°, store rotation time
+        if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.EARTH_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ROTATION]
+            self.tracker.last_event_times[MotionType.EARTH_ROTATION] = t
+            self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
+            self.tracker.totals[MotionType.EARTH_ROTATION] += 1
+            print(f&#39;Sim Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours&#39;)
+
+        # If the Moon has orbited 360°, store the orbit time
+        if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ORBIT]
+            self.tracker.last_event_times[MotionType.MOON_ORBIT] = t
+            self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
+            self.tracker.totals[MotionType.MOON_ORBIT] += 1
+            print(f&#39;Sim Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+            print(f&#39;There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
+                self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.&#39;)
+
+        # If the Moon has rotated 360°, store rotation time
+        if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ROTATION]
+            self.tracker.last_event_times[MotionType.MOON_ROTATION] = t
+            self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
+            self.tracker.totals[MotionType.MOON_ROTATION] += 1
+            print(f&#39;Sim Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+
+    def run(self, runtime: float = 0) -&gt; None:
         &#34;&#34;&#34;
         Execute the main simulation loop, updating positions of celestial bodies.
 
-        This method runs indefinitely, updating the positions and rotations of
-        the Earth and Moon based on the elapsed simulation time.
+        This method runs as long as `runtime` specifies, or indefinitely if `runtime=0`.
+        It updates the positions and rotations of the celestial bodies based on the elapsed simulation time.
+
+        Args:
+            runtime (float): How long to run the simulation (s).  Defaults to 0 (indefinite runtime)
         &#34;&#34;&#34;
         # Initialize simulation loop time variables
         t: float = 0
-        dt: float = 0.01 * self._time_scale_factor
+        t_prime: float = 0
+        dt: float = 0.01
+        dt_prime: float = dt * self._time_scale_factor
 
-        while True:
+        print()
+
+        while self._exit_sim is False and True if runtime == 0 else t &lt; runtime:
             vp.rate(100)
 
-            # Update Moon&#39;s position based on total time elapsed
-            self._moon.update_position(t)
+            if OrbitSimulator._no_gui is False:
+                # Update Moon&#39;s position based on total time elapsed
+                self.moon.update_position(t_prime)
 
-            # Rotate the moon and earth based on the small time step and their respective angular velocities
-            self._earth.rotate(dt)
-            self._moon.rotate(dt)
+                # Rotate the moon and earth based on the small time step and their respective angular velocities
+                self.earth.rotate(dt_prime)
+                self.moon.rotate(dt_prime)
 
-            t += dt</code></pre>
+            # Check the objects we&#39;re tracking for full angles
+            self._check_for_full_angle(t_prime)
+
+            t += dt
+            t_prime += dt_prime</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -323,15 +482,41 @@ parameters, and runs the simulation.</p>
 <div class="desc"><p>The min value allowed for the dist_scale_factor.</p></div>
 </dd>
 </dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="orbits.orbit_simulator.OrbitSimulator.disable_gui"><code class="name flex">
+<span>def <span class="ident">disable_gui</span></span>(<span>no_gui: bool) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enables or disables the GUI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Flag to indicate where GUI should be disabled (True = disable GUI).</dd>
+</dl></div>
+</dd>
+<dt id="orbits.orbit_simulator.OrbitSimulator.quit_simulation"><code class="name flex">
+<span>def <span class="ident">quit_simulation</span></span>(<span>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Stops the VPython server.</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="orbits.orbit_simulator.OrbitSimulator.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>self) ‑> None</span>
+<span>def <span class="ident">run</span></span>(<span>self, runtime: float = 0) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute the main simulation loop, updating positions of celestial bodies.</p>
-<p>This method runs indefinitely, updating the positions and rotations of
-the Earth and Moon based on the elapsed simulation time.</p></div>
+<p>This method runs as long as <code>runtime</code> specifies, or indefinitely if <code>runtime=0</code>.
+It updates the positions and rotations of the celestial bodies based on the elapsed simulation time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>runtime</code></strong> :&ensp;<code>float</code></dt>
+<dd>How long to run the simulation (s).
+Defaults to 0 (indefinite runtime)</dd>
+</dl></div>
 </dd>
 </dl>
 </dd>
@@ -359,12 +544,23 @@ the Earth and Moon based on the elapsed simulation time.</p></div>
 <h4><code><a title="orbits.orbit_simulator.CustomArgparseFormatter" href="#orbits.orbit_simulator.CustomArgparseFormatter">CustomArgparseFormatter</a></code></h4>
 </li>
 <li>
+<h4><code><a title="orbits.orbit_simulator.MotionTracker" href="#orbits.orbit_simulator.MotionTracker">MotionTracker</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.orbit_simulator.MotionTracker.angles" href="#orbits.orbit_simulator.MotionTracker.angles">angles</a></code></li>
+<li><code><a title="orbits.orbit_simulator.MotionTracker.full_angle_times" href="#orbits.orbit_simulator.MotionTracker.full_angle_times">full_angle_times</a></code></li>
+<li><code><a title="orbits.orbit_simulator.MotionTracker.last_event_times" href="#orbits.orbit_simulator.MotionTracker.last_event_times">last_event_times</a></code></li>
+<li><code><a title="orbits.orbit_simulator.MotionTracker.totals" href="#orbits.orbit_simulator.MotionTracker.totals">totals</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="orbits.orbit_simulator.OrbitSimulator" href="#orbits.orbit_simulator.OrbitSimulator">OrbitSimulator</a></code></h4>
 <ul class="">
 <li><code><a title="orbits.orbit_simulator.OrbitSimulator.DEFAULT_DIST_SCALE_FACTOR" href="#orbits.orbit_simulator.OrbitSimulator.DEFAULT_DIST_SCALE_FACTOR">DEFAULT_DIST_SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.orbit_simulator.OrbitSimulator.DEFAULT_TIME_SCALE_FACTOR" href="#orbits.orbit_simulator.OrbitSimulator.DEFAULT_TIME_SCALE_FACTOR">DEFAULT_TIME_SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.orbit_simulator.OrbitSimulator.MAX_TIME_SCALE_FACTOR" href="#orbits.orbit_simulator.OrbitSimulator.MAX_TIME_SCALE_FACTOR">MAX_TIME_SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.orbit_simulator.OrbitSimulator.MIN_DIST_SCALE_FACTOR" href="#orbits.orbit_simulator.OrbitSimulator.MIN_DIST_SCALE_FACTOR">MIN_DIST_SCALE_FACTOR</a></code></li>
+<li><code><a title="orbits.orbit_simulator.OrbitSimulator.disable_gui" href="#orbits.orbit_simulator.OrbitSimulator.disable_gui">disable_gui</a></code></li>
+<li><code><a title="orbits.orbit_simulator.OrbitSimulator.quit_simulation" href="#orbits.orbit_simulator.OrbitSimulator.quit_simulation">quit_simulation</a></code></li>
 <li><code><a title="orbits.orbit_simulator.OrbitSimulator.run" href="#orbits.orbit_simulator.OrbitSimulator.run">run</a></code></li>
 </ul>
 </li>
