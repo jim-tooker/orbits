@@ -8,7 +8,7 @@ for Earth and Moon, along with their physical parameters and visualization prope
 from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any, Final, Optional
 import math
 import vpython as vp
 from orbits.orbit import Orbit, MoonOrbit
@@ -171,7 +171,7 @@ class Earth(CelestialBody):
     Attributes:
         sidereal_day (float): The sidereal day duration in hours.
     """
-    sidereal_day: float = 23.9344696  # hours
+    sidereal_day: Final[float] = 23.9344696  # hours
 
     params = CelestialBodyParams(
         radius = 6378,  # km
@@ -202,7 +202,7 @@ class Moon(CelestialBody):
         orbit (MoonOrbit): Object handling the moon's orbital mechanics.
         arrow (vp.arrow): Visual indicator of moon's orientation.
     """
-    sidereal_month: float = 27.321661  # days
+    sidereal_month: Final[float] = 27.321661  # days
 
     params = CelestialBodyParams(
         radius = 1738,  # km
