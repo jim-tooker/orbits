@@ -85,7 +85,6 @@ class Orbit(ABC):
         """
         self.params: OrbitParams = params
         self._dist_scale_factor: float = dist_scale_factor
-        self._orbit_mag: float = 1
 
         if self.params.no_gui is False:
             self.__create_path()
@@ -124,16 +123,6 @@ class Orbit(ABC):
 
         return av
 
-    @property
-    def orbit_mag(self) -> float:
-        """
-        Get the current magnitude of the orbit.
-
-        Returns:
-            float: Orbit magnitude
-        """
-        return self._orbit_mag
-
     def angle(self, t: float) -> float:
         """
         Calculates the current angle of the orbit based on the given time.
@@ -166,7 +155,6 @@ class Orbit(ABC):
         y: float = x_zero_inclination * math.sin(self.params.inclination)
 
         next_point: vp.vector = vp.vector(x,y,z)
-        self._orbit_mag = next_point.mag
 
         return next_point
 
