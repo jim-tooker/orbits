@@ -21,6 +21,8 @@ when running this program:
                    This allows easier viewing of the planets. Without this scaling, planets  
                    are generally too small to view because orbital distances are relatively  
                    much larger than the planet sizes.  
+
+The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 """
 
 __author__ = "Jim Tooker"

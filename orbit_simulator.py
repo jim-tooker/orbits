@@ -22,15 +22,18 @@ when running this program:
                    This allows easier viewing of the planets. Without this scaling, planets  
                    are generally too small to view because orbital distances are relatively  
                    much larger than the planet sizes.  
+
+The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 """
 import os
 import sys
 import math
 import argparse
-from typing import Final
+from typing import List, Final
 from dataclasses import dataclass, field
 import vpython as vp
-from orbits.celestial_body import Earth, Moon, MotionType
+from orbits.celestial_body import Earth, Moon, MotionType, Sun
+from orbits.orbit import Orbit, EarthOrbit, MoonOrbit
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 @dataclass
@@ -61,7 +64,7 @@ class OrbitSimulator:
     MAX_TIME_SCALE_FACTOR: Final[float] = 1_000_000
     """The max value allowed for the time_scale_factor."""
 
-    MIN_DIST_SCALE_FACTOR: Final[float] = 0.1
+    MIN_DIST_SCALE_FACTOR: Final[float] = 0.001
     """The min value allowed for the dist_scale_factor."""
 
     MAX_RUNTIME: Final[float] = SECS_IN_HR  # 1 hr
@@ -97,9 +100,23 @@ class OrbitSimulator:
                                                 height=1000,
                                                 align='left')
 
-        self.earth: Earth = Earth(no_gui=OrbitSimulator._no_gui)
-        self.moon: Moon = Moon(no_gui=OrbitSimulator._no_gui,
-                               dist_scale_factor=dist_scale_factor)
+        # Create Sun
+        self.sun: Sun = Sun(no_gui=OrbitSimulator._no_gui)
+
+        # Create orbits List
+        orbits: List[Orbit] = []
+
+        # Create Earth and its orbit
+        earth_orbit: EarthOrbit = EarthOrbit(dist_scale_factor=dist_scale_factor)
+        orbits.append(earth_orbit)
+        self.earth: Earth = Earth(orbits=orbits,
+                                  no_gui=OrbitSimulator._no_gui)
+
+        # Create Moon and its orbit
+        moon_orbit: MoonOrbit = MoonOrbit(dist_scale_factor=dist_scale_factor)
+        orbits.append(moon_orbit)
+        self.moon: Moon = Moon(orbits=orbits,
+                               no_gui=OrbitSimulator._no_gui)
 
         if OrbitSimulator._no_gui is False:
             self._create_orientation_figure()
@@ -137,8 +154,9 @@ class OrbitSimulator:
     def _create_orientation_figure(self) -> None:
         """Create orientation arrows and labels to show the x, y, and z axes."""
         # Define orientation figure size and position using the largest object on the canvas.
-        # Currently this is the Moon's orbit.  This will need to change when adding more orbits.
-        canvas_mag: Final[float] = 36_000   # Arbitrary based on mag of Moon's orbit
+        # Currently this is the Earth's orbit around the sun.
+        #   (This will need to change if a larger orbit is added)
+        canvas_mag: Final[float] = self.earth.orbit.orbit_mag
         orient_size: Final[float] = canvas_mag/8
         orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
 
@@ -272,7 +290,7 @@ class OrbitSimulator:
             self.tracker.last_event_times[MotionType.EARTH_ROTATION] = t
             self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
             self.tracker.totals[MotionType.EARTH_ROTATION] += 1
-            print(f'Sim Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
+            print(f'Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
                 self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours')
 
         # If the Moon has orbited 360°, store the orbit time
@@ -282,7 +300,7 @@ class OrbitSimulator:
             self.tracker.last_event_times[MotionType.MOON_ORBIT] = t
             self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
             self.tracker.totals[MotionType.MOON_ORBIT] += 1
-            print(f'Sim Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
+            print(f'Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
                 self.tracker.full_angle_times[MotionType.MOON_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
             print(f'There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
                 self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.')
@@ -294,8 +312,18 @@ class OrbitSimulator:
             self.tracker.last_event_times[MotionType.MOON_ROTATION] = t
             self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
             self.tracker.totals[MotionType.MOON_ROTATION] += 1
-            print(f'Sim Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
+            print(f'Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
                 self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+
+        # If the Earth has orbited 360° around the Sun, store the orbit time
+        if abs(self.earth.orbit.angle(t) - self.tracker.angles[MotionType.EARTH_ORBIT]) >= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.EARTH_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ORBIT]
+            self.tracker.last_event_times[MotionType.EARTH_ORBIT] = t
+            self.tracker.angles[MotionType.EARTH_ORBIT] = self.earth.orbit.angle(t)
+            self.tracker.totals[MotionType.EARTH_ORBIT] += 1
+            print(f'Earth Orbit {self.tracker.totals[MotionType.EARTH_ORBIT]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.EARTH_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
 
     def _handle_quit_button(self, button: vp.button) -> None:
         """Handles quit simulation button"""
@@ -348,10 +376,12 @@ class OrbitSimulator:
             vp.rate(100)
 
             if OrbitSimulator._no_gui is False:
-                # Update Moon's position based on total time elapsed
+                # Update celestial bodies orbit position based on total time elapsed
+                self.earth.update_position(t_prime)
                 self.moon.update_position(t_prime)
 
-                # Rotate the moon and earth based on the small time step and their respective angular velocities
+                # Rotate celestial bodies based on the small time step and their respective angular velocities
+                self.sun.rotate(dt_prime)
                 self.earth.rotate(dt_prime)
                 self.moon.rotate(dt_prime)
 

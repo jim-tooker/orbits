@@ -8,16 +8,18 @@ for Earth and Moon, along with their physical parameters and visualization prope
 from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Final, Optional
+from copy import copy
+from typing import List, Any, Final, Optional
 import math
 import vpython as vp
-from orbits.orbit import Orbit, MoonOrbit
+from orbits.orbit import Orbit
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 
 class MotionType(Enum):
     """Enum for different types of motions we track."""
     EARTH_ROTATION = auto()
+    EARTH_ORBIT = auto()
     MOON_ROTATION = auto()
     MOON_ORBIT = auto()
 
@@ -76,25 +78,54 @@ class CelestialBody(ABC):
     
     Attributes:
         params (CelestialBodyParams): Parameters defining the celestial body.
-        orbit (Optional[Orbit]): Orbit of the celestial body. Optional because not  
-                                 all bodies will have orbits.  Must be overridden in  
+        orbits (List[Orbit]): Orbit of the celestial body. FIXME because not  
+                                 all bodies will have orbits.  FIXME Must be overridden in  
                                  subclass.
     """
-    def __init__(self, params: CelestialBodyParams, position: vp.vector = vp.vector(0, 0, 0)):
+    def __init__(self,
+                 params: CelestialBodyParams,
+                 orbits: Optional[List[Orbit]] = None):
         """
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            position (vp.vector): Initial position of Earth. Defaults to (0, 0, 0).
+            FIXME
+            position (vp.vector): Initial position of celestial body. Defaults to (0, 0, 0).
         """
         self.params: CelestialBodyParams = params
-        self.orbit: Optional[Orbit] = None
+
+        # Copy the orbits, if they exist
+        self._orbits: List[Orbit]
+        if orbits is None:
+            self._orbits = []
+        else:
+            self._orbits = copy(orbits)
 
         if self.params.no_gui is False:
-            self._sphere: vp.sphere = vp.sphere(pos=position,
-                                                radius=self.params.radius,
-                                                texture=self.params.texture)
+            self._sphere: vp.sphere = vp.sphere(radius=self.params.radius,
+                                                texture=self.params.texture,
+                                                make_trail=True)
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
+
+    @property
+    def orbit(self) -> Orbit:
+        """
+        The primary orbit of the celestial body.
+
+        Returns:
+            Orbit: The primary orbit of the celestial body.
+        """
+        return self._orbits[-1]
+
+    @property
+    def position(self) -> vp.vector:
+        """
+        The position of the celestial body.
+
+        Returns:
+            vp.vector: The position of the celestial body.
+        """
+        return self._sphere.pos
 
     @property
     def angular_velocity(self) -> float:
@@ -147,10 +178,14 @@ class CelestialBody(ABC):
         Args:
             t (float): The current simulation time.
         """
-        # Update the position with the rotated values
-        assert self.orbit
-        next_point: vp.vector = self.orbit.update_position(t)
-        self._sphere.pos = next_point
+        # Add up all the orbits
+        new_pos: vp.vector = vp.vector(0, 0, 0)
+        for orbit in self._orbits:
+            new_pos += orbit.position(t)
+
+        # Update positions of celestial body and its axis line
+        self._sphere.pos = new_pos
+        self._axis_line.pos = new_pos - self._axis_line.axis/2
 
     def rotate(self, dt: float) -> None:
         """
@@ -164,6 +199,33 @@ class CelestialBody(ABC):
         self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
 
 
+class Sun(CelestialBody):
+    """
+    Represents the Sun
+    
+    Attributes:
+        params (CelestialBodyParams): Parameters defining the Sun.
+    """
+    params = CelestialBodyParams(
+        radius = 695_700,  # km
+        tilt = 0,  # radians
+        rotation_period = 27 * HRS_IN_DAY * SECS_IN_HR,  # seconds
+        texture = 'images/sun_texture.jpg')
+
+    def __init__(self,
+                 no_gui: bool = False):
+        """
+        Args:
+            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
+        """
+        self.params.no_gui = no_gui
+        super().__init__(params=self.params)
+
+        # Make Sun glow
+        self._sphere.emissive = True
+        self._sphere.shininess = 1
+
+        
 class Earth(CelestialBody):
     """
     Representation of Earth
@@ -174,23 +236,22 @@ class Earth(CelestialBody):
     sidereal_day: Final[float] = 23.9344696  # hours
 
     params = CelestialBodyParams(
-        radius = 6378,  # km
+        radius = 200_000,  # km
+        #radius = (6378.137 + 6356.752) / 2,  # km
         tilt = math.radians(23.44),  # radians
         rotation_period = sidereal_day * SECS_IN_HR,  # seconds
-        texture=vp.textures.earth
-    )
+        texture=vp.textures.earth)
 
-    def __init__(self, position: vp.vector = vp.vector(0, 0, 0),
-                 dist_scale_factor: float = 1,
+    def __init__(self,
+                 orbits: List[Orbit],
                  no_gui: bool = False):
         """
         Args:
-            position (vp.vector): Initial position of Earth. Defaults to (0, 0, 0).
-            dist_scale_factor (float): How much to scale down the orbital distances.
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
-        super().__init__(params=self.params, position=position)
+        super().__init__(params=self.params,
+                         orbits=orbits)
 
 
 class Moon(CelestialBody):
@@ -205,25 +266,23 @@ class Moon(CelestialBody):
     sidereal_month: Final[float] = 27.321661  # days
 
     params = CelestialBodyParams(
-        radius = 1738,  # km
+        radius = 50_000,  # km
+        #radius = 1738,  # km
         tilt = math.radians(6.68),  # radians
         rotation_period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # seconds
         texture = 'images/moon_texture.jpg')
 
     def __init__(self,
-                 dist_scale_factor: float = 1,
+                 orbits: List[Orbit],
                  no_gui: bool = False):
         """
         Args:
-            dist_scale_factor (float): Factor to scale down the orbital distances.
+            orbits: FIXME
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
-        orbit: MoonOrbit = MoonOrbit(dist_scale_factor=dist_scale_factor, no_gui=no_gui)
         self.params.no_gui = no_gui
-        super().__init__(params=self.params, position=vp.vector(orbit.a, 0, 0))
-
-        # Override base class orbit with MoonOrbit type
-        self.orbit: MoonOrbit = orbit
+        super().__init__(params=self.params,
+                         orbits=orbits)
 
         if self.params.no_gui is False:
             # Create arrow for Moon that points to Earth
@@ -251,8 +310,7 @@ class Moon(CelestialBody):
         """
         super().update_position(t)
 
-        # Update axis line and arrow positions
-        self._axis_line.pos = self._sphere.pos - self._axis_line.axis/2
+        # Update arrow position
         self.arrow.pos = self._sphere.pos
 
     def rotate(self, dt: float) -> None:

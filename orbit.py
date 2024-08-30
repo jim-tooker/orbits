@@ -6,6 +6,7 @@ in the celestial body simulation. It includes abstract base classes and
 specific implementations for orbits, along with their associated parameters
 and visualization elements.
 """
+from __future__ import annotations
 from enum import Enum, auto
 from abc import ABC
 from dataclasses import dataclass
@@ -77,17 +78,19 @@ class Orbit(ABC):
     Attributes:
         params (OrbitParams): Parameters defining the orbit.
     """
-    def __init__(self, params: OrbitParams, dist_scale_factor: float = 1):
+    def __init__(self,
+                 params: OrbitParams,
+                 dist_scale_factor: float = 1):
         """
         Args:
             params (OrbitParams): Parameters defining the orbit
+            FIXME
+            FIXME
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         self.params: OrbitParams = params
+        self._orbit_mag: float = 0
         self._dist_scale_factor: float = dist_scale_factor
-
-        if self.params.no_gui is False:
-            self.__create_path()
 
     @property
     def a(self) -> float:
@@ -123,6 +126,22 @@ class Orbit(ABC):
 
         return av
 
+    @property
+    def orbit_mag(self) -> float:
+        """
+        The magnitude of the orbit.
+
+        Returns:
+            float: The magnitude of the orbit.
+        """
+        return self._orbit_mag
+    @orbit_mag.setter
+    def orbit_mag(self, mag: float) -> None:
+        """
+        Sets the magnitude of the orbit.
+        """
+        self._orbit_mag = mag
+
     def angle(self, t: float) -> float:
         """
         Calculates the current angle of the orbit based on the given time.
@@ -135,7 +154,7 @@ class Orbit(ABC):
         """
         return self.angular_velocity * t
 
-    def _calculate_next_point_on_path(self, angle: float) -> vp.vector:
+    def calculate_next_point_on_path(self, angle: float) -> vp.vector:
         """
         Calculate the next point on the orbit path at the given angle.
         
@@ -158,23 +177,42 @@ class Orbit(ABC):
 
         return next_point
 
-    def __create_path(self) -> None:
-        """Create the visual representation of the orbit path."""
-        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5))
-
-        for theta in range(0, 360+1):
-            theta_rad: float = math.radians(theta)
-            next_point: vp.vector = self._calculate_next_point_on_path(theta_rad)
-            orbit_ellipse.append(next_point)
-
-    def update_position(self, t: float) -> vp.vector:
+    def position(self, t: float) -> vp.vector:
         """
         Compute position in the orbital plane based on the given time.
 
         Args:
             t (float): The current simulation time.
+
+        Returns:
+            FIXME
         """
-        return self._calculate_next_point_on_path(self.angle(t))
+        return self.calculate_next_point_on_path(self.angle(t))
+
+
+class EarthOrbit(Orbit):
+    """
+    Represents the orbit of the Earth around the Sun.
+
+    This class inherits from the Orbit base class and defines
+    specific parameters for the Earth's orbit.
+    """
+    sidereal_year: float = 365.256 # days
+
+    params = OrbitParams(
+        semi_major_axis = 149_597_870,  # km
+        eccentricity = 0.0167,
+        inclination = math.radians(0),  # radians
+        period = sidereal_year * HRS_IN_DAY * SECS_IN_HR,  # secs
+        direction = OrbitDirection.COUNTER_CLOCKWISE)
+
+    def __init__(self,
+                 dist_scale_factor: float = 1):
+        """
+        Args:
+            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
+        """
+        super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
 
 
 class MoonOrbit(Orbit):
@@ -187,17 +225,20 @@ class MoonOrbit(Orbit):
     sidereal_month: float = 27.321661  # days
 
     params = OrbitParams(
-        semi_major_axis = 384405,  # km
+        semi_major_axis = 20_000_000,  # km
+        #semi_major_axis = 384_405,  # km
         eccentricity = 0.0549,
         inclination = math.radians(5.145),  # radians
         period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self, dist_scale_factor: float = 1, no_gui: bool = False):
+    def __init__(self,
+                 dist_scale_factor: float = 1):
         """
         Args:
+            FIXME
             dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
         """
-        self.params.no_gui = no_gui
-        super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
+        super().__init__(params=self.params,
+                         dist_scale_factor=dist_scale_factor)
