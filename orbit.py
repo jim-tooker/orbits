@@ -9,6 +9,7 @@ and visualization elements.
 from __future__ import annotations
 from enum import Enum, auto
 from abc import ABC
+from typing import Final
 from dataclasses import dataclass
 import math
 import vpython as vp
@@ -80,17 +81,15 @@ class Orbit(ABC):
     """
     def __init__(self,
                  params: OrbitParams,
-                 dist_scale_factor: float = 1):
+                 scale_factor: float = 1):
         """
         Args:
             params (OrbitParams): Parameters defining the orbit
             FIXME
             FIXME
-            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
         """
         self.params: OrbitParams = params
-        self._orbit_mag: float = 0
-        self._dist_scale_factor: float = dist_scale_factor
+        self.scale_factor: float = scale_factor
 
     @property
     def a(self) -> float:
@@ -100,7 +99,7 @@ class Orbit(ABC):
         Returns:
             float: Scaled semi-major axis
         """
-        return self.params.semi_major_axis * self._dist_scale_factor
+        return self.params.semi_major_axis * self.scale_factor
 
     @property
     def b(self) -> float:
@@ -134,13 +133,7 @@ class Orbit(ABC):
         Returns:
             float: The magnitude of the orbit.
         """
-        return self._orbit_mag
-    @orbit_mag.setter
-    def orbit_mag(self, mag: float) -> None:
-        """
-        Sets the magnitude of the orbit.
-        """
-        self._orbit_mag = mag
+        return self.calculate_next_point_on_path(0).mag
 
     def angle(self, t: float) -> float:
         """
@@ -164,6 +157,7 @@ class Orbit(ABC):
         Returns:
             vp.vector: The 3D position of the body on the orbit
         """
+        angle = angle + math.pi
         # Calculate the radial distance for this angle
         r: float = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
 
@@ -196,23 +190,23 @@ class EarthOrbit(Orbit):
 
     This class inherits from the Orbit base class and defines
     specific parameters for the Earth's orbit.
+    
+    Attributes:
+        FIXME
     """
-    sidereal_year: float = 365.256 # days
+    SIDEREAL_YEAR: Final[float] = 365.256 # days
+    SCALE_FACTOR: Final[float] = 1/30
 
     params = OrbitParams(
         semi_major_axis = 149_597_870,  # km
         eccentricity = 0.0167,
         inclination = math.radians(0),  # radians
-        period = sidereal_year * HRS_IN_DAY * SECS_IN_HR,  # secs
+        period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self,
-                 dist_scale_factor: float = 1):
-        """
-        Args:
-            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
-        """
-        super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)
+    def __init__(self):
+        super().__init__(params=self.params,
+                         scale_factor=self.SCALE_FACTOR)
 
 
 class MoonOrbit(Orbit):
@@ -221,24 +215,20 @@ class MoonOrbit(Orbit):
 
     This class inherits from the Orbit base class and defines
     specific parameters for the Moon's orbit.
+
+    Attributes:
+        FIXME
     """
-    sidereal_month: float = 27.321661  # days
+    SIDEREAL_MONTH: Final[float] = 27.321661  # days
+    SCALE_FACTOR: Final[float] = 1/4
 
     params = OrbitParams(
-        semi_major_axis = 20_000_000,  # km
-        #semi_major_axis = 384_405,  # km
+        semi_major_axis = 384_405,  # km
         eccentricity = 0.0549,
         inclination = math.radians(5.145),  # radians
-        period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # secs
+        period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self,
-                 dist_scale_factor: float = 1):
-        """
-        Args:
-            FIXME
-            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
-        """
+    def __init__(self):
         super().__init__(params=self.params,
-                         dist_scale_factor=dist_scale_factor)
+                         scale_factor=self.SCALE_FACTOR)

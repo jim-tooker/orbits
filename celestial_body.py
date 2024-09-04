@@ -84,14 +84,15 @@ class CelestialBody(ABC):
     """
     def __init__(self,
                  params: CelestialBodyParams,
-                 orbits: Optional[List[Orbit]] = None):
+                 orbits: Optional[List[Orbit]] = None,
+                 scale_factor: float = 1):
         """
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
             FIXME
-            position (vp.vector): Initial position of celestial body. Defaults to (0, 0, 0).
         """
         self.params: CelestialBodyParams = params
+        self.scale_factor = scale_factor
 
         # Copy the orbits, if they exist
         self._orbits: List[Orbit]
@@ -101,12 +102,22 @@ class CelestialBody(ABC):
             self._orbits = copy(orbits)
 
         if self.params.no_gui is False:
-            self._sphere: vp.sphere = vp.sphere(radius=self.params.radius,
+            self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
-                                                make_trail=True)
+                                                make_trail=True,
+                                                trail_radius=0.25*self.radius,
+                                                #trail_type="points",
+                                                retain=1000)
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
 
+    @property
+    def radius(self) -> float:
+        """
+        FIXME
+        """
+        return self.params.radius * self.scale_factor
+    
     @property
     def orbit(self) -> Orbit:
         """
@@ -137,18 +148,6 @@ class CelestialBody(ABC):
         """
         return FULL_ANGLE / self.params.rotation_period
 
-    def angle(self, t: float) -> float:
-        """
-        Calculates the current rotational angle of the celestial body based on the given time.
-
-        Args:
-            t (float): The current time.
-
-        Returns:
-            float: Current orbit angle
-        """
-        return self.angular_velocity * t
-
     def _calculate_axis(self) -> vp.vector:
         """
         Calculate the axis vector based on the body's tilt.
@@ -165,11 +164,23 @@ class CelestialBody(ABC):
         Returns:
             vp.cylinder: A cylinder object representing the axis.
         """
-        axis_length: float = self.params.radius * 3
+        axis_length: float = self.radius * 3
         return vp.cylinder(pos=self._sphere.pos - axis_length/2 * self._axis,
                            axis=axis_length * self._axis,
-                           radius=self.params.radius/50,
+                           radius=self.radius/50,
                            color=vp.color.white)
+
+    def angle(self, t: float) -> float:
+        """
+        Calculates the current rotational angle of the celestial body based on the given time.
+
+        Args:
+            t (float): The current time.
+
+        Returns:
+            float: Current orbit angle
+        """
+        return self.angular_velocity * t
 
     def update_position(self, t: float) -> None:
         """
@@ -206,6 +217,8 @@ class Sun(CelestialBody):
     Attributes:
         params (CelestialBodyParams): Parameters defining the Sun.
     """
+    SCALE_FACTOR: Final[float] = 1
+
     params = CelestialBodyParams(
         radius = 695_700,  # km
         tilt = 0,  # radians
@@ -219,7 +232,8 @@ class Sun(CelestialBody):
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
-        super().__init__(params=self.params)
+        super().__init__(params=self.params,
+                         scale_factor=self.SCALE_FACTOR)
 
         # Make Sun glow
         self._sphere.emissive = True
@@ -231,15 +245,16 @@ class Earth(CelestialBody):
     Representation of Earth
     
     Attributes:
-        sidereal_day (float): The sidereal day duration in hours.
+        SIDEREAL_DAY (float): The sidereal day duration in hours.
+        FIXME
     """
-    sidereal_day: Final[float] = 23.9344696  # hours
+    SIDEREAL_DAY: Final[float] = 23.9344696  # hours
+    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
-        radius = 200_000,  # km
-        #radius = (6378.137 + 6356.752) / 2,  # km
+        radius = (6378.137 + 6356.752) / 2,  # km
         tilt = math.radians(23.44),  # radians
-        rotation_period = sidereal_day * SECS_IN_HR,  # seconds
+        rotation_period = SIDEREAL_DAY * SECS_IN_HR,  # seconds
         texture=vp.textures.earth)
 
     def __init__(self,
@@ -251,7 +266,8 @@ class Earth(CelestialBody):
         """
         self.params.no_gui = no_gui
         super().__init__(params=self.params,
-                         orbits=orbits)
+                         orbits=orbits,
+                         scale_factor=self.SCALE_FACTOR)
 
 
 class Moon(CelestialBody):
@@ -259,21 +275,22 @@ class Moon(CelestialBody):
     Represents the Earth's moon with its own orbit and visualization.
     
     Attributes:
-        sidereal_month (float): The sidereal month duration in days.
+        SIDEREAL_MONTH (float): The sidereal month duration in days.
         orbit (MoonOrbit): Object handling the moon's orbital mechanics.
-        arrow (vp.arrow): Visual indicator of moon's orientation.
+        FIXME
     """
-    sidereal_month: Final[float] = 27.321661  # days
+    SIDEREAL_MONTH: Final[float] = 27.321661  # days
+    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
-        radius = 50_000,  # km
-        #radius = 1738,  # km
+        radius = 1738,  # km
         tilt = math.radians(6.68),  # radians
-        rotation_period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # seconds
+        rotation_period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # seconds
         texture = 'images/moon_texture.jpg')
 
     def __init__(self,
                  orbits: List[Orbit],
+                 earth: Earth,
                  no_gui: bool = False):
         """
         Args:
@@ -281,12 +298,14 @@ class Moon(CelestialBody):
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
+        self.earth = earth
         super().__init__(params=self.params,
-                         orbits=orbits)
+                         orbits=orbits,
+                         scale_factor=self.SCALE_FACTOR)
 
         if self.params.no_gui is False:
             # Create arrow for Moon that points to Earth
-            self.arrow: vp.arrow = self._create_arrow()
+            self._arrow: vp.arrow = self._create_arrow()
 
     def _create_arrow(self) -> vp.arrow:
         """
@@ -295,7 +314,7 @@ class Moon(CelestialBody):
         Returns:
             vp.arrow: An arrow object pointing towards Earth.
         """
-        arrow_length: float = self.params.radius * 2
+        arrow_length: float = self.radius * 2
         return vp.arrow(pos=self._sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,
@@ -311,7 +330,7 @@ class Moon(CelestialBody):
         super().update_position(t)
 
         # Update arrow position
-        self.arrow.pos = self._sphere.pos
+        self._arrow.pos = self._sphere.pos
 
     def rotate(self, dt: float) -> None:
         """
@@ -324,4 +343,4 @@ class Moon(CelestialBody):
 
         # Axis of arrow should be a normalized vector pointing to Earth multiplied by
         # the magnitude of the arrow's axis vector
-        self.arrow.axis = vp.norm(-self._sphere.pos) * self.arrow.axis.mag
+        self._arrow.axis = vp.norm(self.earth.position - self._sphere.pos) * self._arrow.axis.mag

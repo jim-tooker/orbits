@@ -11,17 +11,12 @@ body, the following are visualized:
 - Orbital radius
 - Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
 
-To ease visualizing the simulation, there are two scaling factors that can *optionally* be used
+To ease visualizing the simulation, there is a time scaling factor that can *optionally* be used
 when running this program:
 
 - `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.  
-                   This allows the simulation to progress faster than reality so  
-                   that observing rotations and orbits is possible.  
-
-- `dist_scale_factor`: This factor decreases the orbital distance vs. the actual distance.  
-                   This allows easier viewing of the planets. Without this scaling, planets  
-                   are generally too small to view because orbital distances are relatively  
-                   much larger than the planet sizes.  
+                       This allows the simulation to progress faster than reality so  
+                       that observing rotations and orbits is possible.  
 
 The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 """
@@ -55,17 +50,11 @@ class OrbitSimulator:
         tracker (MotionTracker): Tracker to keep track of simulation object's angles and times
     """
 
-    DEFAULT_TIME_SCALE_FACTOR: Final[float] = SECS_IN_HR * HRS_IN_DAY  # 86,400
+    DEFAULT_TIME_SCALE_FACTOR: Final[float] = 1_000_000
     """The default value for the time_scale_factor."""
 
-    DEFAULT_DIST_SCALE_FACTOR: Final[float] = 0.1
-    """The default value for the dist_scale_factor."""
-
-    MAX_TIME_SCALE_FACTOR: Final[float] = 1_000_000
+    MAX_TIME_SCALE_FACTOR: Final[float] = 2_000_000
     """The max value allowed for the time_scale_factor."""
-
-    MIN_DIST_SCALE_FACTOR: Final[float] = 0.001
-    """The min value allowed for the dist_scale_factor."""
 
     MAX_RUNTIME: Final[float] = SECS_IN_HR  # 1 hr
     """The max time for a simulation to run, if a time is specified"""
@@ -74,29 +63,23 @@ class OrbitSimulator:
     _no_gui: bool = False
 
     def __init__(self,
-                 time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR,
-                 dist_scale_factor: float = DEFAULT_DIST_SCALE_FACTOR):
+                 time_scale_factor: float = DEFAULT_TIME_SCALE_FACTOR):
         """
         Args:
             time_scale_factor (float): How much to scale up the sense of time.
-            dist_scale_factor (float): How much to scale down the orbital distances.
         """
         if not 1 <= time_scale_factor <= self.MAX_TIME_SCALE_FACTOR:
             raise ValueError(f'time_scale_factor must be between 1 and {self.MAX_TIME_SCALE_FACTOR}')
 
-        if not self.MIN_DIST_SCALE_FACTOR <= dist_scale_factor <= 1:
-            raise ValueError(f'dist_scale_factor must be between {self.MIN_DIST_SCALE_FACTOR} and 1')
-
         self._exit_sim: bool = False
         self._time_scale_factor: float = time_scale_factor
-        self._dist_scale_factor: float = dist_scale_factor
 
         # Create self.tracker so we can monitor times and angles of objects
         self.tracker: MotionTracker = MotionTracker()
 
         if OrbitSimulator._no_gui is False:
             self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
-                                                width=1500,
+                                                width=1600,
                                                 height=1000,
                                                 align='left')
 
@@ -107,15 +90,16 @@ class OrbitSimulator:
         orbits: List[Orbit] = []
 
         # Create Earth and its orbit
-        earth_orbit: EarthOrbit = EarthOrbit(dist_scale_factor=dist_scale_factor)
+        earth_orbit: EarthOrbit = EarthOrbit()
         orbits.append(earth_orbit)
         self.earth: Earth = Earth(orbits=orbits,
                                   no_gui=OrbitSimulator._no_gui)
 
         # Create Moon and its orbit
-        moon_orbit: MoonOrbit = MoonOrbit(dist_scale_factor=dist_scale_factor)
+        moon_orbit: MoonOrbit = MoonOrbit()
         orbits.append(moon_orbit)
         self.moon: Moon = Moon(orbits=orbits,
+                               earth=self.earth,
                                no_gui=OrbitSimulator._no_gui)
 
         if OrbitSimulator._no_gui is False:
@@ -124,7 +108,7 @@ class OrbitSimulator:
             self._info_canvas: vp.canvas = self._setup_info_canvas()
 
             # rotate camera around the x axis to see the orbits better (not straight on)
-            camera_rotate_angle: Final[float] = 2  # degrees
+            camera_rotate_angle: Final[float] = 30  # degrees
             self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
 
     def __del__(self) -> None:
@@ -195,12 +179,17 @@ class OrbitSimulator:
                  opacity=0,
                  box=False)
 
-    def _create_info_label(self, text: str, left_margin: int, line_number: int) -> vp.label:
+    def _create_info_label(self,
+                           text: str,
+                           left_margin: int,
+                           line_number: int,
+                           color: vp.vector=vp.color.white) -> vp.label:
         """
         Create a label with given text at specified position on the info canvas.
 
         Args:
             text (str): The text to display on the label.
+            FIXME
             left_margin (int): The left margin position for the label.
             line_number (int): The vertical position (line number) for the label.
 
@@ -209,6 +198,7 @@ class OrbitSimulator:
         """
         return vp.label(pos=vp.vector(left_margin, line_number, 0),
                                       text=text,
+                                      color=color,
                                       height=16,
                                       align='left',
                                       box=False)
@@ -243,39 +233,79 @@ class OrbitSimulator:
         self._create_info_label(f'Time scale: {self._time_scale_factor:,.0f}x. 1 sec = {
               self._time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).',
               left_margin, line_number)
-        line_number -= 1
-
-        # Create distance scale label
-        self._create_info_label(f'Orbital distance scale: 1/{1/self._dist_scale_factor:.0f}.',
-                                left_margin, line_number)
         line_number -= 2
 
-        # Create Earth info label
-        self._create_info_label(f'Earth Info:\n  Radius: {self.earth.params.radius:,.0f} km\n  Tilt: {
-            self.earth.params.tilt_degrees:.1f}°\n  Sidereal day: {self.earth.sidereal_day:.2f} hrs',
-                                left_margin, line_number)
-        line_number -= 5
-
-        # Create Moon info label
-        self._create_info_label(f'Moon Info:\n  Radius: {self.moon.params.radius:,.0f} km\n  Tilt: {
-            self.moon.params.tilt_degrees:.1f}°\n  Sidereal month: {self.moon.sidereal_month:.2f} days',
-                                left_margin, line_number)
-        line_number -= 5
-
-        # Create Moon's Orbit info label
-        self._create_info_label(f"Moon's Orbit Info:\n  Semi-major axis: {
-            self.moon.orbit.params.semi_major_axis:,.0f} km\n  Eccentricity: {
-            self.moon.orbit.params.eccentricity:.3f}\n  Inclination: {
-            self.moon.orbit.params.inclination_degs:.2f}°\n  Period: {
-            self.moon.orbit.params.period_days:.2f} days",
+        # Create Sun info label
+        self._create_info_label('Sun Info:\n' +
+                                f'  Radius: {self.sun.params.radius:,.0f} km\n' +
+                                f'    <i>Simulation visual scale factor:</i> {self.sun.scale_factor:.0f}x\n' +
+                                f'  Tilt: {self.sun.params.tilt_degrees:.1f}°\n' +
+                                f'  Rotation period: {self.sun.params.rotation_period_days:.2f} days',
                                 left_margin, line_number)
         line_number -= 6
+
+        # Create Earth info label
+        self._create_info_label('Earth Info:\n' +
+                                f'  Radius: {self.earth.params.radius:,.0f} km\n' +
+                                f'    <i>Simulation visual scale factor:</i> {self.earth.scale_factor:.0f}x\n' +
+                                f'  Tilt: {self.earth.params.tilt_degrees:.1f}°\n' +
+                                f'  Sidereal day: {self.earth.SIDEREAL_DAY:.2f} hrs',
+                                left_margin, line_number)
+        line_number -= 6
+
+        # Create Moon info label
+        self._create_info_label('Moon Info:\n' +
+                                f'  Radius: {self.moon.params.radius:,.0f} km\n' +
+                                f'    <i>Simulation visual scale factor:</i> {self.moon.scale_factor:.0f}x\n' +
+                                f'  Tilt: {self.moon.params.tilt_degrees:.1f}°\n' +
+                                f'  Sidereal month: {self.moon.SIDEREAL_MONTH:.2f} days',
+                                left_margin, line_number)
+        line_number -= 6
+
+        # Create Earth's Orbit info label
+        self._create_info_label("Earth's Orbit Info:\n" +
+                                f'  Semi-major axis: {self.earth.orbit.params.semi_major_axis:,.0f} km\n' +
+                                f'    <i>Simulation visual scale factor:</i> 1/{1/self.earth.orbit.scale_factor:.0f}x\n'
+                                f'  Eccentricity: {self.earth.orbit.params.eccentricity:.3f}\n' +
+                                f'  Inclination: {self.earth.orbit.params.inclination_degs:.2f}°\n' +
+                                f'  Period: {self.earth.orbit.params.period_days:.2f} days',
+                                left_margin, line_number)
+        line_number -= 7
+
+        # Create Moon's Orbit info label
+        self._create_info_label("Moon's Orbit Info:\n" +
+                                f'  Semi-major axis: {self.moon.orbit.params.semi_major_axis:,.0f} km\n' +
+                                f'    <i>Simulation visual scale factor:</i> 1/{1/self.moon.orbit.scale_factor:.0f}x\n'
+                                f'  Eccentricity: {self.moon.orbit.params.eccentricity:.3f}\n' +
+                                f'  Inclination: {self.moon.orbit.params.inclination_degs:.2f}°\n' +
+                                f'  Period: {self.moon.orbit.params.period_days:.2f} days',
+                                left_margin, line_number)
+        line_number -= 7
+
+        # Create Camera view info label
+        self._create_info_label(text='To change view:\n' +
+                                     'Rotate view: Drag with right mouse button.\n' +
+                                     'Zoom: Scroll wheel or drag left/right mouse buttons.\n' +
+                                     'Pan: Shift drag with left mouse button.',
+                                left_margin=left_margin,
+                                line_number=line_number,
+                                color=vp.color.yellow)
+        line_number -= 5
+
+        # Create Sim view scale info label
+        self._create_info_label(text='Note:  Celestial body sizes and orbits have\n' +
+                                     '           been scaled to fit screen.\n' +
+                                     'See "Simulation visual scale factor" notes above.',
+                                left_margin=left_margin,
+                                line_number=line_number,
+                                color=vp.color.orange)
+        line_number -= 4
 
         # Create Time remaining label
         self._runtime_left_label = self._create_info_label(text='',
                                                            left_margin=left_margin,
                                                            line_number=line_number)
-        line_number -= 1
+        line_number -= 2
 
         # Set default canvas back to normal canvas
         self._canvas.select()
@@ -420,10 +450,6 @@ def main() -> None:
                         type=float,
                         default=int(OrbitSimulator.DEFAULT_TIME_SCALE_FACTOR),
                         help='How much to scale up the sense of time.')
-    parser.add_argument('-d', '--dist-scale-factor',
-                        type=float,
-                        default=OrbitSimulator.DEFAULT_DIST_SCALE_FACTOR,
-                        help='How much to scale down the orbital distances.')
     parser.add_argument('-r', '--runtime',
                         type=float,
                         default=0,
@@ -436,8 +462,7 @@ def main() -> None:
         print('Hit Ctrl-C to exit.')
 
     try:
-        simulation: OrbitSimulator = OrbitSimulator(time_scale_factor=args.time_scale_factor,
-                                                    dist_scale_factor=args.dist_scale_factor)
+        simulation: OrbitSimulator = OrbitSimulator(time_scale_factor=args.time_scale_factor)
         simulation.run(args.runtime)
     except ValueError as e:
         print(f'Error: {e}')
