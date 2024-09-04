@@ -189,9 +189,9 @@ class OrbitSimulator:
 
         Args:
             text (str): The text to display on the label.
-            FIXME
             left_margin (int): The left margin position for the label.
             line_number (int): The vertical position (line number) for the label.
+            color (vp.vector): The color of the label text. Defaults to white.
 
         Returns:
             vp.label: The created label object.

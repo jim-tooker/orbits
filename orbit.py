@@ -78,15 +78,15 @@ class Orbit(ABC):
     
     Attributes:
         params (OrbitParams): Parameters defining the orbit.
+        scale_factor (float): How much to scale the size of orbit.
     """
     def __init__(self,
                  params: OrbitParams,
                  scale_factor: float = 1):
         """
         Args:
-            params (OrbitParams): Parameters defining the orbit
-            FIXME
-            FIXME
+            params (OrbitParams): Parameters defining the orbit.
+            scale_factor (float): How much to scale the size of orbit.
         """
         self.params: OrbitParams = params
         self.scale_factor: float = scale_factor
@@ -157,7 +157,9 @@ class Orbit(ABC):
         Returns:
             vp.vector: The 3D position of the body on the orbit
         """
+        # Shift the angle by pi to start with the orbit coming towards the user at input angle=0
         angle = angle + math.pi
+
         # Calculate the radial distance for this angle
         r: float = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
 
@@ -179,7 +181,7 @@ class Orbit(ABC):
             t (float): The current simulation time.
 
         Returns:
-            FIXME
+            vp.vector: The position at time t.
         """
         return self.calculate_next_point_on_path(self.angle(t))
 
@@ -192,7 +194,9 @@ class EarthOrbit(Orbit):
     specific parameters for the Earth's orbit.
     
     Attributes:
-        FIXME
+        SIDEREAL_YEAR (float): The sidereal year duration in days.
+        SCALE_FACTOR (float): How much to scale the size of the Earth orbit.
+        params (OrbitParams): Parameters defining the Earth's orbit.
     """
     SIDEREAL_YEAR: Final[float] = 365.256 # days
     SCALE_FACTOR: Final[float] = 1/30
@@ -205,6 +209,11 @@ class EarthOrbit(Orbit):
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
     def __init__(self):
+        """
+        Args:
+            params (OrbitParams): Parameters defining the Earth's orbit.
+            scale_factor (float): How much to scale the size of the Earth's orbit.
+        """
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)
 
@@ -217,7 +226,9 @@ class MoonOrbit(Orbit):
     specific parameters for the Moon's orbit.
 
     Attributes:
-        FIXME
+        SIDEREAL_MONTH (float): The sidereal month duration in days.
+        SCALE_FACTOR (float): How much to scale the size of the Moon's orbit.
+        params (OrbitParams): Parameters defining the Moon's orbit.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
     SCALE_FACTOR: Final[float] = 1/4
@@ -230,5 +241,10 @@ class MoonOrbit(Orbit):
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
     def __init__(self):
+        """
+        Args:
+            params (OrbitParams): Parameters defining the Moon's orbit.
+            scale_factor (float): How much to scale the size of the Moon's orbit.
+        """
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)

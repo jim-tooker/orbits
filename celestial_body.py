@@ -78,9 +78,7 @@ class CelestialBody(ABC):
     
     Attributes:
         params (CelestialBodyParams): Parameters defining the celestial body.
-        orbits (List[Orbit]): Orbit of the celestial body. FIXME because not  
-                                 all bodies will have orbits.  FIXME Must be overridden in  
-                                 subclass.
+        scale_factor (float): How much to scale the size of the celestial body.
     """
     def __init__(self,
                  params: CelestialBodyParams,
@@ -89,7 +87,8 @@ class CelestialBody(ABC):
         """
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            FIXME
+            orbits (List[Orbit]): A list of orbits relevant to the celestial body.
+            scale_factor (float): How much to scale the size of the celestial body.
         """
         self.params: CelestialBodyParams = params
         self.scale_factor = scale_factor
@@ -106,7 +105,6 @@ class CelestialBody(ABC):
                                                 texture=self.params.texture,
                                                 make_trail=True,
                                                 trail_radius=0.25*self.radius,
-                                                #trail_type="points",
                                                 retain=1000)
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
@@ -114,7 +112,10 @@ class CelestialBody(ABC):
     @property
     def radius(self) -> float:
         """
-        FIXME
+        The radius of the celestial body.
+
+        Returns:
+            float: The radius of the celestial body.
         """
         return self.params.radius * self.scale_factor
     
@@ -215,6 +216,7 @@ class Sun(CelestialBody):
     Represents the Sun
     
     Attributes:
+        SCALE_FACTOR (float): How much to scale the size of the Sun.
         params (CelestialBodyParams): Parameters defining the Sun.
     """
     SCALE_FACTOR: Final[float] = 1
@@ -239,14 +241,15 @@ class Sun(CelestialBody):
         self._sphere.emissive = True
         self._sphere.shininess = 1
 
-        
+
 class Earth(CelestialBody):
     """
     Representation of Earth
     
     Attributes:
         SIDEREAL_DAY (float): The sidereal day duration in hours.
-        FIXME
+        SCALE_FACTOR (float): How much to scale the size of the Earth.
+        params (CelestialBodyParams): Parameters defining the Earth.
     """
     SIDEREAL_DAY: Final[float] = 23.9344696  # hours
     SCALE_FACTOR: Final[float] = 8
@@ -262,6 +265,7 @@ class Earth(CelestialBody):
                  no_gui: bool = False):
         """
         Args:
+            orbits (List[Orbit]): A list of orbits relevant to the Earth.
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
@@ -276,8 +280,8 @@ class Moon(CelestialBody):
     
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        orbit (MoonOrbit): Object handling the moon's orbital mechanics.
-        FIXME
+        SCALE_FACTOR (float): How much to scale the size of the Moon.
+        params (CelestialBodyParams): Parameters defining the Moon.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
     SCALE_FACTOR: Final[float] = 8
@@ -294,7 +298,8 @@ class Moon(CelestialBody):
                  no_gui: bool = False):
         """
         Args:
-            orbits: FIXME
+            orbits (List[Orbit]): A list of orbits relevant to the Moon.
+            earth (Earth): A reference to the Earth object
             no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
         self.params.no_gui = no_gui
