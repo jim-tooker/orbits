@@ -40,95 +40,35 @@ hljs.highlightAll();
 <dd>
 <div class="desc"><p>Main entry point for test.</p></div>
 </dd>
-</dl>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="orbits.tests.test_orbit_simulator.TestOrbitSimulation"><code class="flex name class">
-<span>class <span class="ident">TestOrbitSimulation</span></span>
+<dt id="orbits.tests.test_orbit_simulator.test_earth_orbital_period"><code class="name flex">
+<span>def <span class="ident">test_earth_orbital_period</span></span>(<span>) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class for <code>pytest</code> testing of Orbit Simulator.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class TestOrbitSimulation:
-    &#34;&#34;&#34;Class for `pytest` testing of Orbit Simulator.&#34;&#34;&#34;
-
-    def test_earth_rotation_period(self) -&gt; None:
-        &#34;&#34;&#34;Verify the Earth&#39;s rotational period matches the defined value.&#34;&#34;&#34;
-        # Relative tolerance for test results
-        rel_tolerance = 0.001
-
-        # Initialize simulator
-        time_scale_factor: float = 10_000
-        sim: OrbitSimulator = OrbitSimulator(time_scale_factor=time_scale_factor)
-
-        # Run long enough for 3 revolutions
-        num_of_revolutions: float = 3
-        time_margin: float = 0.5
-        run_time: float = ((sim.earth.params.rotation_period / time_scale_factor) * num_of_revolutions) + time_margin
-
-        # Run it
-        sim.run(run_time)
-
-        # Check if Earth&#39;s rotation time matches given rotation period parameters
-        assert sim.tracker.full_angle_times[MotionType.EARTH_ROTATION] == \
-            pytest.approx(sim.earth.params.rotation_period, rel=rel_tolerance)
-
-    def test_moon_orbital_and_rotation_period(self) -&gt; None:
-        &#34;&#34;&#34;
-        Verify the Moon&#39;s orbital period matches the defined value.  
-        Verify the Moon&#39;s rotational period matches the defined value.  
-        Verify the number of Earth&#39;s rotations within one Moon&#39;s orbit matches the defined value.  
-        &#34;&#34;&#34;
-        # Relative tolerance for test results
-        rel_tolerance = 0.1
-
-        # Initialize simulator
-        time_scale_factor: float = OrbitSimulator.DEFAULT_TIME_SCALE_FACTOR
-        sim: OrbitSimulator = OrbitSimulator(time_scale_factor=time_scale_factor)
-
-        # Run long enough for one orbit
-        time_margin: float = 0.5
-        run_time: float = (sim.moon.orbit.params.period / time_scale_factor) + time_margin
-
-        # Run it
-        sim.run(run_time)
-
-        # Check if Moon&#39;s orbit time matches given orbit time parameters
-        assert sim.tracker.full_angle_times[MotionType.MOON_ORBIT] == \
-            pytest.approx(sim.moon.orbit.params.period, rel=rel_tolerance)
-
-        # Check if Moon&#39;s rotation time matches given rotation period parameters
-        assert sim.tracker.full_angle_times[MotionType.MOON_ROTATION] == \
-            pytest.approx(sim.moon.params.rotation_period, rel=rel_tolerance)
-
-        # Check if the number of Earth&#39;s revolutions during one Moon&#39;s orbit matches given parameters
-        assert sim.tracker.totals[MotionType.EARTH_ROTATION] == \
-            pytest.approx(sim.moon.orbit.params.period_days, rel=rel_tolerance)</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_earth_rotation_period"><code class="name flex">
-<span>def <span class="ident">test_earth_rotation_period</span></span>(<span>self) ‑> None</span>
+<div class="desc"><p>Verify the Earth's orbital period matches the defined value.</p></div>
+</dd>
+<dt id="orbits.tests.test_orbit_simulator.test_earth_rotation_period"><code class="name flex">
+<span>def <span class="ident">test_earth_rotation_period</span></span>(<span>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Verify the Earth's rotational period matches the defined value.</p></div>
 </dd>
-<dt id="orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_moon_orbital_and_rotation_period"><code class="name flex">
-<span>def <span class="ident">test_moon_orbital_and_rotation_period</span></span>(<span>self) ‑> None</span>
+<dt id="orbits.tests.test_orbit_simulator.test_moon_orbital_and_rotation_period"><code class="name flex">
+<span>def <span class="ident">test_moon_orbital_and_rotation_period</span></span>(<span>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Verify the Moon's orbital period matches the defined value.<br>
 Verify the Moon's rotational period matches the defined value.<br>
 Verify the number of Earth's rotations within one Moon's orbit matches the defined value.</p></div>
 </dd>
-</dl>
+<dt id="orbits.tests.test_orbit_simulator.test_sun_rotation_period"><code class="name flex">
+<span>def <span class="ident">test_sun_rotation_period</span></span>(<span>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Verify the Sun's rotational period matches the defined value.</p></div>
 </dd>
 </dl>
+</section>
+<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -144,17 +84,10 @@ Verify the number of Earth's rotations within one Moon's orbit matches the defin
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="orbits.tests.test_orbit_simulator.main" href="#orbits.tests.test_orbit_simulator.main">main</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="orbits.tests.test_orbit_simulator.TestOrbitSimulation" href="#orbits.tests.test_orbit_simulator.TestOrbitSimulation">TestOrbitSimulation</a></code></h4>
-<ul class="">
-<li><code><a title="orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_earth_rotation_period" href="#orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_earth_rotation_period">test_earth_rotation_period</a></code></li>
-<li><code><a title="orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_moon_orbital_and_rotation_period" href="#orbits.tests.test_orbit_simulator.TestOrbitSimulation.test_moon_orbital_and_rotation_period">test_moon_orbital_and_rotation_period</a></code></li>
-</ul>
-</li>
+<li><code><a title="orbits.tests.test_orbit_simulator.test_earth_orbital_period" href="#orbits.tests.test_orbit_simulator.test_earth_orbital_period">test_earth_orbital_period</a></code></li>
+<li><code><a title="orbits.tests.test_orbit_simulator.test_earth_rotation_period" href="#orbits.tests.test_orbit_simulator.test_earth_rotation_period">test_earth_rotation_period</a></code></li>
+<li><code><a title="orbits.tests.test_orbit_simulator.test_moon_orbital_and_rotation_period" href="#orbits.tests.test_orbit_simulator.test_moon_orbital_and_rotation_period">test_moon_orbital_and_rotation_period</a></code></li>
+<li><code><a title="orbits.tests.test_orbit_simulator.test_sun_rotation_period" href="#orbits.tests.test_orbit_simulator.test_sun_rotation_period">test_sun_rotation_period</a></code></li>
 </ul>
 </li>
 </ul>

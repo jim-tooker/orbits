@@ -40,49 +40,53 @@ and visualization elements.</p>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="orbits.orbit.MoonOrbit"><code class="flex name class">
-<span>class <span class="ident">MoonOrbit</span></span>
-<span>(</span><span>dist_scale_factor: float = 1, no_gui: bool = False)</span>
+<dt id="orbits.orbit.EarthOrbit"><code class="flex name class">
+<span>class <span class="ident">EarthOrbit</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents the orbit of the Moon around Earth.</p>
+<div class="desc"><p>Represents the orbit of the Earth around the Sun.</p>
 <p>This class inherits from the Orbit base class and defines
-specific parameters for the Moon's orbit.</p>
-<h2 id="args">Args</h2>
+specific parameters for the Earth's orbit.</p>
+<h2 id="attributes">Attributes</h2>
 <dl>
-<dt><strong><code>dist_scale_factor</code></strong> :&ensp;<code>float</code></dt>
-<dd>Scaling factor for orbital distance. Defaults to 1.</dd>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False</dd>
+<dt><strong><code>SIDEREAL_YEAR</code></strong> :&ensp;<code>float</code></dt>
+<dd>The sidereal year duration in days.</dd>
+<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Earth orbit.</dd>
+<dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
+<dd>Parameters defining the Earth's orbit.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class MoonOrbit(Orbit):
+<pre><code class="python">class EarthOrbit(Orbit):
     &#34;&#34;&#34;
-    Represents the orbit of the Moon around Earth.
+    Represents the orbit of the Earth around the Sun.
 
     This class inherits from the Orbit base class and defines
-    specific parameters for the Moon&#39;s orbit.
+    specific parameters for the Earth&#39;s orbit.
+    
+    Attributes:
+        SIDEREAL_YEAR (float): The sidereal year duration in days.
+        SCALE_FACTOR (float): How much to scale the size of the Earth orbit.
+        params (OrbitParams): Parameters defining the Earth&#39;s orbit.
     &#34;&#34;&#34;
-    sidereal_month: float = 27.321661  # days
+    SIDEREAL_YEAR: Final[float] = 365.256 # days
+    SCALE_FACTOR: Final[float] = 1/30
 
     params = OrbitParams(
-        semi_major_axis = 384405,  # km
-        eccentricity = 0.0549,
-        inclination = math.radians(5.145),  # radians
-        period = sidereal_month * HRS_IN_DAY * SECS_IN_HR,  # secs
+        semi_major_axis = 149_597_870,  # km
+        eccentricity = 0.0167,
+        inclination = math.radians(0),  # radians
+        period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self, dist_scale_factor: float = 1, no_gui: bool = False):
+    def __init__(self) -&gt; None:
         &#34;&#34;&#34;
-        Args:
-            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
         &#34;&#34;&#34;
-        self.params.no_gui = no_gui
-        super().__init__(params=self.params, dist_scale_factor=dist_scale_factor)</code></pre>
+        super().__init__(params=self.params,
+                         scale_factor=self.SCALE_FACTOR)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -91,11 +95,15 @@ specific parameters for the Moon's orbit.</p>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.orbit.MoonOrbit.params"><code class="name">var <span class="ident">params</span></code></dt>
+<dt id="orbits.orbit.EarthOrbit.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="orbits.orbit.MoonOrbit.sidereal_month"><code class="name">var <span class="ident">sidereal_month</span> : float</code></dt>
+<dt id="orbits.orbit.EarthOrbit.SIDEREAL_YEAR"><code class="name">var <span class="ident">SIDEREAL_YEAR</span> : Final[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.EarthOrbit.params"><code class="name">var <span class="ident">params</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -108,15 +116,99 @@ specific parameters for the Moon's orbit.</p>
 <li><code><a title="orbits.orbit.Orbit.angle" href="#orbits.orbit.Orbit.angle">angle</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.angular_velocity" href="#orbits.orbit.Orbit.angular_velocity">angular_velocity</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.b" href="#orbits.orbit.Orbit.b">b</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.calculate_next_point_on_path" href="#orbits.orbit.Orbit.calculate_next_point_on_path">calculate_next_point_on_path</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.orbit_mag" href="#orbits.orbit.Orbit.orbit_mag">orbit_mag</a></code></li>
-<li><code><a title="orbits.orbit.Orbit.update_position" href="#orbits.orbit.Orbit.update_position">update_position</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.position" href="#orbits.orbit.Orbit.position">position</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="orbits.orbit.MoonOrbit"><code class="flex name class">
+<span>class <span class="ident">MoonOrbit</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the orbit of the Moon around Earth.</p>
+<p>This class inherits from the Orbit base class and defines
+specific parameters for the Moon's orbit.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>SIDEREAL_MONTH</code></strong> :&ensp;<code>float</code></dt>
+<dd>The sidereal month duration in days.</dd>
+<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Moon's orbit.</dd>
+<dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
+<dd>Parameters defining the Moon's orbit.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MoonOrbit(Orbit):
+    &#34;&#34;&#34;
+    Represents the orbit of the Moon around Earth.
+
+    This class inherits from the Orbit base class and defines
+    specific parameters for the Moon&#39;s orbit.
+
+    Attributes:
+        SIDEREAL_MONTH (float): The sidereal month duration in days.
+        SCALE_FACTOR (float): How much to scale the size of the Moon&#39;s orbit.
+        params (OrbitParams): Parameters defining the Moon&#39;s orbit.
+    &#34;&#34;&#34;
+    SIDEREAL_MONTH: Final[float] = 27.321661  # days
+    SCALE_FACTOR: Final[float] = 1/4
+
+    params = OrbitParams(
+        semi_major_axis = 384_405,  # km
+        eccentricity = 0.0549,
+        inclination = math.radians(5.145),  # radians
+        period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
+        direction = OrbitDirection.COUNTER_CLOCKWISE)
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        super().__init__(params=self.params,
+                         scale_factor=self.SCALE_FACTOR)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.orbit.MoonOrbit.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.MoonOrbit.SIDEREAL_MONTH"><code class="name">var <span class="ident">SIDEREAL_MONTH</span> : Final[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.orbit.MoonOrbit.params"><code class="name">var <span class="ident">params</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></b></code>:
+<ul class="hlist">
+<li><code><a title="orbits.orbit.Orbit.a" href="#orbits.orbit.Orbit.a">a</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.angle" href="#orbits.orbit.Orbit.angle">angle</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.angular_velocity" href="#orbits.orbit.Orbit.angular_velocity">angular_velocity</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.b" href="#orbits.orbit.Orbit.b">b</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.calculate_next_point_on_path" href="#orbits.orbit.Orbit.calculate_next_point_on_path">calculate_next_point_on_path</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.orbit_mag" href="#orbits.orbit.Orbit.orbit_mag">orbit_mag</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.position" href="#orbits.orbit.Orbit.position">position</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
 <dt id="orbits.orbit.Orbit"><code class="flex name class">
 <span>class <span class="ident">Orbit</span></span>
-<span>(</span><span>params: <a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a>, dist_scale_factor: float = 1)</span>
+<span>(</span><span>params: <a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a>, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class that defines common properties and methods for all orbits.</p>
@@ -124,13 +216,15 @@ specific parameters for the Moon's orbit.</p>
 <dl>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
 <dd>Parameters defining the orbit.</dd>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of orbit.</dd>
 </dl>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
-<dd>Parameters defining the orbit</dd>
-<dt><strong><code>dist_scale_factor</code></strong> :&ensp;<code>float</code></dt>
-<dd>Scaling factor for orbital distance. Defaults to 1.</dd>
+<dd>Parameters defining the orbit.</dd>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of orbit.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -142,19 +236,18 @@ specific parameters for the Moon's orbit.</p>
     
     Attributes:
         params (OrbitParams): Parameters defining the orbit.
+        scale_factor (float): How much to scale the size of orbit.
     &#34;&#34;&#34;
-    def __init__(self, params: OrbitParams, dist_scale_factor: float = 1):
+    def __init__(self,
+                 params: OrbitParams,
+                 scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
-            params (OrbitParams): Parameters defining the orbit
-            dist_scale_factor (float): Scaling factor for orbital distance. Defaults to 1.
+            params (OrbitParams): Parameters defining the orbit.
+            scale_factor (float): How much to scale the size of orbit.
         &#34;&#34;&#34;
         self.params: OrbitParams = params
-        self._dist_scale_factor: float = dist_scale_factor
-        self._orbit_mag: float = 1
-
-        if self.params.no_gui is False:
-            self.__create_path()
+        self.scale_factor: float = scale_factor
 
     @property
     def a(self) -&gt; float:
@@ -164,7 +257,7 @@ specific parameters for the Moon's orbit.</p>
         Returns:
             float: Scaled semi-major axis
         &#34;&#34;&#34;
-        return self.params.semi_major_axis * self._dist_scale_factor
+        return self.params.semi_major_axis * self.scale_factor
 
     @property
     def b(self) -&gt; float:
@@ -193,12 +286,12 @@ specific parameters for the Moon's orbit.</p>
     @property
     def orbit_mag(self) -&gt; float:
         &#34;&#34;&#34;
-        Get the current magnitude of the orbit.
+        The magnitude of the orbit.
 
         Returns:
-            float: Orbit magnitude
+            float: The magnitude of the orbit.
         &#34;&#34;&#34;
-        return self._orbit_mag
+        return self.calculate_next_point_on_path(0).mag
 
     def angle(self, t: float) -&gt; float:
         &#34;&#34;&#34;
@@ -212,7 +305,7 @@ specific parameters for the Moon's orbit.</p>
         &#34;&#34;&#34;
         return self.angular_velocity * t
 
-    def _calculate_next_point_on_path(self, angle: float) -&gt; vp.vector:
+    def calculate_next_point_on_path(self, angle: float) -&gt; vp.vector:
         &#34;&#34;&#34;
         Calculate the next point on the orbit path at the given angle.
         
@@ -222,6 +315,9 @@ specific parameters for the Moon's orbit.</p>
         Returns:
             vp.vector: The 3D position of the body on the orbit
         &#34;&#34;&#34;
+        # Shift the angle by pi to start with the orbit coming towards the user at input angle=0
+        angle = angle + math.pi
+
         # Calculate the radial distance for this angle
         r: float = self.a * (1 - self.params.eccentricity**2) / (1 + self.params.eccentricity * math.cos(angle))
 
@@ -232,27 +328,20 @@ specific parameters for the Moon's orbit.</p>
         y: float = x_zero_inclination * math.sin(self.params.inclination)
 
         next_point: vp.vector = vp.vector(x,y,z)
-        self._orbit_mag = next_point.mag
 
         return next_point
 
-    def __create_path(self) -&gt; None:
-        &#34;&#34;&#34;Create the visual representation of the orbit path.&#34;&#34;&#34;
-        orbit_ellipse: vp.curve = vp.curve(color=vp.color.gray(0.5))
-
-        for theta in range(0, 360+1):
-            theta_rad: float = math.radians(theta)
-            next_point: vp.vector = self._calculate_next_point_on_path(theta_rad)
-            orbit_ellipse.append(next_point)
-
-    def update_position(self, t: float) -&gt; vp.vector:
+    def position(self, t: float) -&gt; vp.vector:
         &#34;&#34;&#34;
         Compute position in the orbital plane based on the given time.
 
         Args:
             t (float): The current simulation time.
+
+        Returns:
+            vp.vector: The position at time t.
         &#34;&#34;&#34;
-        return self._calculate_next_point_on_path(self.angle(t))</code></pre>
+        return self.calculate_next_point_on_path(self.angle(t))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -260,6 +349,7 @@ specific parameters for the Moon's orbit.</p>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="orbits.orbit.EarthOrbit" href="#orbits.orbit.EarthOrbit">EarthOrbit</a></li>
 <li><a title="orbits.orbit.MoonOrbit" href="#orbits.orbit.MoonOrbit">MoonOrbit</a></li>
 </ul>
 <h3>Instance variables</h3>
@@ -284,7 +374,7 @@ def a(self) -&gt; float:
     Returns:
         float: Scaled semi-major axis
     &#34;&#34;&#34;
-    return self.params.semi_major_axis * self._dist_scale_factor</code></pre>
+    return self.params.semi_major_axis * self.scale_factor</code></pre>
 </details>
 </dd>
 <dt id="orbits.orbit.Orbit.angular_velocity"><code class="name">prop <span class="ident">angular_velocity</span> : float</code></dt>
@@ -339,11 +429,11 @@ def b(self) -&gt; float:
 </dd>
 <dt id="orbits.orbit.Orbit.orbit_mag"><code class="name">prop <span class="ident">orbit_mag</span> : float</code></dt>
 <dd>
-<div class="desc"><p>Get the current magnitude of the orbit.</p>
+<div class="desc"><p>The magnitude of the orbit.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>float</code></dt>
-<dd>Orbit magnitude</dd>
+<dd>The magnitude of the orbit.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -352,12 +442,12 @@ def b(self) -&gt; float:
 <pre><code class="python">@property
 def orbit_mag(self) -&gt; float:
     &#34;&#34;&#34;
-    Get the current magnitude of the orbit.
+    The magnitude of the orbit.
 
     Returns:
-        float: Orbit magnitude
+        float: The magnitude of the orbit.
     &#34;&#34;&#34;
-    return self._orbit_mag</code></pre>
+    return self.calculate_next_point_on_path(0).mag</code></pre>
 </details>
 </dd>
 </dl>
@@ -379,8 +469,24 @@ def orbit_mag(self) -&gt; float:
 <dd>Current orbit angle</dd>
 </dl></div>
 </dd>
-<dt id="orbits.orbit.Orbit.update_position"><code class="name flex">
-<span>def <span class="ident">update_position</span></span>(<span>self, t: float) ‑> vp.vector</span>
+<dt id="orbits.orbit.Orbit.calculate_next_point_on_path"><code class="name flex">
+<span>def <span class="ident">calculate_next_point_on_path</span></span>(<span>self, angle: float) ‑> vp.vector</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate the next point on the orbit path at the given angle.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>angle</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current angle in radians along the orbit</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The 3D position of the body on the orbit</dd>
+</dl></div>
+</dd>
+<dt id="orbits.orbit.Orbit.position"><code class="name flex">
+<span>def <span class="ident">position</span></span>(<span>self, t: float) ‑> vp.vector</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Compute position in the orbital plane based on the given time.</p>
@@ -388,6 +494,11 @@ def orbit_mag(self) -&gt; float:
 <dl>
 <dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
 <dd>The current simulation time.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The position at time t.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -614,21 +725,31 @@ def period_hrs(self) -&gt; float:
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="orbits.orbit.EarthOrbit" href="#orbits.orbit.EarthOrbit">EarthOrbit</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.orbit.EarthOrbit.SCALE_FACTOR" href="#orbits.orbit.EarthOrbit.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
+<li><code><a title="orbits.orbit.EarthOrbit.SIDEREAL_YEAR" href="#orbits.orbit.EarthOrbit.SIDEREAL_YEAR">SIDEREAL_YEAR</a></code></li>
+<li><code><a title="orbits.orbit.EarthOrbit.params" href="#orbits.orbit.EarthOrbit.params">params</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="orbits.orbit.MoonOrbit" href="#orbits.orbit.MoonOrbit">MoonOrbit</a></code></h4>
 <ul class="">
+<li><code><a title="orbits.orbit.MoonOrbit.SCALE_FACTOR" href="#orbits.orbit.MoonOrbit.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
+<li><code><a title="orbits.orbit.MoonOrbit.SIDEREAL_MONTH" href="#orbits.orbit.MoonOrbit.SIDEREAL_MONTH">SIDEREAL_MONTH</a></code></li>
 <li><code><a title="orbits.orbit.MoonOrbit.params" href="#orbits.orbit.MoonOrbit.params">params</a></code></li>
-<li><code><a title="orbits.orbit.MoonOrbit.sidereal_month" href="#orbits.orbit.MoonOrbit.sidereal_month">sidereal_month</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="orbits.orbit.Orbit" href="#orbits.orbit.Orbit">Orbit</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="orbits.orbit.Orbit.a" href="#orbits.orbit.Orbit.a">a</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.angle" href="#orbits.orbit.Orbit.angle">angle</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.angular_velocity" href="#orbits.orbit.Orbit.angular_velocity">angular_velocity</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.b" href="#orbits.orbit.Orbit.b">b</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.calculate_next_point_on_path" href="#orbits.orbit.Orbit.calculate_next_point_on_path">calculate_next_point_on_path</a></code></li>
 <li><code><a title="orbits.orbit.Orbit.orbit_mag" href="#orbits.orbit.Orbit.orbit_mag">orbit_mag</a></code></li>
-<li><code><a title="orbits.orbit.Orbit.update_position" href="#orbits.orbit.Orbit.update_position">update_position</a></code></li>
+<li><code><a title="orbits.orbit.Orbit.position" href="#orbits.orbit.Orbit.position">position</a></code></li>
 </ul>
 </li>
 <li>
