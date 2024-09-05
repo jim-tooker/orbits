@@ -10,17 +10,14 @@ body, the following are visualized:
 - Orbital radius
 - Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
 
-To ease visualizing the simulation, there are two scaling factors that can *optionally* be used
+To ease visualizing the simulation, there is a time scaling factor that can *optionally* be used
 when running this program:
 
-- `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.  
-                   This allows the simulation to progress faster than reality so  
-                   that observing rotations and orbits is possible.  
+- `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.
+                       This allows the simulation to progress faster than reality so
+                       that observing rotations and orbits is possible.
 
-- `dist_scale_factor`: This factor decreases the orbital distance vs. the actual distance.  
-                   This allows easier viewing of the planets. Without this scaling, planets  
-                   are generally too small to view because orbital distances are relatively  
-                   much larger than the planet sizes.  
+The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 
 ## Modules:
 - `orbit_simulator`: Main module responsible for setting up and running the orbit simulation

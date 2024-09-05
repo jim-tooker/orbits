@@ -7,22 +7,13 @@ for Earth and Moon, along with their physical parameters and visualization prope
 """
 from abc import ABC
 from dataclasses import dataclass
-from enum import Enum, auto
 from copy import copy
 from typing import List, Any, Final, Optional
 import math
 import vpython as vp
 from orbits.orbit import Orbit
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
-
-
-class MotionType(Enum):
-    """Enum for different types of motions we track."""
-    EARTH_ROTATION = auto()
-    EARTH_ORBIT = auto()
-    MOON_ROTATION = auto()
-    MOON_ORBIT = auto()
-    SUN_ROTATION = auto()
+from orbits import config
 
 
 @dataclass
@@ -35,13 +26,11 @@ class CelestialBodyParams:
         tilt (float): Axial tilt of the celestial body in radians
         rotation_period (float): Rotation period of the body in seconds
         texture (Any): Texture object for the celestial body
-        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
     """
     radius: float
     tilt: float
     rotation_period: float
     texture: Any
-    no_gui: bool = False
 
     @property
     def tilt_degrees(self) -> float:
@@ -88,7 +77,7 @@ class CelestialBody(ABC):
         """
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            orbits (List[Orbit]): A list of orbits relevant to the celestial body.
+            orbits (Optional[List[Orbit]]): A list of orbits relevant to the celestial body.
             scale_factor (float): How much to scale the size of the celestial body.
         """
         self.params: CelestialBodyParams = params
@@ -101,7 +90,7 @@ class CelestialBody(ABC):
         else:
             self._orbits = copy(orbits)
 
-        if self.params.no_gui is False:
+        if config.no_gui is False:
             self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
                                                 make_trail=True,
@@ -228,17 +217,13 @@ class Sun(CelestialBody):
         rotation_period = 27 * HRS_IN_DAY * SECS_IN_HR,  # seconds
         texture = 'images/sun_texture.jpg')
 
-    def __init__(self,
-                 no_gui: bool = False):
+    def __init__(self):
         """
-        Args:
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
-        self.params.no_gui = no_gui
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)
 
-        if self.params.no_gui is False:
+        if config.no_gui is False:
             # Make Sun glow
             self._sphere.emissive = True
             self._sphere.shininess = 1
@@ -263,14 +248,11 @@ class Earth(CelestialBody):
         texture=vp.textures.earth)
 
     def __init__(self,
-                 orbits: List[Orbit],
-                 no_gui: bool = False):
+                 orbits: Optional[List[Orbit]] = None):
         """
         Args:
-            orbits (List[Orbit]): A list of orbits relevant to the Earth.
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
+            orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
         """
-        self.params.no_gui = no_gui
         super().__init__(params=self.params,
                          orbits=orbits,
                          scale_factor=self.SCALE_FACTOR)
@@ -296,21 +278,18 @@ class Moon(CelestialBody):
 
     def __init__(self,
                  orbits: List[Orbit],
-                 earth: Earth,
-                 no_gui: bool = False):
+                 earth: Earth):
         """
         Args:
             orbits (List[Orbit]): A list of orbits relevant to the Moon.
             earth (Earth): A reference to the Earth object
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
         """
-        self.params.no_gui = no_gui
         self.earth = earth
         super().__init__(params=self.params,
                          orbits=orbits,
                          scale_factor=self.SCALE_FACTOR)
 
-        if self.params.no_gui is False:
+        if config.no_gui is False:
             # Create arrow for Moon that points to Earth
             self._arrow: vp.arrow = self._create_arrow()
 

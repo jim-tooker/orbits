@@ -32,14 +32,12 @@ class OrbitParams:
         inclination (float): The inclination of the orbit in radians
         period (float): The orbital period in seconds
         direction (OrbitDirection): The direction of the orbit (clockwise or counter-clockwise)
-        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
 """
     semi_major_axis: float
     eccentricity: float
     inclination: float
     period: float
     direction: OrbitDirection
-    no_gui: bool = False
 
     @property
     def inclination_degs(self) -> float:
