@@ -208,11 +208,8 @@ class EarthOrbit(Orbit):
         period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
-        Args:
-            params (OrbitParams): Parameters defining the Earth's orbit.
-            scale_factor (float): How much to scale the size of the Earth's orbit.
         """
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)
@@ -240,11 +237,8 @@ class MoonOrbit(Orbit):
         period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
-        Args:
-            params (OrbitParams): Parameters defining the Moon's orbit.
-            scale_factor (float): How much to scale the size of the Moon's orbit.
         """
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)

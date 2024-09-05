@@ -22,6 +22,7 @@ class MotionType(Enum):
     EARTH_ORBIT = auto()
     MOON_ROTATION = auto()
     MOON_ORBIT = auto()
+    SUN_ROTATION = auto()
 
 
 @dataclass
@@ -118,7 +119,7 @@ class CelestialBody(ABC):
             float: The radius of the celestial body.
         """
         return self.params.radius * self.scale_factor
-    
+
     @property
     def orbit(self) -> Orbit:
         """

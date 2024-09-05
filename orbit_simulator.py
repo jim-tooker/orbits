@@ -4,19 +4,19 @@ Welcome to the Orbit Simulator.
 
 This program simulates the rotation and orbital physics of celestial bodies.  For each celestial
 body, the following are visualized:
-- Rotation period around its axis
-- Axial tilt with respect to its orbit
-- Orbital inclination
-- Orbital period
-- Orbital radius
-- Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
+- Rotation period around its axis  
+- Axial tilt with respect to its orbit  
+- Orbital inclination  
+- Orbital period  
+- Orbital radius  
+- Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity  
 
 To ease visualizing the simulation, there is a time scaling factor that can *optionally* be used
 when running this program:
 
-- `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.  
-                       This allows the simulation to progress faster than reality so  
-                       that observing rotations and orbits is possible.  
+- `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.
+                       This allows the simulation to progress faster than reality so
+                       that observing rotations and orbits is possible.
 
 The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 """
@@ -45,9 +45,10 @@ class OrbitSimulator:
     Main class responsible for setting up and running the orbit simulation.
 
     Attributes:
+        sun (Sun): Representation of the Sun.
         earth (Earth): Representation of the Earth.
         moon (Moon): Representation of the Moon.
-        tracker (MotionTracker): Tracker to keep track of simulation object's angles and times
+        tracker (MotionTracker): Tracker to keep track of simulation object's angles and times.
     """
 
     DEFAULT_TIME_SCALE_FACTOR: Final[float] = 1_000_000
@@ -354,6 +355,16 @@ class OrbitSimulator:
             self.tracker.totals[MotionType.EARTH_ORBIT] += 1
             print(f'Earth Orbit {self.tracker.totals[MotionType.EARTH_ORBIT]:.0f}: Time: {
                 self.tracker.full_angle_times[MotionType.EARTH_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
+
+        # If the Sun has rotated 360°, store rotation time
+        if abs(self.sun.angle(t) - self.tracker.angles[MotionType.SUN_ROTATION]) >= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.SUN_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.SUN_ROTATION]
+            self.tracker.last_event_times[MotionType.SUN_ROTATION] = t
+            self.tracker.angles[MotionType.SUN_ROTATION] = self.sun.angle(t)
+            self.tracker.totals[MotionType.SUN_ROTATION] += 1
+            print(f'Sun Rotation {self.tracker.totals[MotionType.SUN_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.SUN_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
 
     def _handle_quit_button(self, button: vp.button) -> None:
         """Handles quit simulation button"""

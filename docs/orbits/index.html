@@ -29,28 +29,21 @@ hljs.highlightAll();
 <p>This program simulates the rotation and orbital physics of celestial bodies.
 For each celestial
 body, the following are visualized:
-- Rotation period around its axis
-- Axial tilt with respect to its orbit
-- Orbital inclination
-- Orbital period
-- Orbital radius
-- Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity</p>
-<p>To ease visualizing the simulation, there are two scaling factors that can <em>optionally</em> be used
+- Rotation period around its axis<br>
+- Axial tilt with respect to its orbit<br>
+- Orbital inclination<br>
+- Orbital period<br>
+- Orbital radius<br>
+- Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
+</p>
+<p>To ease visualizing the simulation, there is a time scaling factor that can <em>optionally</em> be used
 when running this program:</p>
 <ul>
-<li>
-<p><code>time_scale_factor</code>: This factor increases the simulation's time reference vs. real-time.<br>
-This allows the simulation to progress faster than reality so<br>
-that observing rotations and orbits is possible.
-</p>
-</li>
-<li>
-<p><code>dist_scale_factor</code>: This factor decreases the orbital distance vs. the actual distance.<br>
-This allows easier viewing of the planets. Without this scaling, planets<br>
-are generally too small to view because orbital distances are relatively<br>
-much larger than the planet sizes.</p>
-</li>
+<li><code>time_scale_factor</code>: This factor increases the simulation's time reference vs. real-time.
+This allows the simulation to progress faster than reality so
+that observing rotations and orbits is possible.</li>
 </ul>
+<p>The simulation runs indefinitely unless you specify a <code>runtime</code> with the call to <code>run()</code>.</p>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
