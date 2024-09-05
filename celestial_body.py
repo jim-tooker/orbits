@@ -238,9 +238,10 @@ class Sun(CelestialBody):
         super().__init__(params=self.params,
                          scale_factor=self.SCALE_FACTOR)
 
-        # Make Sun glow
-        self._sphere.emissive = True
-        self._sphere.shininess = 1
+        if self.params.no_gui is False:
+            # Make Sun glow
+            self._sphere.emissive = True
+            self._sphere.shininess = 1
 
 
 class Earth(CelestialBody):
