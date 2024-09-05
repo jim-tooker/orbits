@@ -16,6 +16,7 @@ when running this program:
 - `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.
                        This allows the simulation to progress faster than reality so
                        that observing rotations and orbits is possible.
+- FIXME, add others
 
 The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
 """

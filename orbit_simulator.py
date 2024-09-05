@@ -23,7 +23,6 @@ The simulation runs indefinitely unless you specify a `runtime` with the call to
 """
 import os
 import sys
-import math
 import argparse
 from typing import Final
 import vpython as vp
@@ -40,11 +39,18 @@ class OrbitSimulator:
         sun (Sun): Representation of the Sun.
         earth (Earth): Representation of the Earth.
         moon (Moon): Representation of the Moon.
+        FIXME
         tracker (MotionTracker): Tracker to keep track of simulation object's angles and times.
     """
 
-    MAX_RUNTIME: Final[float] = SECS_IN_HR  # 1 hr
-    """The max time for a simulation to run, if a time is specified"""
+    @staticmethod
+    def quit_simulation() -> None:
+        """Stops the VPython server."""
+        if config.no_gui is False:
+            # We don't import vp_services until needed, because importing it will start
+            # the server, if not started already.
+            import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
+            vp_services.stop_server()
 
     def __init__(self):
         if not 1 <= config.time_scale_factor <= config.MAX_TIME_SCALE_FACTOR:
@@ -55,98 +61,11 @@ class OrbitSimulator:
         else:
             self.mode = SunEarthMoonMode()
 
-        if config.no_gui is False:
-            self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
-                                                width=1600,
-                                                height=1000,
-                                                align='left')
-
-        self.mode.create_celestial_bodies()
-
         self._exit_sim: bool = False
 
-        if config.no_gui is False:
-            self._create_orientation_figure()
-            self._runtime_left_label: vp.label
-            self._info_canvas: vp.canvas = self.mode.setup_info_canvas()
-
-            # Set default canvas back to normal canvas
-            self._canvas.select()
-
-            # rotate camera around the x axis to see the orbits better (not straight on)
-            camera_rotate_angle: Final[float] = 30  # degrees
-            self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
-
-    def __del__(self) -> None:
-        """
-        Deletes the canvases and sets the reference to None to allow canvases to disappear from GUI
-        """
-        if hasattr(self, '_canvas') and self._canvas:
-            self._canvas.delete()
-
-        if hasattr(self, '_info_canvas') and self._info_canvas:
-            self._info_canvas.delete()
-
-    def _exit_sim_loop(self) -> None:
-        """Causes the sim loop to exit."""
-        self._exit_sim = True
-
-    def _create_orientation_figure(self) -> None:
-        """Create orientation arrows and labels to show the x, y, and z axes."""
-        # Define orientation figure size and position using the largest object on the canvas.
-        # Currently this is the Earth's orbit around the sun.
-        #   (This will need to change if a larger orbit is added)
-        canvas_mag: Final[float] = self.mode.earth.orbit.orbit_mag     #FIXME (get the biggest??)
-        orient_size: Final[float] = canvas_mag/8
-        orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
-
-        # Create the arrows in each direction of x,y,z axis
-        vp.arrow(pos=orient_pos,
-                 axis=vp.vector(orient_size, 0, 0),
-                 color=vp.color.red,
-                 round=True,
-                 emissive=True)
-        vp.arrow(pos=orient_pos,
-                 axis=vp.vector(0, orient_size, 0),
-                 color=vp.color.green,
-                 round=True,
-                 emissive=True)
-        vp.arrow(pos=orient_pos,
-                 axis=vp.vector(0, 0, orient_size),
-                 color=vp.color.yellow,
-                 round=True,
-                 emissive=True)
-
-        # Label the arrows
-        label_distance: float = orient_size * 1.1
-        vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
-                 text='X',
-                 color=vp.color.red,
-                 opacity=0,
-                 box=False)
-        vp.label(pos=orient_pos + vp.vector(0, label_distance, 0),
-                 text='Y',
-                 color=vp.color.green,
-                 opacity=0,
-                 box=False)
-        vp.label(pos=orient_pos + vp.vector(0, 0, label_distance),
-                 text='Z',
-                 color=vp.color.yellow,
-                 opacity=0,
-                 box=False)
-
-    def _handle_quit_button(self, button: vp.button) -> None:
+    def handle_quit_button(self, button: vp.button) -> None:
         """Handles quit simulation button"""
-        self._exit_sim_loop()
-
-    @staticmethod
-    def quit_simulation() -> None:
-        """Stops the VPython server."""
-        if config.no_gui is False:
-            # We don't import vp_services until needed, because importing it will start
-            # the server, if not started already.
-            import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
-            vp_services.stop_server()
+        self._exit_sim = True
 
     def run(self, runtime: float = 0) -> None:
         """
@@ -158,8 +77,11 @@ class OrbitSimulator:
         Args:
             runtime (float): How long to run the simulation (s).  Defaults to 0 (indefinite runtime)
         """
-        if not 0 <= runtime <= self.MAX_RUNTIME:
-            raise ValueError(f'Runtime must be between 0 and {self.MAX_RUNTIME}')
+        # The max time for a simulation to run, if a time is specified
+        max_runtime: Final[float] = 1 * SECS_IN_HR  # 1 hr
+
+        if not 0 <= runtime <= max_runtime:
+            raise ValueError(f'Runtime must be between 0 and {max_runtime}')
 
         # Initialize simulation loop time variables
         t: float = 0
@@ -169,16 +91,7 @@ class OrbitSimulator:
 
         # If GUI enabled and this is an indefinite runtime, add a quit button
         if config.no_gui is False and runtime == 0:
-            # Reduce the height of the info canvas by the height of the quit button
-            height_of_quit_button: Final[int] = 25
-            self._info_canvas.height -= height_of_quit_button
-
-            # Add the Quit simulation button, and bind it to _handle_quit_button()
-            vp.button(pos=self._info_canvas.title_anchor,
-                    text='                                Quit Simulation                                ',
-                    color=vp.color.red,
-                    background=vp.color.gray(0.8),
-                    bind=self._handle_quit_button)
+            self.mode.add_quit_button(self)
 
         print()
 
@@ -190,7 +103,7 @@ class OrbitSimulator:
 
                 # If we're on a timed runtime, display how much time we have left
                 if runtime != 0:
-                    self._runtime_left_label.text = f'Simulation time left: {(runtime - t):.1f}'
+                    self.mode.runtime_left_label.text = f'Simulation time left: {(runtime - t):.1f}'
 
 
             # Check the objects we're tracking for full angles
