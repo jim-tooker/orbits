@@ -217,9 +217,10 @@ class CelestialBody(ABC):
         Args:
           params (TrailParams): The parameters for the sphere trail.
         """
-        self._sphere.trail_radius = params.trail_radius
-        self._sphere.trail_color = params.trail_color
-        self._sphere.retain = params.trail_retain
+        if config.no_gui is False:
+            self._sphere.trail_radius = params.trail_radius
+            self._sphere.trail_color = params.trail_color
+            self._sphere.retain = params.trail_retain
 
 
 class Sun(CelestialBody):

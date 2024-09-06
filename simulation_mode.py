@@ -406,9 +406,9 @@ class SunEarthMoonMode(SimulationMode):
         if config.no_gui is False:
             self._setup_info_canvas()
 
-        # rotate camera around the x axis to see the orbits better (not straight on)
-        camera_rotate_angle: Final[float] = 30  # degrees
-        self._rotate_camera_angle(camera_rotate_angle)
+            # rotate camera around the x axis to see the orbits better (not straight on)
+            camera_rotate_angle: Final[float] = 30  # degrees
+            self._rotate_camera_angle(camera_rotate_angle)
 
     def update_celestial_bodies(self, t: float, dt: float) -> None:
         """
@@ -515,9 +515,9 @@ class EarthMoonMode(SimulationMode):
         if config.no_gui is False:
             self._setup_info_canvas()
 
-        # rotate camera around the x axis to see the orbits better (not straight on)
-        camera_rotate_angle: Final[float] = 2  # degrees
-        self._rotate_camera_angle(camera_rotate_angle)
+            # rotate camera around the x axis to see the orbits better (not straight on)
+            camera_rotate_angle: Final[float] = 2  # degrees
+            self._rotate_camera_angle(camera_rotate_angle)
 
     def update_celestial_bodies(self, t: float, dt: float) -> None:
         """
