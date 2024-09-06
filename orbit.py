@@ -13,7 +13,7 @@ from typing import Final
 from dataclasses import dataclass
 import math
 import vpython as vp
-from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+from constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 __author__ = "Jim Tooker"
 

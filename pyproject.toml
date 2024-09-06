@@ -1,0 +1,20 @@
+[project]
+    name = "orbits"
+    version = "0.1.0"
+    description = "Simulates the rotation and orbital physics of celestial bodies."
+    authors = [{name = "Jim Tooker", email = "none@me.com"}]
+    readme = "README.md"
+    requires-python = ">=3.10"
+    dependencies = [
+        "vpython",
+    ]
+
+[project.urls]
+    "Homepage" = "https://github.com/jim-tooker/orbits"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+    "pdoc",
+]

@@ -12,11 +12,11 @@ from abc import ABC, abstractmethod
 from typing import List, Final
 import math
 import vpython as vp
-from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
-from orbits import config
-from orbits.celestial_body import Earth, Moon, Sun, TrailParams
-from orbits.orbit import Orbit, EarthOrbit, MoonOrbit
-from orbits.motion_tracker import MotionTracker, MotionType
+from constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+import config
+from celestial_body import Earth, Moon, Sun, TrailParams
+from orbit import Orbit, EarthOrbit, MoonOrbit
+from motion_tracker import MotionTracker, MotionType
 
 __author__ = "Jim Tooker"
 
