@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>orbits.simulation_mode API documentation</title>
+<meta name="description" content="Simulation Mode Module …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>orbits.simulation_mode</code></h1>
+</header>
+<section id="section-intro">
+<p>Simulation Mode Module</p>
+<p>This module defines classes that handle the simulation mode we are in.
+Currently, there are two possible modes:<br>
+- Sun, Earth, and Moon:
+The simulator shows the Sun with the Earth's and Moon's orbits around it.<br>
+- Earth and Moon: The simulator shows the Earth and Moon's orbit around it.
+</p>
+<p>This module also handles all the VPython GUI and canvas updates.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="orbits.simulation_mode.EarthMoonMode"><code class="flex name class">
+<span>class <span class="ident">EarthMoonMode</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subclass to handle the Simulation mode of Earth and Moon.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EarthMoonMode(SimulationMode):
+    &#34;&#34;&#34;
+    Subclass to handle the Simulation mode of Earth and Moon.
+    &#34;&#34;&#34;
+    def __init__(self) -&gt; None:
+        super().__init__()
+
+        # Set time scale, if not set
+        if config.time_scale_factor == 0:
+            default_time_scale_factor: Final[float] = SECS_IN_HR * HRS_IN_DAY  # 1 day = 1 sec
+            config.time_scale_factor = default_time_scale_factor
+
+        if config.no_gui is False:
+            self._setup_info_canvas()
+
+        # rotate camera around the x axis to see the orbits better (not straight on)
+        camera_rotate_angle: Final[float] = 2  # degrees
+        self._rotate_camera_angle(camera_rotate_angle)
+
+    def update_celestial_bodies(self, t: float, dt: float) -&gt; None:
+        &#34;&#34;&#34;
+        Updates the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
+        &#34;&#34;&#34;
+        # Update celestial bodies orbit position based on total time elapsed
+        self.moon.update_position(t)
+
+        # Rotate celestial bodies based on the small time step and their respective angular velocities
+        self.earth.rotate(dt)
+        self.moon.rotate(dt)
+
+    def check_for_full_angle(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        self._check_earth_rotation(t)
+        self._check_moon_rotation(t)
+        self._check_moon_orbit(t)
+
+    def _create_celestial_bodies(self) -&gt; None:
+        &#34;&#34;&#34;Creates the celestial bodies.&#34;&#34;&#34;
+        # Create orbits List
+        orbits: List[Orbit] = []
+
+        # Create Earth
+        self.earth = Earth()
+
+        # Create Moon and its orbit
+        moon_orbit_scale_factor: Final[float] = 1/10
+        moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
+        orbits.append(moon_orbit)
+        self.moon = Moon(orbits=orbits, earth=self.earth)
+        trail_params: TrailParams = TrailParams(
+            trail_radius=0,
+            trail_retain=1000)
+        self.moon.set_trail_params(trail_params)
+
+    def _setup_info_canvas(self) -&gt; None:
+        &#34;&#34;&#34;
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the celestial bodies.
+        &#34;&#34;&#34;
+        super()._setup_info_canvas()
+
+        self._create_time_scale_info_label()
+        self._create_earth_info_label()
+        self._create_moon_info_label()
+        self._create_moon_orbit_info_label()
+
+        # Set default canvas back to normal canvas
+        self._canvas.select()
+
+    def _largest_orbit_mag(self) -&gt; float:
+        &#34;&#34;&#34;
+        Determines the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
+        &#34;&#34;&#34;
+        return self.moon.orbit.orbit_mag</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="orbits.simulation_mode.SimulationMode" href="#orbits.simulation_mode.SimulationMode">SimulationMode</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="orbits.simulation_mode.EarthMoonMode.check_for_full_angle"><code class="name flex">
+<span>def <span class="ident">check_for_full_angle</span></span>(<span>self, t: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if any celestial bodies have made a full rotation or full orbit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+</dl></div>
+</dd>
+<dt id="orbits.simulation_mode.EarthMoonMode.update_celestial_bodies"><code class="name flex">
+<span>def <span class="ident">update_celestial_bodies</span></span>(<span>self, t: float, dt: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the positions of celestial bodies based on time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+<dt><strong><code>dt</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current delta time.</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="orbits.simulation_mode.SimulationMode" href="#orbits.simulation_mode.SimulationMode">SimulationMode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="orbits.simulation_mode.SimulationMode.add_quit_button" href="#orbits.simulation_mode.SimulationMode.add_quit_button">add_quit_button</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="orbits.simulation_mode.SimulationMode"><code class="flex name class">
+<span>class <span class="ident">SimulationMode</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract class to handle all the common simulation mode methods and states.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SimulationMode(ABC):
+    &#34;&#34;&#34;Abstract class to handle all the common simulation mode methods and states.&#34;&#34;&#34;
+    def __init__(self) -&gt; None:
+        # Create celestial bodies
+        self.sun: Sun
+        self.earth: Earth
+        self.moon: Moon
+
+        # Create tracker so we can monitor times and angles of objects
+        self.tracker: MotionTracker = MotionTracker()
+
+        # Label to update the runtime left
+        self.runtime_left_label: vp.label
+
+        # Flag to indicate when the user has pressed the quit simulation button
+        self.quit_sim: bool = False
+
+        # Variables for the info canvas left margin and current line number
+        self._info_canvas_left_margin: float = 0
+        self._info_canvas_line_number: float = 0
+
+        # Create main canvas if GUI enabled
+        if config.no_gui is False:
+            self._canvas: vp.canvas = vp.canvas(title=&#39;Orbit Simulator&#39;,
+                                                width=1600,
+                                                height=1000,
+                                                align=&#39;left&#39;)
+
+        # Create all the celestial bodies (handled in the sub classes)
+        self._create_celestial_bodies()
+
+        if config.no_gui is False:
+            self._create_orientation_figure()
+
+            # Create info canvas (will be populated by sub classes)
+            self._info_canvas: vp.canvas
+
+    def __del__(self) -&gt; None:
+        &#34;&#34;&#34;
+        Deletes the canvases to allow canvases to disappear from GUI
+        &#34;&#34;&#34;
+        if hasattr(self, &#39;_canvas&#39;) and self._canvas:
+            self._canvas.delete()
+
+        if hasattr(self, &#39;_info_canvas&#39;) and self._info_canvas:
+            self._info_canvas.delete()
+
+    @abstractmethod
+    def update_celestial_bodies(self, t: float, dt: float) -&gt; None:
+        &#34;&#34;&#34;
+        Abstract method to update the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
+        &#34;&#34;&#34;
+
+    @abstractmethod
+    def check_for_full_angle(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Abstract method to check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+
+    @abstractmethod
+    def _create_celestial_bodies(self) -&gt; None:
+        &#34;&#34;&#34;Abstract method to create the celestial bodies.&#34;&#34;&#34;
+
+    @abstractmethod
+    def _largest_orbit_mag(self) -&gt; float:
+        &#34;&#34;&#34;
+        Abstract method to determine the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
+        &#34;&#34;&#34;
+
+    def _handle_quit_button(self, _: vp.button) -&gt; None:
+        &#34;&#34;&#34;Handles quit simulation button&#34;&#34;&#34;
+        self.quit_sim = True
+
+    def add_quit_button(self) -&gt; None:
+        &#34;&#34;&#34;Adds a &#34;Quit&#34; button to the info canvas.&#34;&#34;&#34;
+        # Reduce the height of the info canvas by the height of the quit button
+        height_of_quit_button: Final[int] = 25
+        self._info_canvas.height -= height_of_quit_button
+
+        # Add the Quit simulation button, and bind it to _handle_quit_button()
+        vp.button(pos=self._info_canvas.title_anchor,
+                text=&#39;                                Quit Simulation                                &#39;,
+                color=vp.color.red,
+                background=vp.color.gray(0.8),
+                bind=self._handle_quit_button)
+
+    def _create_orientation_figure(self) -&gt; None:
+        &#34;&#34;&#34;Create orientation arrows and labels to show the x, y, and z axes.&#34;&#34;&#34;
+        # Define orientation figure size and position using the largest object on the canvas.
+        canvas_mag: Final[float] = self._largest_orbit_mag()
+        orient_size: Final[float] = canvas_mag/8
+        orient_pos: vp.vector = vp.vector(-canvas_mag, canvas_mag/2, 0)
+
+        # Create the arrows in each direction of x,y,z axis
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(orient_size, 0, 0),
+                 color=vp.color.red,
+                 round=True,
+                 emissive=True)
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(0, orient_size, 0),
+                 color=vp.color.green,
+                 round=True,
+                 emissive=True)
+        vp.arrow(pos=orient_pos,
+                 axis=vp.vector(0, 0, orient_size),
+                 color=vp.color.yellow,
+                 round=True,
+                 emissive=True)
+
+        # Label the arrows
+        label_distance: float = orient_size * 1.1
+        vp.label(pos=orient_pos + vp.vector(label_distance, 0, 0),
+                 text=&#39;X&#39;,
+                 color=vp.color.red,
+                 opacity=0,
+                 box=False)
+        vp.label(pos=orient_pos + vp.vector(0, label_distance, 0),
+                 text=&#39;Y&#39;,
+                 color=vp.color.green,
+                 opacity=0,
+                 box=False)
+        vp.label(pos=orient_pos + vp.vector(0, 0, label_distance),
+                 text=&#39;Z&#39;,
+                 color=vp.color.yellow,
+                 opacity=0,
+                 box=False)
+
+    def _create_info_label(self,
+                           text: str,
+                           color: vp.vector=vp.color.white) -&gt; vp.label:
+        &#34;&#34;&#34;
+        Create a label with given text at specified position on the info canvas.
+
+        Args:
+            text (str): The text to display on the label.
+            color (vp.vector): The color of the label text. Defaults to white.
+
+        Returns:
+            vp.label: The created label object.
+        &#34;&#34;&#34;
+        return vp.label(pos=vp.vector(self._info_canvas_left_margin,
+                                      self._info_canvas_line_number,
+                                      0),
+                        text=text,
+                        color=color,
+                        height=16,
+                        align=&#39;left&#39;,
+                        box=False)
+
+    def _setup_info_canvas(self) -&gt; None:
+        &#34;&#34;&#34;
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the celestial bodies.
+        &#34;&#34;&#34;
+        # Create canvas and configure
+        width: Final[int] = 400
+        height: Final[int] = 1000
+        self._info_canvas = vp.canvas(width=width, height=height, align=&#39;left&#39;)
+        self._info_canvas.range = 10
+        self._info_canvas.userzoom = False
+        self._info_canvas.userspin = False
+        self._info_canvas.userpan = False
+
+        # Start labels 1 over from left margin (range -10 to 10)
+        self._info_canvas_left_margin = -self._info_canvas.range + 1
+
+        # Start lines at the top minus 2
+        self._info_canvas_line_number = int(self._info_canvas.range * height/width - 2)
+
+        # Create Sim view scale info label
+        self._create_info_label(text=&#39;Note:  Celestial body sizes and orbits have\n&#39; +
+                                     &#39;           been scaled to fit screen.\n&#39; +
+                                     &#39;See &#34;Simulation visual scale factor&#34; notes below.&#39;,
+                                color=vp.color.orange)
+        self._info_canvas_line_number -= 4
+
+        # Create Camera view info label
+        self._create_info_label(text=&#39;To change view:\n&#39; +
+                                     &#39;Rotate view: Drag with right mouse button.\n&#39; +
+                                     &#39;Zoom: Scroll wheel or drag left/right mouse buttons.\n&#39; +
+                                     &#39;Pan: Shift drag with left mouse button.&#39;,
+                                color=vp.color.yellow)
+        self._info_canvas_line_number -= 5
+
+        # Create Time remaining label
+        self.runtime_left_label = self._create_info_label(text=&#39;&#39;)
+        self._info_canvas_line_number -= 2
+
+    def _rotate_camera_angle(self, angle: float) -&gt; None:
+        &#34;&#34;&#34;
+        Rotates the camera angle for a better initial viewing angle
+        
+        Args:
+          angle (float): The angle to rotate the camera (in degrees).
+        &#34;&#34;&#34;
+        self._canvas.camera.rotate(angle=-math.radians(angle), axis=vp.vector(1, 0, 0))
+
+    def _check_earth_rotation(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if the Earth has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        # If the Earth has rotated 360°, store rotation time
+        if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.EARTH_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ROTATION]
+            self.tracker.last_event_times[MotionType.EARTH_ROTATION] = t
+            self.tracker.angles[MotionType.EARTH_ROTATION] = self.earth.angle(t)
+            self.tracker.totals[MotionType.EARTH_ROTATION] += 1
+            print(f&#39;Earth Rotation {self.tracker.totals[MotionType.EARTH_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours&#39;)
+
+    def _check_moon_rotation(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if the Moon has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        # If the Moon has rotated 360°, store rotation time
+        if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ROTATION]
+            self.tracker.last_event_times[MotionType.MOON_ROTATION] = t
+            self.tracker.angles[MotionType.MOON_ROTATION] = self.moon.angle(t)
+            self.tracker.totals[MotionType.MOON_ROTATION] += 1
+            print(f&#39;Moon Rotation {self.tracker.totals[MotionType.MOON_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+
+    def _check_moon_orbit(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if the Moon has done a full orbit. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        # If the Moon has orbited 360°, store the orbit time
+        if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.MOON_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.MOON_ORBIT]
+            self.tracker.last_event_times[MotionType.MOON_ORBIT] = t
+            self.tracker.angles[MotionType.MOON_ORBIT] = self.moon.orbit.angle(t)
+            self.tracker.totals[MotionType.MOON_ORBIT] += 1
+            print(f&#39;Moon Orbit {self.tracker.totals[MotionType.MOON_ORBIT]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.MOON_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+            print(f&#39;There were {self.tracker.totals[MotionType.EARTH_ROTATION] / \
+                self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.&#39;)
+
+    def _check_earth_orbit(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if the Earth has done a full orbit. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        # If the Earth has orbited 360° around the Sun, store the orbit time
+        if abs(self.earth.orbit.angle(t) - self.tracker.angles[MotionType.EARTH_ORBIT]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.EARTH_ORBIT] = \
+                t - self.tracker.last_event_times[MotionType.EARTH_ORBIT]
+            self.tracker.last_event_times[MotionType.EARTH_ORBIT] = t
+            self.tracker.angles[MotionType.EARTH_ORBIT] = self.earth.orbit.angle(t)
+            self.tracker.totals[MotionType.EARTH_ORBIT] += 1
+            print(f&#39;Earth Orbit {self.tracker.totals[MotionType.EARTH_ORBIT]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.EARTH_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+
+    def _check_sun_rotation(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if the Sun has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        # If the Sun has rotated 360°, store rotation time
+        if abs(self.sun.angle(t) - self.tracker.angles[MotionType.SUN_ROTATION]) &gt;= FULL_ANGLE:
+            self.tracker.full_angle_times[MotionType.SUN_ROTATION] = \
+                t - self.tracker.last_event_times[MotionType.SUN_ROTATION]
+            self.tracker.last_event_times[MotionType.SUN_ROTATION] = t
+            self.tracker.angles[MotionType.SUN_ROTATION] = self.sun.angle(t)
+            self.tracker.totals[MotionType.SUN_ROTATION] += 1
+            print(f&#39;Sun Rotation {self.tracker.totals[MotionType.SUN_ROTATION]:.0f}: Time: {
+                self.tracker.full_angle_times[MotionType.SUN_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days&#39;)
+
+    def _create_sun_info_label(self) -&gt; None:
+        &#34;&#34;&#34;
+        Create a label with the Sun&#39;s info.
+        &#34;&#34;&#34;
+        # Create Sun info label
+        self._create_info_label(&#39;Sun Info:\n&#39; +
+                                f&#39;  Radius: {self.sun.params.radius:,.0f} km\n&#39; +
+                                f&#39;    &lt;i&gt;Simulation visual scale factor:&lt;/i&gt; {self.sun.scale_factor:.0f}x\n&#39; +
+                                f&#39;  Tilt: {self.sun.params.tilt_degrees:.1f}°\n&#39; +
+                                f&#39;  Rotation period: {self.sun.params.rotation_period_days:.2f} days&#39;)
+        self._info_canvas_line_number -= 6
+
+    def _create_earth_info_label(self) -&gt; None:
+        &#34;&#34;&#34;
+        Create a label with the Earth&#39;s info.
+        &#34;&#34;&#34;
+        # Create Earth info label
+        self._create_info_label(&#39;Earth Info:\n&#39; +
+                                f&#39;  Radius: {self.earth.params.radius:,.0f} km\n&#39; +
+                                f&#39;    &lt;i&gt;Simulation visual scale factor:&lt;/i&gt; {self.earth.scale_factor:.0f}x\n&#39; +
+                                f&#39;  Tilt: {self.earth.params.tilt_degrees:.1f}°\n&#39; +
+                                f&#39;  Sidereal day: {self.earth.SIDEREAL_DAY:.2f} hrs&#39;)
+        self._info_canvas_line_number -= 6
+
+    def _create_moon_info_label(self) -&gt; None:
+        &#34;&#34;&#34;
+        Create a label with the Moon&#39;s info.
+        &#34;&#34;&#34;
+        # Create Moon info label
+        self._create_info_label(&#39;Moon Info:\n&#39; +
+                                f&#39;  Radius: {self.moon.params.radius:,.0f} km\n&#39; +
+                                f&#39;    &lt;i&gt;Simulation visual scale factor:&lt;/i&gt; {self.moon.scale_factor:.0f}x\n&#39; +
+                                f&#39;  Tilt: {self.moon.params.tilt_degrees:.1f}°\n&#39; +
+                                f&#39;  Sidereal month: {self.moon.SIDEREAL_MONTH:.2f} days&#39;)
+        self._info_canvas_line_number -= 6
+
+    def _create_earth_orbit_info_label(self) -&gt; None:
+        &#34;&#34;&#34;
+        Create a label with the Earth&#39;s orbit info.
+        &#34;&#34;&#34;
+        # Create Earth&#39;s Orbit info label
+        self._create_info_label(&#34;Earth&#39;s Orbit Info:\n&#34; +
+                                f&#39;  Semi-major axis: {self.earth.orbit.params.semi_major_axis:,.0f} km\n&#39; +
+                                f&#39;    &lt;i&gt;Simulation visual scale factor:&lt;/i&gt; 1/{1/self.earth.orbit.scale_factor:.0f}x\n&#39;
+                                f&#39;  Eccentricity: {self.earth.orbit.params.eccentricity:.3f}\n&#39; +
+                                f&#39;  Inclination: {self.earth.orbit.params.inclination_degs:.2f}°\n&#39; +
+                                f&#39;  Period: {self.earth.orbit.params.period_days:.2f} days&#39;)
+        self._info_canvas_line_number -= 7
+
+    def _create_moon_orbit_info_label(self) -&gt; None:
+        &#34;&#34;&#34;
+        Create a label with the Moon&#39;s orbit info.
+        &#34;&#34;&#34;
+        # Create Moon&#39;s Orbit info label
+        self._create_info_label(&#34;Moon&#39;s Orbit Info:\n&#34; +
+                                f&#39;  Semi-major axis: {self.moon.orbit.params.semi_major_axis:,.0f} km\n&#39; +
+                                f&#39;    &lt;i&gt;Simulation visual scale factor:&lt;/i&gt; 1/{1/self.moon.orbit.scale_factor:.0f}x\n&#39;
+                                f&#39;  Eccentricity: {self.moon.orbit.params.eccentricity:.3f}\n&#39; +
+                                f&#39;  Inclination: {self.moon.orbit.params.inclination_degs:.2f}°\n&#39; +
+                                f&#39;  Period: {self.moon.orbit.params.period_days:.2f} days&#39;)
+        self._info_canvas_line_number -= 7
+
+    def _create_time_scale_info_label(self )-&gt; None:
+        &#34;&#34;&#34;
+        Create a label with time scale info.
+        &#34;&#34;&#34;
+        # Create time scale label
+        self._create_info_label(f&#39;Time scale: {config.time_scale_factor:,.0f}x. 1 sec = {
+              config.time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).&#39;)
+        self._info_canvas_line_number -= 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="orbits.simulation_mode.EarthMoonMode" href="#orbits.simulation_mode.EarthMoonMode">EarthMoonMode</a></li>
+<li><a title="orbits.simulation_mode.SunEarthMoonMode" href="#orbits.simulation_mode.SunEarthMoonMode">SunEarthMoonMode</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="orbits.simulation_mode.SimulationMode.add_quit_button"><code class="name flex">
+<span>def <span class="ident">add_quit_button</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a "Quit" button to the info canvas.</p></div>
+</dd>
+<dt id="orbits.simulation_mode.SimulationMode.check_for_full_angle"><code class="name flex">
+<span>def <span class="ident">check_for_full_angle</span></span>(<span>self, t: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract method to check if any celestial bodies have made a full rotation or full orbit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+</dl></div>
+</dd>
+<dt id="orbits.simulation_mode.SimulationMode.update_celestial_bodies"><code class="name flex">
+<span>def <span class="ident">update_celestial_bodies</span></span>(<span>self, t: float, dt: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract method to update the positions of celestial bodies based on time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+<dt><strong><code>dt</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current delta time.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="orbits.simulation_mode.SunEarthMoonMode"><code class="flex name class">
+<span>class <span class="ident">SunEarthMoonMode</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subclass to handle the Simulation mode of Sun, Earth, and Moon.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SunEarthMoonMode(SimulationMode):
+    &#34;&#34;&#34;
+    Subclass to handle the Simulation mode of Sun, Earth, and Moon.
+    &#34;&#34;&#34;
+    def __init__(self) -&gt; None:
+        super().__init__()
+
+        # Set time scale, if not set
+        if config.time_scale_factor == 0:
+            default_time_scale_factor: Final[float] = 10 * SECS_IN_HR * HRS_IN_DAY  # 10 day = 1 sec
+            config.time_scale_factor = default_time_scale_factor
+
+        if config.no_gui is False:
+            self._setup_info_canvas()
+
+        # rotate camera around the x axis to see the orbits better (not straight on)
+        camera_rotate_angle: Final[float] = 30  # degrees
+        self._rotate_camera_angle(camera_rotate_angle)
+
+    def update_celestial_bodies(self, t: float, dt: float) -&gt; None:
+        &#34;&#34;&#34;
+        Updates the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
+        &#34;&#34;&#34;
+        # Update celestial bodies orbit position based on total time elapsed
+        self.earth.update_position(t)
+        self.moon.update_position(t)
+
+        # Rotate celestial bodies based on the small time step and their respective angular velocities
+        self.sun.rotate(dt)
+        self.earth.rotate(dt)
+        self.moon.rotate(dt)
+
+    def check_for_full_angle(self, t: float) -&gt; None:
+        &#34;&#34;&#34;
+        Check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
+        &#34;&#34;&#34;
+        self._check_earth_rotation(t)
+        self._check_moon_rotation(t)
+        self._check_moon_orbit(t)
+        self._check_earth_orbit(t)
+        self._check_sun_rotation(t)
+
+    def _create_celestial_bodies(self) -&gt; None:
+        &#34;&#34;&#34;Creates the celestial bodies.&#34;&#34;&#34;
+        # Create Sun
+        self.sun = Sun()
+
+        # Create orbits List
+        orbits: List[Orbit] = []
+
+        # Create Earth and its orbit
+        earth_orbit_scale_factor: Final[float] = 1/30
+        earth_orbit: EarthOrbit = EarthOrbit(scale_factor=earth_orbit_scale_factor)
+        orbits.append(earth_orbit)
+        earth_scale_factor: Final[float] = 8
+        self.earth = Earth(scale_factor=earth_scale_factor, orbits=orbits)
+        trail_params: TrailParams = TrailParams(
+            trail_radius=0.1*self.earth.radius,
+            trail_retain=1000)
+        self.earth.set_trail_params(trail_params)
+
+        # Create Moon and its orbit
+        moon_orbit_scale_factor: Final[float] = 1/4
+        moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
+        orbits.append(moon_orbit)
+        moon_scale_factor: Final[float] = 8
+        self.moon = Moon(scale_factor=moon_scale_factor, orbits=orbits, earth=self.earth)
+        trail_params = TrailParams(
+            trail_radius=0.25*self.moon.radius,
+            trail_retain=1000)
+        self.moon.set_trail_params(trail_params)
+
+    def _setup_info_canvas(self) -&gt; None:
+        &#34;&#34;&#34;
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the celestial bodies.
+        &#34;&#34;&#34;
+        super()._setup_info_canvas()
+
+        self._create_time_scale_info_label()
+        self._create_sun_info_label()
+        self._create_earth_info_label()
+        self._create_moon_info_label()
+        self._create_earth_orbit_info_label()
+        self._create_moon_orbit_info_label()
+
+        # Set default canvas back to normal canvas
+        self._canvas.select()
+
+    def _largest_orbit_mag(self) -&gt; float:
+        &#34;&#34;&#34;
+        Determines the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
+        &#34;&#34;&#34;
+        return self.earth.orbit.orbit_mag</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="orbits.simulation_mode.SimulationMode" href="#orbits.simulation_mode.SimulationMode">SimulationMode</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="orbits.simulation_mode.SunEarthMoonMode.check_for_full_angle"><code class="name flex">
+<span>def <span class="ident">check_for_full_angle</span></span>(<span>self, t: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if any celestial bodies have made a full rotation or full orbit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+</dl></div>
+</dd>
+<dt id="orbits.simulation_mode.SunEarthMoonMode.update_celestial_bodies"><code class="name flex">
+<span>def <span class="ident">update_celestial_bodies</span></span>(<span>self, t: float, dt: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the positions of celestial bodies based on time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current time.</dd>
+<dt><strong><code>dt</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current delta time.</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="orbits.simulation_mode.SimulationMode" href="#orbits.simulation_mode.SimulationMode">SimulationMode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="orbits.simulation_mode.SimulationMode.add_quit_button" href="#orbits.simulation_mode.SimulationMode.add_quit_button">add_quit_button</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="orbits" href="index.html">orbits</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="orbits.simulation_mode.EarthMoonMode" href="#orbits.simulation_mode.EarthMoonMode">EarthMoonMode</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.simulation_mode.EarthMoonMode.check_for_full_angle" href="#orbits.simulation_mode.EarthMoonMode.check_for_full_angle">check_for_full_angle</a></code></li>
+<li><code><a title="orbits.simulation_mode.EarthMoonMode.update_celestial_bodies" href="#orbits.simulation_mode.EarthMoonMode.update_celestial_bodies">update_celestial_bodies</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="orbits.simulation_mode.SimulationMode" href="#orbits.simulation_mode.SimulationMode">SimulationMode</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.simulation_mode.SimulationMode.add_quit_button" href="#orbits.simulation_mode.SimulationMode.add_quit_button">add_quit_button</a></code></li>
+<li><code><a title="orbits.simulation_mode.SimulationMode.check_for_full_angle" href="#orbits.simulation_mode.SimulationMode.check_for_full_angle">check_for_full_angle</a></code></li>
+<li><code><a title="orbits.simulation_mode.SimulationMode.update_celestial_bodies" href="#orbits.simulation_mode.SimulationMode.update_celestial_bodies">update_celestial_bodies</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="orbits.simulation_mode.SunEarthMoonMode" href="#orbits.simulation_mode.SunEarthMoonMode">SunEarthMoonMode</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.simulation_mode.SunEarthMoonMode.check_for_full_angle" href="#orbits.simulation_mode.SunEarthMoonMode.check_for_full_angle">check_for_full_angle</a></code></li>
+<li><code><a title="orbits.simulation_mode.SunEarthMoonMode.update_celestial_bodies" href="#orbits.simulation_mode.SunEarthMoonMode.update_celestial_bodies">update_celestial_bodies</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

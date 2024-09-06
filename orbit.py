@@ -2,8 +2,8 @@
 Orbit Module
 
 This module defines classes and data structures for representing orbits
-in the celestial body simulation. It includes abstract base classes and
-specific implementations for orbits, along with their associated parameters
+in the celestial body simulation. It includes abstract base classes and subclasses
+for specific implementations of orbits, along with their associated parameters
 and visualization elements.
 """
 from __future__ import annotations
@@ -15,11 +15,13 @@ import math
 import vpython as vp
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
+__author__ = "Jim Tooker"
+
+
 class OrbitDirection(Enum):
     """Enum to represent the direction of an orbit (clockwise or counter-clockwise)."""
     CLOCKWISE = auto()
     COUNTER_CLOCKWISE = auto()
-
 
 @dataclass
 class OrbitParams:
@@ -32,14 +34,12 @@ class OrbitParams:
         inclination (float): The inclination of the orbit in radians
         period (float): The orbital period in seconds
         direction (OrbitDirection): The direction of the orbit (clockwise or counter-clockwise)
-        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
 """
     semi_major_axis: float
     eccentricity: float
     inclination: float
     period: float
     direction: OrbitDirection
-    no_gui: bool = False
 
     @property
     def inclination_degs(self) -> float:
@@ -195,11 +195,9 @@ class EarthOrbit(Orbit):
     
     Attributes:
         SIDEREAL_YEAR (float): The sidereal year duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Earth orbit.
         params (OrbitParams): Parameters defining the Earth's orbit.
     """
     SIDEREAL_YEAR: Final[float] = 365.256 # days
-    SCALE_FACTOR: Final[float] = 1/30
 
     params = OrbitParams(
         semi_major_axis = 149_597_870,  # km
@@ -208,11 +206,14 @@ class EarthOrbit(Orbit):
         period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 scale_factor: float) -> None:
         """
+        Args:
+            scale_factor (float): How much to scale the size of the Earth's orbit.
         """
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
 
 class MoonOrbit(Orbit):
@@ -224,11 +225,9 @@ class MoonOrbit(Orbit):
 
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Moon's orbit.
         params (OrbitParams): Parameters defining the Moon's orbit.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
-    SCALE_FACTOR: Final[float] = 1/4
 
     params = OrbitParams(
         semi_major_axis = 384_405,  # km
@@ -237,8 +236,11 @@ class MoonOrbit(Orbit):
         period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 scale_factor: float) -> None:
         """
+        Args:
+            scale_factor (float): How much to scale the size of the Moon's orbit.
         """
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)

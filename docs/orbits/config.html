@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>orbits API documentation</title>
-<meta name="description" content="Orbit Simulator
-(Package `orbits`) …">
+<title>orbits.config API documentation</title>
+<meta name="description" content="This file holds all the configuration items for the Orbit Simulator.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -23,94 +22,105 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>orbits</code></h1>
+<h1 class="title">Module <code>orbits.config</code></h1>
 </header>
 <section id="section-intro">
-<h2 id="orbit-simulator">Orbit Simulator</h2>
-<p>(Package <code><a title="orbits" href="#orbits">orbits</a></code>)</p>
-<p>This program simulates the rotation and orbital physics of celestial bodies.
-For each celestial
-body, the following are visualized:<br>
-- Rotation period around its axis<br>
-- Axial tilt with respect to its orbit<br>
-- Orbital inclination<br>
-- Orbital period<br>
-- Orbital radius<br>
-- Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity
-</p>
-<p>Here are the runtime options: <code>python orbit_simulator.py -h</code>:</p>
-<pre><code>options:
-  -h, --help            show this help message and exit
-  -t TIME_SCALE_FACTOR, --time_scale_factor TIME_SCALE_FACTOR
-                        How much to scale up the sense of time. 0 means use best-fit time scaling. (default: 0)
-  -r RUNTIME, --runtime RUNTIME
-                        How many secs to run the simulation. 0 means run indefinitely. (default: 0)
-  -m {sun_earth_moon,earth_moon}, --mode {sun_earth_moon,earth_moon}
-                        Simulation mode to use. (default: sun_earth_moon)
-  --no_gui              Run without GUI (default: False)
-</code></pre>
+<p>This file holds all the configuration items for the Orbit Simulator.</p>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt><code class="name"><a title="orbits.celestial_body" href="celestial_body.html">orbits.celestial_body</a></code></dt>
+<dt id="orbits.config.MAX_TIME_SCALE_FACTOR"><code class="name">var <span class="ident">MAX_TIME_SCALE_FACTOR</span> : Final[float]</code></dt>
 <dd>
-<div class="desc"><p>Celestial Body Module …</p></div>
+<div class="desc"><p>The max value allowed for the time_scale_factor.</p></div>
 </dd>
-<dt><code class="name"><a title="orbits.config" href="config.html">orbits.config</a></code></dt>
+<dt id="orbits.config.no_gui"><code class="name">var <span class="ident">no_gui</span> : bool</code></dt>
 <dd>
-<div class="desc"><p>This file holds all the configuration items for the Orbit Simulator.</p></div>
+<div class="desc"><p>Flag to enable or disable the GUI.</p></div>
 </dd>
-<dt><code class="name"><a title="orbits.constants" href="constants.html">orbits.constants</a></code></dt>
+<dt id="orbits.config.sim_mode"><code class="name">var <span class="ident">sim_mode</span> : <a title="orbits.config.SimMode" href="#orbits.config.SimMode">SimMode</a></code></dt>
 <dd>
-<div class="desc"><p>Constants for the orbits package.</p></div>
+<div class="desc"><p>What simulation mode is selected.
+Defaults to SUN_EARTH_MOON.</p></div>
 </dd>
-<dt><code class="name"><a title="orbits.motion_tracker" href="motion_tracker.html">orbits.motion_tracker</a></code></dt>
+<dt id="orbits.config.time_scale_factor"><code class="name">var <span class="ident">time_scale_factor</span> : float</code></dt>
 <dd>
-<div class="desc"><p>Motion Tracker Module …</p></div>
-</dd>
-<dt><code class="name"><a title="orbits.orbit" href="orbit.html">orbits.orbit</a></code></dt>
-<dd>
-<div class="desc"><p>Orbit Module …</p></div>
-</dd>
-<dt><code class="name"><a title="orbits.orbit_simulator" href="orbit_simulator.html">orbits.orbit_simulator</a></code></dt>
-<dd>
-<div class="desc"><p>Welcome to the Orbit Simulator …</p></div>
-</dd>
-<dt><code class="name"><a title="orbits.simulation_mode" href="simulation_mode.html">orbits.simulation_mode</a></code></dt>
-<dd>
-<div class="desc"><p>Simulation Mode Module …</p></div>
-</dd>
-<dt><code class="name"><a title="orbits.tests" href="tests/index.html">orbits.tests</a></code></dt>
-<dd>
-<div class="desc"><p>Tests for the Orbit Simulator system.</p></div>
+<div class="desc"><p>This factor increases the simulation's time reference vs. real-time.
+This allows the simulation to progress faster than reality so that
+observing rotations and orbits is possible.</p></div>
 </dd>
 </dl>
 </section>
 <section>
 </section>
 <section>
-</section>
-<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="orbits.config.SimMode"><code class="flex name class">
+<span>class <span class="ident">SimMode</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enum for different Simulation modes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SimMode(Enum):
+    &#34;&#34;&#34;
+    Enum for different Simulation modes.
+    &#34;&#34;&#34;
+    SUN_EARTH_MOON = auto()
+    EARTH_MOON = auto()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.config.SimMode.EARTH_MOON"><code class="name">var <span class="ident">EARTH_MOON</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.config.SimMode.SUN_EARTH_MOON"><code class="name">var <span class="ident">SUN_EARTH_MOON</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
 <div class="toc">
-<ul>
-<li><a href="#orbit-simulator">Orbit Simulator</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="orbits.celestial_body" href="celestial_body.html">orbits.celestial_body</a></code></li>
-<li><code><a title="orbits.config" href="config.html">orbits.config</a></code></li>
-<li><code><a title="orbits.constants" href="constants.html">orbits.constants</a></code></li>
-<li><code><a title="orbits.motion_tracker" href="motion_tracker.html">orbits.motion_tracker</a></code></li>
-<li><code><a title="orbits.orbit" href="orbit.html">orbits.orbit</a></code></li>
-<li><code><a title="orbits.orbit_simulator" href="orbit_simulator.html">orbits.orbit_simulator</a></code></li>
-<li><code><a title="orbits.simulation_mode" href="simulation_mode.html">orbits.simulation_mode</a></code></li>
-<li><code><a title="orbits.tests" href="tests/index.html">orbits.tests</a></code></li>
+<li><code><a title="orbits" href="index.html">orbits</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="orbits.config.MAX_TIME_SCALE_FACTOR" href="#orbits.config.MAX_TIME_SCALE_FACTOR">MAX_TIME_SCALE_FACTOR</a></code></li>
+<li><code><a title="orbits.config.no_gui" href="#orbits.config.no_gui">no_gui</a></code></li>
+<li><code><a title="orbits.config.sim_mode" href="#orbits.config.sim_mode">sim_mode</a></code></li>
+<li><code><a title="orbits.config.time_scale_factor" href="#orbits.config.time_scale_factor">time_scale_factor</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="orbits.config.SimMode" href="#orbits.config.SimMode">SimMode</a></code></h4>
+<ul class="">
+<li><code><a title="orbits.config.SimMode.EARTH_MOON" href="#orbits.config.SimMode.EARTH_MOON">EARTH_MOON</a></code></li>
+<li><code><a title="orbits.config.SimMode.SUN_EARTH_MOON" href="#orbits.config.SimMode.SUN_EARTH_MOON">SUN_EARTH_MOON</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

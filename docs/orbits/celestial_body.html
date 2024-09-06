@@ -27,8 +27,8 @@ hljs.highlightAll();
 <section id="section-intro">
 <p>Celestial Body Module</p>
 <p>This module defines classes and data structures for representing celestial bodies
-in an orbital simulation. It includes abstract base classes and specific implementations
-for Earth and Moon, along with their physical parameters and visualization properties.</p>
+in an orbital simulation. It includes abstract base classes and subclasses
+for the Sun, Earth and Moon, along with their physical parameters and visualization properties.</p>
 </section>
 <section>
 </section>
@@ -56,7 +56,7 @@ for Earth and Moon, along with their physical parameters and visualization prope
 <dl>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></dt>
 <dd>Parameters defining the celestial body.</dd>
-<dt><strong><code>orbits</code></strong> :&ensp;<code>List[Orbit]</code></dt>
+<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[Orbit]]</code></dt>
 <dd>A list of orbits relevant to the celestial body.</dd>
 <dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
 <dd>How much to scale the size of the celestial body.</dd>
@@ -80,7 +80,7 @@ for Earth and Moon, along with their physical parameters and visualization prope
         &#34;&#34;&#34;
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            orbits (List[Orbit]): A list of orbits relevant to the celestial body.
+            orbits (Optional[List[Orbit]]): A list of orbits relevant to the celestial body.
             scale_factor (float): How much to scale the size of the celestial body.
         &#34;&#34;&#34;
         self.params: CelestialBodyParams = params
@@ -93,12 +93,11 @@ for Earth and Moon, along with their physical parameters and visualization prope
         else:
             self._orbits = copy(orbits)
 
-        if self.params.no_gui is False:
+        if config.no_gui is False:
             self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
-                                                make_trail=True,
-                                                trail_radius=0.25*self.radius,
-                                                retain=1000)
+                                                make_trail=True)
+
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
 
@@ -158,7 +157,7 @@ for Earth and Moon, along with their physical parameters and visualization prope
         Returns:
             vp.cylinder: A cylinder object representing the axis.
         &#34;&#34;&#34;
-        axis_length: float = self.radius * 3
+        axis_length: Final[float] = self.radius * 3
         return vp.cylinder(pos=self._sphere.pos - axis_length/2 * self._axis,
                            axis=axis_length * self._axis,
                            radius=self.radius/50,
@@ -201,7 +200,18 @@ for Earth and Moon, along with their physical parameters and visualization prope
         &#34;&#34;&#34;
         angle: float = self.angle(dt)
         self._sphere.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
-        self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)</code></pre>
+        self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
+
+    def set_trail_params(self, params: TrailParams) -&gt; None:
+        &#34;&#34;&#34;
+        Sets the trail parameters for a VPython sphere.
+        
+        Args:
+          params (TrailParams): The parameters for the sphere trail.
+        &#34;&#34;&#34;
+        self._sphere.trail_radius = params.trail_radius
+        self._sphere.trail_color = params.trail_color
+        self._sphere.retain = params.trail_retain</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -337,6 +347,17 @@ def radius(self) -&gt; float:
 <dd>The small time increment (seconds) to rotate by.</dd>
 </dl></div>
 </dd>
+<dt id="orbits.celestial_body.CelestialBody.set_trail_params"><code class="name flex">
+<span>def <span class="ident">set_trail_params</span></span>(<span>self, params: <a title="orbits.celestial_body.TrailParams" href="#orbits.celestial_body.TrailParams">TrailParams</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the trail parameters for a VPython sphere.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.TrailParams" href="#orbits.celestial_body.TrailParams">TrailParams</a></code></dt>
+<dd>The parameters for the sphere trail.</dd>
+</dl></div>
+</dd>
 <dt id="orbits.celestial_body.CelestialBody.update_position"><code class="name flex">
 <span>def <span class="ident">update_position</span></span>(<span>self, t: float) ‑> None</span>
 </code></dt>
@@ -352,7 +373,7 @@ def radius(self) -&gt; float:
 </dd>
 <dt id="orbits.celestial_body.CelestialBodyParams"><code class="flex name class">
 <span>class <span class="ident">CelestialBodyParams</span></span>
-<span>(</span><span>radius: float, tilt: float, rotation_period: float, texture: Any, no_gui: bool = False)</span>
+<span>(</span><span>radius: float, tilt: float, rotation_period: float, texture: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Data class to encapsulate the key parameters of a celestial body.</p>
@@ -366,8 +387,6 @@ def radius(self) -&gt; float:
 <dd>Rotation period of the body in seconds</dd>
 <dt><strong><code>texture</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Texture object for the celestial body</dd>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -383,13 +402,11 @@ class CelestialBodyParams:
         tilt (float): Axial tilt of the celestial body in radians
         rotation_period (float): Rotation period of the body in seconds
         texture (Any): Texture object for the celestial body
-        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
     &#34;&#34;&#34;
     radius: float
     tilt: float
     rotation_period: float
     texture: Any
-    no_gui: bool = False
 
     @property
     def tilt_degrees(self) -&gt; float:
@@ -423,10 +440,6 @@ class CelestialBodyParams:
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.celestial_body.CelestialBodyParams.no_gui"><code class="name">var <span class="ident">no_gui</span> : bool</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.celestial_body.CelestialBodyParams.radius"><code class="name">var <span class="ident">radius</span> : float</code></dt>
 <dd>
 <div class="desc"></div>
@@ -519,7 +532,7 @@ def tilt_degrees(self) -&gt; float:
 </dd>
 <dt id="orbits.celestial_body.Earth"><code class="flex name class">
 <span>class <span class="ident">Earth</span></span>
-<span>(</span><span>orbits: List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>], no_gui: bool = False)</span>
+<span>(</span><span>orbits: Optional[List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]] = None, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Representation of Earth</p>
@@ -527,17 +540,15 @@ def tilt_degrees(self) -&gt; float:
 <dl>
 <dt><strong><code>SIDEREAL_DAY</code></strong> :&ensp;<code>float</code></dt>
 <dd>The sidereal day duration in hours.</dd>
-<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
-<dd>How much to scale the size of the Earth.</dd>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></dt>
 <dd>Parameters defining the Earth.</dd>
 </dl>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>orbits</code></strong> :&ensp;<code>List[Orbit]</code></dt>
+<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[Orbit]]</code></dt>
 <dd>A list of orbits relevant to the Earth.</dd>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False.</dd>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Earth.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -549,11 +560,9 @@ def tilt_degrees(self) -&gt; float:
     
     Attributes:
         SIDEREAL_DAY (float): The sidereal day duration in hours.
-        SCALE_FACTOR (float): How much to scale the size of the Earth.
         params (CelestialBodyParams): Parameters defining the Earth.
     &#34;&#34;&#34;
     SIDEREAL_DAY: Final[float] = 23.9344696  # hours
-    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
         radius = (6378.137 + 6356.752) / 2,  # km
@@ -562,17 +571,16 @@ def tilt_degrees(self) -&gt; float:
         texture=vp.textures.earth)
 
     def __init__(self,
-                 orbits: List[Orbit],
-                 no_gui: bool = False):
+                 orbits: Optional[List[Orbit]] = None,
+                 scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
-            orbits (List[Orbit]): A list of orbits relevant to the Earth.
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
+            orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
+            scale_factor (float): How much to scale the size of the Earth.
         &#34;&#34;&#34;
-        self.params.no_gui = no_gui
         super().__init__(params=self.params,
                          orbits=orbits,
-                         scale_factor=self.SCALE_FACTOR)</code></pre>
+                         scale_factor=scale_factor)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -581,10 +589,6 @@ def tilt_degrees(self) -&gt; float:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.celestial_body.Earth.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.celestial_body.Earth.SIDEREAL_DAY"><code class="name">var <span class="ident">SIDEREAL_DAY</span> : Final[float]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -604,6 +608,7 @@ def tilt_degrees(self) -&gt; float:
 <li><code><a title="orbits.celestial_body.CelestialBody.position" href="#orbits.celestial_body.CelestialBody.position">position</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.radius" href="#orbits.celestial_body.CelestialBody.radius">radius</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.rotate" href="#orbits.celestial_body.CelestialBody.rotate">rotate</a></code></li>
+<li><code><a title="orbits.celestial_body.CelestialBody.set_trail_params" href="#orbits.celestial_body.CelestialBody.set_trail_params">set_trail_params</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.update_position" href="#orbits.celestial_body.CelestialBody.update_position">update_position</a></code></li>
 </ul>
 </li>
@@ -611,7 +616,7 @@ def tilt_degrees(self) -&gt; float:
 </dd>
 <dt id="orbits.celestial_body.Moon"><code class="flex name class">
 <span>class <span class="ident">Moon</span></span>
-<span>(</span><span>orbits: List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>], earth: <a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a>, no_gui: bool = False)</span>
+<span>(</span><span>orbits: List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>], earth: <a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a>, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents the Earth's moon with its own orbit and visualization.</p>
@@ -619,8 +624,6 @@ def tilt_degrees(self) -&gt; float:
 <dl>
 <dt><strong><code>SIDEREAL_MONTH</code></strong> :&ensp;<code>float</code></dt>
 <dd>The sidereal month duration in days.</dd>
-<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
-<dd>How much to scale the size of the Moon.</dd>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></dt>
 <dd>Parameters defining the Moon.</dd>
 </dl>
@@ -630,8 +633,8 @@ def tilt_degrees(self) -&gt; float:
 <dd>A list of orbits relevant to the Moon.</dd>
 <dt><strong><code>earth</code></strong> :&ensp;<code><a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a></code></dt>
 <dd>A reference to the Earth object</dd>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False.</dd>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Moon.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -643,11 +646,9 @@ def tilt_degrees(self) -&gt; float:
     
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Moon.
         params (CelestialBodyParams): Parameters defining the Moon.
     &#34;&#34;&#34;
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
-    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
         radius = 1738,  # km
@@ -658,20 +659,19 @@ def tilt_degrees(self) -&gt; float:
     def __init__(self,
                  orbits: List[Orbit],
                  earth: Earth,
-                 no_gui: bool = False):
+                 scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
             orbits (List[Orbit]): A list of orbits relevant to the Moon.
             earth (Earth): A reference to the Earth object
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
+            scale_factor (float): How much to scale the size of the Moon.
         &#34;&#34;&#34;
-        self.params.no_gui = no_gui
-        self.earth = earth
+        self.earth: Earth = earth
         super().__init__(params=self.params,
                          orbits=orbits,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
-        if self.params.no_gui is False:
+        if config.no_gui is False:
             # Create arrow for Moon that points to Earth
             self._arrow: vp.arrow = self._create_arrow()
 
@@ -682,7 +682,7 @@ def tilt_degrees(self) -&gt; float:
         Returns:
             vp.arrow: An arrow object pointing towards Earth.
         &#34;&#34;&#34;
-        arrow_length: float = self.radius * 2
+        arrow_length: Final[float] = self.radius * 2
         return vp.arrow(pos=self._sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,
@@ -720,10 +720,6 @@ def tilt_degrees(self) -&gt; float:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.celestial_body.Moon.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.celestial_body.Moon.SIDEREAL_MONTH"><code class="name">var <span class="ident">SIDEREAL_MONTH</span> : Final[float]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -767,73 +763,26 @@ def tilt_degrees(self) -&gt; float:
 <li><code><a title="orbits.celestial_body.CelestialBody.orbit" href="#orbits.celestial_body.CelestialBody.orbit">orbit</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.position" href="#orbits.celestial_body.CelestialBody.position">position</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.radius" href="#orbits.celestial_body.CelestialBody.radius">radius</a></code></li>
+<li><code><a title="orbits.celestial_body.CelestialBody.set_trail_params" href="#orbits.celestial_body.CelestialBody.set_trail_params">set_trail_params</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
-<dt id="orbits.celestial_body.MotionType"><code class="flex name class">
-<span>class <span class="ident">MotionType</span></span>
-<span>(</span><span>*args, **kwds)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Enum for different types of motions we track.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MotionType(Enum):
-    &#34;&#34;&#34;Enum for different types of motions we track.&#34;&#34;&#34;
-    EARTH_ROTATION = auto()
-    EARTH_ORBIT = auto()
-    MOON_ROTATION = auto()
-    MOON_ORBIT = auto()
-    SUN_ROTATION = auto()</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="orbits.celestial_body.MotionType.EARTH_ORBIT"><code class="name">var <span class="ident">EARTH_ORBIT</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="orbits.celestial_body.MotionType.EARTH_ROTATION"><code class="name">var <span class="ident">EARTH_ROTATION</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="orbits.celestial_body.MotionType.MOON_ORBIT"><code class="name">var <span class="ident">MOON_ORBIT</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="orbits.celestial_body.MotionType.MOON_ROTATION"><code class="name">var <span class="ident">MOON_ROTATION</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="orbits.celestial_body.MotionType.SUN_ROTATION"><code class="name">var <span class="ident">SUN_ROTATION</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="orbits.celestial_body.Sun"><code class="flex name class">
 <span>class <span class="ident">Sun</span></span>
-<span>(</span><span>no_gui: bool = False)</span>
+<span>(</span><span>scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents the Sun</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
-<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
-<dd>How much to scale the size of the Sun.</dd>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></dt>
 <dd>Parameters defining the Sun.</dd>
 </dl>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False.</dd>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Sun.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -844,11 +793,8 @@ def tilt_degrees(self) -&gt; float:
     Represents the Sun
     
     Attributes:
-        SCALE_FACTOR (float): How much to scale the size of the Sun.
         params (CelestialBodyParams): Parameters defining the Sun.
     &#34;&#34;&#34;
-    SCALE_FACTOR: Final[float] = 1
-
     params = CelestialBodyParams(
         radius = 695_700,  # km
         tilt = 0,  # radians
@@ -856,18 +802,18 @@ def tilt_degrees(self) -&gt; float:
         texture = &#39;images/sun_texture.jpg&#39;)
 
     def __init__(self,
-                 no_gui: bool = False):
+                 scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
-            no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False.
+            scale_factor (float): How much to scale the size of the Sun.
         &#34;&#34;&#34;
-        self.params.no_gui = no_gui
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
-        # Make Sun glow
-        self._sphere.emissive = True
-        self._sphere.shininess = 1</code></pre>
+        if config.no_gui is False:
+            # Make Sun glow
+            self._sphere.emissive = True
+            self._sphere.shininess = 1</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -876,10 +822,6 @@ def tilt_degrees(self) -&gt; float:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.celestial_body.Sun.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.celestial_body.Sun.params"><code class="name">var <span class="ident">params</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -895,10 +837,44 @@ def tilt_degrees(self) -&gt; float:
 <li><code><a title="orbits.celestial_body.CelestialBody.position" href="#orbits.celestial_body.CelestialBody.position">position</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.radius" href="#orbits.celestial_body.CelestialBody.radius">radius</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.rotate" href="#orbits.celestial_body.CelestialBody.rotate">rotate</a></code></li>
+<li><code><a title="orbits.celestial_body.CelestialBody.set_trail_params" href="#orbits.celestial_body.CelestialBody.set_trail_params">set_trail_params</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.update_position" href="#orbits.celestial_body.CelestialBody.update_position">update_position</a></code></li>
 </ul>
 </li>
 </ul>
+</dd>
+<dt id="orbits.celestial_body.TrailParams"><code class="flex name class">
+<span>class <span class="ident">TrailParams</span></span>
+<span>(</span><span>trail_radius: float = 0, trail_color: vp.vector = &lt;factory&gt;, trail_retain: int = 1000)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parameters for the trail made by a VPython sphere.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class TrailParams:
+    &#34;&#34;&#34;Parameters for the trail made by a VPython sphere.&#34;&#34;&#34;
+    trail_radius: float = 0
+    trail_color: vp.vector = field(default_factory=lambda: vp.color.white)
+    trail_retain: int = 1000</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="orbits.celestial_body.TrailParams.trail_color"><code class="name">var <span class="ident">trail_color</span> : vp.vector</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.celestial_body.TrailParams.trail_radius"><code class="name">var <span class="ident">trail_radius</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="orbits.celestial_body.TrailParams.trail_retain"><code class="name">var <span class="ident">trail_retain</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -924,13 +900,13 @@ def tilt_degrees(self) -&gt; float:
 <li><code><a title="orbits.celestial_body.CelestialBody.position" href="#orbits.celestial_body.CelestialBody.position">position</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.radius" href="#orbits.celestial_body.CelestialBody.radius">radius</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.rotate" href="#orbits.celestial_body.CelestialBody.rotate">rotate</a></code></li>
+<li><code><a title="orbits.celestial_body.CelestialBody.set_trail_params" href="#orbits.celestial_body.CelestialBody.set_trail_params">set_trail_params</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBody.update_position" href="#orbits.celestial_body.CelestialBody.update_position">update_position</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.celestial_body.CelestialBodyParams.no_gui" href="#orbits.celestial_body.CelestialBodyParams.no_gui">no_gui</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBodyParams.radius" href="#orbits.celestial_body.CelestialBodyParams.radius">radius</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBodyParams.rotation_period" href="#orbits.celestial_body.CelestialBodyParams.rotation_period">rotation_period</a></code></li>
 <li><code><a title="orbits.celestial_body.CelestialBodyParams.rotation_period_days" href="#orbits.celestial_body.CelestialBodyParams.rotation_period_days">rotation_period_days</a></code></li>
@@ -943,7 +919,6 @@ def tilt_degrees(self) -&gt; float:
 <li>
 <h4><code><a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.celestial_body.Earth.SCALE_FACTOR" href="#orbits.celestial_body.Earth.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.celestial_body.Earth.SIDEREAL_DAY" href="#orbits.celestial_body.Earth.SIDEREAL_DAY">SIDEREAL_DAY</a></code></li>
 <li><code><a title="orbits.celestial_body.Earth.params" href="#orbits.celestial_body.Earth.params">params</a></code></li>
 </ul>
@@ -951,7 +926,6 @@ def tilt_degrees(self) -&gt; float:
 <li>
 <h4><code><a title="orbits.celestial_body.Moon" href="#orbits.celestial_body.Moon">Moon</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.celestial_body.Moon.SCALE_FACTOR" href="#orbits.celestial_body.Moon.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.celestial_body.Moon.SIDEREAL_MONTH" href="#orbits.celestial_body.Moon.SIDEREAL_MONTH">SIDEREAL_MONTH</a></code></li>
 <li><code><a title="orbits.celestial_body.Moon.params" href="#orbits.celestial_body.Moon.params">params</a></code></li>
 <li><code><a title="orbits.celestial_body.Moon.rotate" href="#orbits.celestial_body.Moon.rotate">rotate</a></code></li>
@@ -959,20 +933,17 @@ def tilt_degrees(self) -&gt; float:
 </ul>
 </li>
 <li>
-<h4><code><a title="orbits.celestial_body.MotionType" href="#orbits.celestial_body.MotionType">MotionType</a></code></h4>
+<h4><code><a title="orbits.celestial_body.Sun" href="#orbits.celestial_body.Sun">Sun</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.celestial_body.MotionType.EARTH_ORBIT" href="#orbits.celestial_body.MotionType.EARTH_ORBIT">EARTH_ORBIT</a></code></li>
-<li><code><a title="orbits.celestial_body.MotionType.EARTH_ROTATION" href="#orbits.celestial_body.MotionType.EARTH_ROTATION">EARTH_ROTATION</a></code></li>
-<li><code><a title="orbits.celestial_body.MotionType.MOON_ORBIT" href="#orbits.celestial_body.MotionType.MOON_ORBIT">MOON_ORBIT</a></code></li>
-<li><code><a title="orbits.celestial_body.MotionType.MOON_ROTATION" href="#orbits.celestial_body.MotionType.MOON_ROTATION">MOON_ROTATION</a></code></li>
-<li><code><a title="orbits.celestial_body.MotionType.SUN_ROTATION" href="#orbits.celestial_body.MotionType.SUN_ROTATION">SUN_ROTATION</a></code></li>
+<li><code><a title="orbits.celestial_body.Sun.params" href="#orbits.celestial_body.Sun.params">params</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="orbits.celestial_body.Sun" href="#orbits.celestial_body.Sun">Sun</a></code></h4>
+<h4><code><a title="orbits.celestial_body.TrailParams" href="#orbits.celestial_body.TrailParams">TrailParams</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.celestial_body.Sun.SCALE_FACTOR" href="#orbits.celestial_body.Sun.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
-<li><code><a title="orbits.celestial_body.Sun.params" href="#orbits.celestial_body.Sun.params">params</a></code></li>
+<li><code><a title="orbits.celestial_body.TrailParams.trail_color" href="#orbits.celestial_body.TrailParams.trail_color">trail_color</a></code></li>
+<li><code><a title="orbits.celestial_body.TrailParams.trail_radius" href="#orbits.celestial_body.TrailParams.trail_radius">trail_radius</a></code></li>
+<li><code><a title="orbits.celestial_body.TrailParams.trail_retain" href="#orbits.celestial_body.TrailParams.trail_retain">trail_retain</a></code></li>
 </ul>
 </li>
 </ul>
