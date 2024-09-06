@@ -3,7 +3,7 @@
 Welcome to the Orbit Simulator.
 
 This program simulates the rotation and orbital physics of celestial bodies.  For each celestial
-body, the following are visualized:
+body, the following are visualized:  
 - Rotation period around its axis  
 - Axial tilt with respect to its orbit  
 - Orbital inclination  
@@ -11,15 +11,18 @@ body, the following are visualized:
 - Orbital radius  
 - Path of the orbit, including direction and semi-major, semi-minor axis, and eccentricity  
 
-To ease visualizing the simulation, there is a time scaling factor that can *optionally* be used
-when running this program:
-
-- `time_scale_factor`: This factor increases the simulation's time reference vs. real-time.
-                       This allows the simulation to progress faster than reality so
-                       that observing rotations and orbits is possible.
-- FIXME (add others)
-
-The simulation runs indefinitely unless you specify a `runtime` with the call to `run()`.
+Here are the runtime options: `python orbit_simulator.py -h`:
+```
+options:
+  -h, --help            show this help message and exit
+  -t TIME_SCALE_FACTOR, --time_scale_factor TIME_SCALE_FACTOR
+                        How much to scale up the sense of time. 0 means use best-fit time scaling. (default: 0)
+  -r RUNTIME, --runtime RUNTIME
+                        How many secs to run the simulation. 0 means run indefinitely. (default: 0)
+  -m {sun_earth_moon,earth_moon}, --mode {sun_earth_moon,earth_moon}
+                        Simulation mode to use. (default: sun_earth_moon)
+  --no_gui              Run without GUI (default: False)
+```
 """
 import os
 import sys
@@ -27,20 +30,19 @@ import argparse
 from typing import Final
 import vpython as vp
 from orbits.constants import SECS_IN_HR
-from orbits.simulation_mode import SimulationMode, SunEarthMoonMode, EarthMoonMode
 from orbits import config
 from orbits.config import SimMode
+from orbits.simulation_mode import SimulationMode, SunEarthMoonMode, EarthMoonMode
+
+__author__ = "Jim Tooker"
+
 
 class OrbitSimulator:
     """
     Main class responsible for setting up and running the orbit simulation.
 
     Attributes:
-        sun (Sun): Representation of the Sun.
-        earth (Earth): Representation of the Earth.
-        moon (Moon): Representation of the Moon.
-        FIXME
-        tracker (MotionTracker): Tracker to keep track of simulation object's angles and times.
+      mode (SimulationMode): Reference to the simulation mode instance
     """
 
     @staticmethod
@@ -52,7 +54,7 @@ class OrbitSimulator:
             import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
             vp_services.stop_server()
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not 0 <= config.time_scale_factor <= config.MAX_TIME_SCALE_FACTOR:
             raise ValueError(f'time_scale_factor must be between 0 and {config.MAX_TIME_SCALE_FACTOR}')
 
@@ -61,12 +63,6 @@ class OrbitSimulator:
             self.mode = EarthMoonMode()
         else:
             self.mode = SunEarthMoonMode()
-
-        self._exit_sim: bool = False
-
-    def handle_quit_button(self, button: vp.button) -> None:
-        """Handles quit simulation button"""
-        self._exit_sim = True
 
     def run(self, runtime: float = 0) -> None:
         """
@@ -92,11 +88,11 @@ class OrbitSimulator:
 
         # If GUI enabled and this is an indefinite runtime, add a quit button
         if config.no_gui is False and runtime == 0:
-            self.mode.add_quit_button(self)
+            self.mode.add_quit_button()
 
         print()
 
-        while self._exit_sim is False and True if runtime == 0 else t < runtime:
+        while self.mode.quit_sim is False and True if runtime == 0 else t < runtime:
             vp.rate(100)
 
             if config.no_gui is False:
@@ -117,7 +113,6 @@ class OrbitSimulator:
 class CustomArgparseFormatter(argparse.ArgumentDefaultsHelpFormatter,
                               argparse.RawDescriptionHelpFormatter):
     """Custom class for `argparse` that combines two `formatter_class` classes."""
-    ...
 
 
 def main() -> None:
@@ -133,18 +128,18 @@ def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(prog=os.path.basename(__file__),
                                      formatter_class=CustomArgparseFormatter,
                                      description=__doc__)
-    parser.add_argument('-t', '--time-scale-factor',
+    parser.add_argument('-t', '--time_scale_factor',
                         type=float,
                         default=0,
-                        help='How much to scale up the sense of time.')
+                        help='How much to scale up the sense of time. 0 means use best-fit time scaling.')
     parser.add_argument('-r', '--runtime',
                         type=float,
                         default=0,
-                        help='How many secs to run the simulation.')
+                        help='How many secs to run the simulation. 0 means run indefinitely.')
     parser.add_argument('-m', '--mode',
                         choices=['sun_earth_moon', 'earth_moon'],
                         default='sun_earth_moon',
-                        help='Simulation mode to use')
+                        help='Simulation mode to use.')
     parser.add_argument('--no_gui', action='store_true', help='Run without GUI')
     args = parser.parse_args()
 

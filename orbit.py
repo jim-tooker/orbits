@@ -2,8 +2,8 @@
 Orbit Module
 
 This module defines classes and data structures for representing orbits
-in the celestial body simulation. It includes abstract base classes and
-specific implementations for orbits, along with their associated parameters
+in the celestial body simulation. It includes abstract base classes and subclasses
+for specific implementations of orbits, along with their associated parameters
 and visualization elements.
 """
 from __future__ import annotations
@@ -14,6 +14,9 @@ from dataclasses import dataclass
 import math
 import vpython as vp
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+
+__author__ = "Jim Tooker"
+
 
 class OrbitDirection(Enum):
     """Enum to represent the direction of an orbit (clockwise or counter-clockwise)."""
@@ -192,7 +195,6 @@ class EarthOrbit(Orbit):
     
     Attributes:
         SIDEREAL_YEAR (float): The sidereal year duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Earth orbit.
         params (OrbitParams): Parameters defining the Earth's orbit.
     """
     SIDEREAL_YEAR: Final[float] = 365.256 # days
@@ -207,6 +209,8 @@ class EarthOrbit(Orbit):
     def __init__(self,
                  scale_factor: float) -> None:
         """
+        Args:
+            scale_factor (float): How much to scale the size of the Earth's orbit.
         """
         super().__init__(params=self.params,
                          scale_factor=scale_factor)
@@ -221,7 +225,6 @@ class MoonOrbit(Orbit):
 
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Moon's orbit.
         params (OrbitParams): Parameters defining the Moon's orbit.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
@@ -236,6 +239,8 @@ class MoonOrbit(Orbit):
     def __init__(self,
                  scale_factor: float) -> None:
         """
+        Args:
+            scale_factor (float): How much to scale the size of the Moon's orbit.
         """
         super().__init__(params=self.params,
                          scale_factor=scale_factor)

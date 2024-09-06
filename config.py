@@ -3,10 +3,12 @@ This file holds all the configuration items for the Orbit Simulator.
 """
 from typing import Final
 from enum import Enum, auto
-from orbits.constants import SECS_IN_HR, HRS_IN_DAY
+
+__author__ = "Jim Tooker"
+
 
 no_gui: bool = False
-"""Flag to enable or disable the GUI"""
+"""Flag to enable or disable the GUI."""
 
 MAX_TIME_SCALE_FACTOR: Final[float] = 2_000_000
 """The max value allowed for the time_scale_factor."""
@@ -27,5 +29,5 @@ class SimMode(Enum):
 
 sim_mode: SimMode = SimMode.SUN_EARTH_MOON
 """
-What simulation mode is selected.  Defaults to SUN_EARTH_MOON
+What simulation mode is selected.  Defaults to SUN_EARTH_MOON.
 """

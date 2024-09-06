@@ -4,9 +4,10 @@ Tests for Orbit Simulator
 import sys
 import argparse
 import pytest
-from orbits.motion_tracker import MotionType
-from orbits.orbit_simulator import OrbitSimulator
 from orbits import config
+from orbits.config import SimMode
+from orbits.orbit_simulator import OrbitSimulator
+from orbits.motion_tracker import MotionType
 
 
 @pytest.mark.earth
@@ -18,6 +19,7 @@ def test_earth_rotation_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 10_000
     config.time_scale_factor = time_scale_factor
+    config.sim_mode = SimMode.EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for 3 revolutions plus a margin
@@ -43,8 +45,9 @@ def test_moon_orbital_and_rotation_period() -> None:
     rel_tolerance = 0.1
 
     # Initialize simulator
-    time_scale_factor: float = 500_000
+    time_scale_factor: float = 100_000
     config.time_scale_factor = time_scale_factor
+    config.sim_mode = SimMode.EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for one orbit
@@ -70,6 +73,7 @@ def test_moon_orbital_and_rotation_period() -> None:
 def test_earth_orbital_period() -> None:
     """
     Verify the Earth's orbital period matches the defined value.  
+    Verify the number of Earth's revolutions during one orbit around the Sun matches the defined value.  
     """
     # Relative tolerance for test results
     rel_tolerance = 0.001
@@ -90,7 +94,7 @@ def test_earth_orbital_period() -> None:
     assert sim.mode.tracker.full_angle_times[MotionType.EARTH_ORBIT] == \
         pytest.approx(sim.mode.earth.orbit.params.period, rel=rel_tolerance)
 
-    # Check if the number of Earth's revolutions during one Earth's orbit matches given parameters
+    # Check if the number of Earth's revolutions during one orbit around the Sun matches given parameters
     assert sim.mode.tracker.totals[MotionType.EARTH_ROTATION] == \
         pytest.approx(sim.mode.earth.orbit.params.period_days, rel=rel_tolerance)
 
@@ -127,8 +131,8 @@ def main() -> None:
     parser.add_argument('-m', help='Only run tests matching given mark expression')
     args = parser.parse_args()
 
-    if args.no_gui:
-        OrbitSimulator.disable_gui(True)
+    if args.no_gui is True:
+        config.no_gui = True
 
     pytest_args = ["tests/test_orbit_simulator.py"]
     if args.test:

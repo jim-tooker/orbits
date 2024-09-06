@@ -2,8 +2,8 @@
 Celestial Body Module
 
 This module defines classes and data structures for representing celestial bodies
-in an orbital simulation. It includes abstract base classes and specific implementations
-for Earth and Moon, along with their physical parameters and visualization properties.
+in an orbital simulation. It includes abstract base classes and subclasses
+for the Sun, Earth and Moon, along with their physical parameters and visualization properties.
 """
 from abc import ABC
 from dataclasses import dataclass, field
@@ -11,9 +11,11 @@ from copy import copy
 from typing import List, Any, Final, Optional
 import math
 import vpython as vp
-from orbits.orbit import Orbit
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 from orbits import config
+from orbits.orbit import Orbit
+
+__author__ = "Jim Tooker"
 
 
 @dataclass
@@ -65,7 +67,7 @@ class CelestialBodyParams:
 
 @dataclass
 class TrailParams:
-    """FIXME"""
+    """Parameters for the trail made by a VPython sphere."""
     trail_radius: float = 0
     trail_color: vp.vector = field(default_factory=lambda: vp.color.white)
     trail_retain: int = 1000
@@ -163,7 +165,7 @@ class CelestialBody(ABC):
         Returns:
             vp.cylinder: A cylinder object representing the axis.
         """
-        axis_length: float = self.radius * 3
+        axis_length: Final[float] = self.radius * 3
         return vp.cylinder(pos=self._sphere.pos - axis_length/2 * self._axis,
                            axis=axis_length * self._axis,
                            radius=self.radius/50,
@@ -209,6 +211,12 @@ class CelestialBody(ABC):
         self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
 
     def set_trail_params(self, params: TrailParams) -> None:
+        """
+        Sets the trail parameters for a VPython sphere.
+        
+        Args:
+          params (TrailParams): The parameters for the sphere trail.
+        """
         self._sphere.trail_radius = params.trail_radius
         self._sphere.trail_color = params.trail_color
         self._sphere.retain = params.trail_retain
@@ -230,6 +238,8 @@ class Sun(CelestialBody):
     def __init__(self,
                  scale_factor: float = 1):
         """
+        Args:
+            scale_factor (float): How much to scale the size of the Sun.
         """
         super().__init__(params=self.params,
                          scale_factor=scale_factor)
@@ -246,7 +256,6 @@ class Earth(CelestialBody):
     
     Attributes:
         SIDEREAL_DAY (float): The sidereal day duration in hours.
-        SCALE_FACTOR (float): How much to scale the size of the Earth.
         params (CelestialBodyParams): Parameters defining the Earth.
     """
     SIDEREAL_DAY: Final[float] = 23.9344696  # hours
@@ -263,6 +272,7 @@ class Earth(CelestialBody):
         """
         Args:
             orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
+            scale_factor (float): How much to scale the size of the Earth.
         """
         super().__init__(params=self.params,
                          orbits=orbits,
@@ -275,7 +285,6 @@ class Moon(CelestialBody):
     
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Moon.
         params (CelestialBodyParams): Parameters defining the Moon.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
@@ -294,8 +303,9 @@ class Moon(CelestialBody):
         Args:
             orbits (List[Orbit]): A list of orbits relevant to the Moon.
             earth (Earth): A reference to the Earth object
+            scale_factor (float): How much to scale the size of the Moon.
         """
-        self.earth = earth
+        self.earth: Earth = earth
         super().__init__(params=self.params,
                          orbits=orbits,
                          scale_factor=scale_factor)
@@ -311,7 +321,7 @@ class Moon(CelestialBody):
         Returns:
             vp.arrow: An arrow object pointing towards Earth.
         """
-        arrow_length: float = self.radius * 2
+        arrow_length: Final[float] = self.radius * 2
         return vp.arrow(pos=self._sphere.pos,
                         axis=arrow_length*vp.vector(1,0,0),
                         color=vp.color.yellow,

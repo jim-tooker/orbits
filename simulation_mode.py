@@ -1,68 +1,121 @@
 """
-FIXME
+Simulation Mode Module
+
+This module defines classes that handle the simulation mode we are in.
+Currently, there are two possible modes:  
+- Sun, Earth, and Moon:  The simulator shows the Sun with the Earth's and Moon's orbits around it.  
+- Earth and Moon: The simulator shows the Earth and Moon's orbit around it.  
+
+This module also handles all the VPython GUI and canvas updates.
 """
 from abc import ABC, abstractmethod
 from typing import List, Final
 import math
 import vpython as vp
+from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 from orbits import config
 from orbits.celestial_body import Earth, Moon, Sun, TrailParams
 from orbits.orbit import Orbit, EarthOrbit, MoonOrbit
 from orbits.motion_tracker import MotionTracker, MotionType
-from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+
+__author__ = "Jim Tooker"
+
 
 class SimulationMode(ABC):
-    """FIXME"""
-    def __init__(self):
+    """Abstract class to handle all the common simulation mode methods and states."""
+    def __init__(self) -> None:
         # Create celestial bodies
         self.sun: Sun
         self.earth: Earth
         self.moon: Moon
 
-        # Create self.tracker so we can monitor times and angles of objects
+        # Create tracker so we can monitor times and angles of objects
         self.tracker: MotionTracker = MotionTracker()
 
+        # Label to update the runtime left
         self.runtime_left_label: vp.label
+
+        # Flag to indicate when the user has pressed the quit simulation button
+        self.quit_sim: bool = False
+
+        # Variables for the info canvas left margin and current line number
         self._info_canvas_left_margin: float = 0
         self._info_canvas_line_number: float = 0
 
+        # Create main canvas if GUI enabled
         if config.no_gui is False:
             self._canvas: vp.canvas = vp.canvas(title='Orbit Simulator',
                                                 width=1600,
                                                 height=1000,
                                                 align='left')
 
+        # Create all the celestial bodies (handled in the sub classes)
         self._create_celestial_bodies()
 
         if config.no_gui is False:
             self._create_orientation_figure()
+
+            # Create info canvas (will be populated by sub classes)
             self._info_canvas: vp.canvas
 
+    def __del__(self) -> None:
+        """
+        Deletes the canvases to allow canvases to disappear from GUI
+        """
+        if hasattr(self, '_canvas') and self._canvas:
+            self._canvas.delete()
+
+        if hasattr(self, '_info_canvas') and self._info_canvas:
+            self._info_canvas.delete()
+
     @abstractmethod
-    def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
-        """FIXME"""
-        pass
+    def update_celestial_bodies(self, t: float, dt: float) -> None:
+        """
+        Abstract method to update the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
+        """
+
+    @abstractmethod
+    def check_for_full_angle(self, t: float) -> None:
+        """
+        Abstract method to check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
+        """
 
     @abstractmethod
     def _create_celestial_bodies(self) -> None:
-        pass
+        """Abstract method to create the celestial bodies."""
 
     @abstractmethod
     def _largest_orbit_mag(self) -> float:
-        pass
+        """
+        Abstract method to determine the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
+        """
 
-    def add_quit_button(self, sim):
-        """FIXME"""
+    def _handle_quit_button(self, _: vp.button) -> None:
+        """Handles quit simulation button"""
+        self.quit_sim = True
+
+    def add_quit_button(self) -> None:
+        """Adds a "Quit" button to the info canvas."""
         # Reduce the height of the info canvas by the height of the quit button
         height_of_quit_button: Final[int] = 25
         self._info_canvas.height -= height_of_quit_button
 
-        # Add the Quit simulation button, and bind it to handle_quit_button()
+        # Add the Quit simulation button, and bind it to _handle_quit_button()
         vp.button(pos=self._info_canvas.title_anchor,
                 text='                                Quit Simulation                                ',
                 color=vp.color.red,
                 background=vp.color.gray(0.8),
-                bind=sim.handle_quit_button)
+                bind=self._handle_quit_button)
 
     def _create_orientation_figure(self) -> None:
         """Create orientation arrows and labels to show the x, y, and z axes."""
@@ -134,7 +187,7 @@ class SimulationMode(ABC):
 
         This method creates a separate canvas for displaying information about
         the simulation, including time and distance scales, and details about
-        the Earth and Moon.
+        the celestial bodies.
         """
         # Create canvas and configure
         width: Final[int] = 400
@@ -171,9 +224,21 @@ class SimulationMode(ABC):
         self._info_canvas_line_number -= 2
 
     def _rotate_camera_angle(self, angle: float) -> None:
+        """
+        Rotates the camera angle for a better initial viewing angle
+        
+        Args:
+          angle (float): The angle to rotate the camera (in degrees).
+        """
         self._canvas.camera.rotate(angle=-math.radians(angle), axis=vp.vector(1, 0, 0))
 
     def _check_earth_rotation(self, t: float) -> None:
+        """
+        Check if the Earth has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        """
         # If the Earth has rotated 360°, store rotation time
         if abs(self.earth.angle(t) - self.tracker.angles[MotionType.EARTH_ROTATION]) >= FULL_ANGLE:
             self.tracker.full_angle_times[MotionType.EARTH_ROTATION] = \
@@ -185,6 +250,12 @@ class SimulationMode(ABC):
                 self.tracker.full_angle_times[MotionType.EARTH_ROTATION]/(SECS_IN_HR):.2f} hours')
 
     def _check_moon_rotation(self, t: float) -> None:
+        """
+        Check if the Moon has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        """
         # If the Moon has rotated 360°, store rotation time
         if abs(self.moon.angle(t) - self.tracker.angles[MotionType.MOON_ROTATION]) >= FULL_ANGLE:
             self.tracker.full_angle_times[MotionType.MOON_ROTATION] = \
@@ -196,6 +267,12 @@ class SimulationMode(ABC):
                 self.tracker.full_angle_times[MotionType.MOON_ROTATION]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
 
     def _check_moon_orbit(self, t: float) -> None:
+        """
+        Check if the Moon has done a full orbit. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        """
         # If the Moon has orbited 360°, store the orbit time
         if abs(self.moon.orbit.angle(t) - self.tracker.angles[MotionType.MOON_ORBIT]) >= FULL_ANGLE:
             self.tracker.full_angle_times[MotionType.MOON_ORBIT] = \
@@ -209,6 +286,12 @@ class SimulationMode(ABC):
                 self.tracker.totals[MotionType.MOON_ORBIT]:.2f} Earth rotations during the last Moon orbit.')
 
     def _check_earth_orbit(self, t: float) -> None:
+        """
+        Check if the Earth has done a full orbit. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        """
         # If the Earth has orbited 360° around the Sun, store the orbit time
         if abs(self.earth.orbit.angle(t) - self.tracker.angles[MotionType.EARTH_ORBIT]) >= FULL_ANGLE:
             self.tracker.full_angle_times[MotionType.EARTH_ORBIT] = \
@@ -220,6 +303,12 @@ class SimulationMode(ABC):
                 self.tracker.full_angle_times[MotionType.EARTH_ORBIT]/(SECS_IN_HR*HRS_IN_DAY):.2f} days')
 
     def _check_sun_rotation(self, t: float) -> None:
+        """
+        Check if the Sun has done a full rotation. If so, store the information in the tracker.
+        
+        Args:
+          t (float): The current time.
+        """
         # If the Sun has rotated 360°, store rotation time
         if abs(self.sun.angle(t) - self.tracker.angles[MotionType.SUN_ROTATION]) >= FULL_ANGLE:
             self.tracker.full_angle_times[MotionType.SUN_ROTATION] = \
@@ -232,7 +321,7 @@ class SimulationMode(ABC):
 
     def _create_sun_info_label(self) -> None:
         """
-        FIXME
+        Create a label with the Sun's info.
         """
         # Create Sun info label
         self._create_info_label('Sun Info:\n' +
@@ -244,7 +333,7 @@ class SimulationMode(ABC):
 
     def _create_earth_info_label(self) -> None:
         """
-        FIXME
+        Create a label with the Earth's info.
         """
         # Create Earth info label
         self._create_info_label('Earth Info:\n' +
@@ -256,7 +345,7 @@ class SimulationMode(ABC):
 
     def _create_moon_info_label(self) -> None:
         """
-        FIXME
+        Create a label with the Moon's info.
         """
         # Create Moon info label
         self._create_info_label('Moon Info:\n' +
@@ -268,7 +357,7 @@ class SimulationMode(ABC):
 
     def _create_earth_orbit_info_label(self) -> None:
         """
-        FIXME
+        Create a label with the Earth's orbit info.
         """
         # Create Earth's Orbit info label
         self._create_info_label("Earth's Orbit Info:\n" +
@@ -281,7 +370,7 @@ class SimulationMode(ABC):
 
     def _create_moon_orbit_info_label(self) -> None:
         """
-        FIXME
+        Create a label with the Moon's orbit info.
         """
         # Create Moon's Orbit info label
         self._create_info_label("Moon's Orbit Info:\n" +
@@ -294,7 +383,7 @@ class SimulationMode(ABC):
 
     def _create_time_scale_info_label(self )-> None:
         """
-        FIXME
+        Create a label with time scale info.
         """
         # Create time scale label
         self._create_info_label(f'Time scale: {config.time_scale_factor:,.0f}x. 1 sec = {
@@ -304,9 +393,9 @@ class SimulationMode(ABC):
 
 class SunEarthMoonMode(SimulationMode):
     """
-    FIXME
+    Subclass to handle the Simulation mode of Sun, Earth, and Moon.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Set time scale, if not set
@@ -321,22 +410,29 @@ class SunEarthMoonMode(SimulationMode):
         camera_rotate_angle: Final[float] = 30  # degrees
         self._rotate_camera_angle(camera_rotate_angle)
 
-    def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
+    def update_celestial_bodies(self, t: float, dt: float) -> None:
         """
-        FIXME
+        Updates the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
         """
         # Update celestial bodies orbit position based on total time elapsed
-        self.earth.update_position(t_prime)
-        self.moon.update_position(t_prime)
+        self.earth.update_position(t)
+        self.moon.update_position(t)
 
         # Rotate celestial bodies based on the small time step and their respective angular velocities
-        self.sun.rotate(dt_prime)
-        self.earth.rotate(dt_prime)
-        self.moon.rotate(dt_prime)
+        self.sun.rotate(dt)
+        self.earth.rotate(dt)
+        self.moon.rotate(dt)
 
     def check_for_full_angle(self, t: float) -> None:
         """
-        FIXME
+        Check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
         """
         self._check_earth_rotation(t)
         self._check_moon_rotation(t)
@@ -345,9 +441,7 @@ class SunEarthMoonMode(SimulationMode):
         self._check_sun_rotation(t)
 
     def _create_celestial_bodies(self) -> None:
-        """
-        FIXME
-        """
+        """Creates the celestial bodies."""
         # Create Sun
         self.sun = Sun()
 
@@ -360,7 +454,7 @@ class SunEarthMoonMode(SimulationMode):
         orbits.append(earth_orbit)
         earth_scale_factor: Final[float] = 8
         self.earth = Earth(scale_factor=earth_scale_factor, orbits=orbits)
-        trail_params = TrailParams(
+        trail_params: TrailParams = TrailParams(
             trail_radius=0.1*self.earth.radius,
             trail_retain=1000)
         self.earth.set_trail_params(trail_params)
@@ -377,6 +471,13 @@ class SunEarthMoonMode(SimulationMode):
         self.moon.set_trail_params(trail_params)
 
     def _setup_info_canvas(self) -> None:
+        """
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the celestial bodies.
+        """
         super()._setup_info_canvas()
 
         self._create_time_scale_info_label()
@@ -391,14 +492,19 @@ class SunEarthMoonMode(SimulationMode):
 
     def _largest_orbit_mag(self) -> float:
         """
-        FIXME
+        Determines the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
         """
         return self.earth.orbit.orbit_mag
 
 
 class EarthMoonMode(SimulationMode):
-    """FIXME"""
-    def __init__(self):
+    """
+    Subclass to handle the Simulation mode of Earth and Moon.
+    """
+    def __init__(self) -> None:
         super().__init__()
 
         # Set time scale, if not set
@@ -413,29 +519,34 @@ class EarthMoonMode(SimulationMode):
         camera_rotate_angle: Final[float] = 2  # degrees
         self._rotate_camera_angle(camera_rotate_angle)
 
-    def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
+    def update_celestial_bodies(self, t: float, dt: float) -> None:
         """
-        FIXME
+        Updates the positions of celestial bodies based on time.
+
+        Args:
+          t (float): The current time.
+          dt (float): The current delta time.
         """
         # Update celestial bodies orbit position based on total time elapsed
-        self.moon.update_position(t_prime)
+        self.moon.update_position(t)
 
         # Rotate celestial bodies based on the small time step and their respective angular velocities
-        self.earth.rotate(dt_prime)
-        self.moon.rotate(dt_prime)
+        self.earth.rotate(dt)
+        self.moon.rotate(dt)
 
     def check_for_full_angle(self, t: float) -> None:
         """
-        FIXME
+        Check if any celestial bodies have made a full rotation or full orbit.
+
+        Args:
+          t (float): The current time.
         """
         self._check_earth_rotation(t)
         self._check_moon_rotation(t)
         self._check_moon_orbit(t)
 
     def _create_celestial_bodies(self) -> None:
-        """
-        FIXME
-        """
+        """Creates the celestial bodies."""
         # Create orbits List
         orbits: List[Orbit] = []
 
@@ -447,12 +558,19 @@ class EarthMoonMode(SimulationMode):
         moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
         orbits.append(moon_orbit)
         self.moon = Moon(orbits=orbits, earth=self.earth)
-        trail_params = TrailParams(
+        trail_params: TrailParams = TrailParams(
             trail_radius=0,
             trail_retain=1000)
         self.moon.set_trail_params(trail_params)
 
     def _setup_info_canvas(self) -> None:
+        """
+        Set up the information canvas with labels displaying simulation details.
+
+        This method creates a separate canvas for displaying information about
+        the simulation, including time and distance scales, and details about
+        the celestial bodies.
+        """
         super()._setup_info_canvas()
 
         self._create_time_scale_info_label()
@@ -465,6 +583,9 @@ class EarthMoonMode(SimulationMode):
 
     def _largest_orbit_mag(self) -> float:
         """
-        FIXME
+        Determines the largest orbit on the canvas.
+        
+        Returns:
+          float:  The magnitude of the largest orbit.
         """
         return self.moon.orbit.orbit_mag

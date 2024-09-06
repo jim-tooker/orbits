@@ -27,8 +27,8 @@ hljs.highlightAll();
 <section id="section-intro">
 <p>Orbit Module</p>
 <p>This module defines classes and data structures for representing orbits
-in the celestial body simulation. It includes abstract base classes and
-specific implementations for orbits, along with their associated parameters
+in the celestial body simulation. It includes abstract base classes and subclasses
+for specific implementations of orbits, along with their associated parameters
 and visualization elements.</p>
 </section>
 <section>
@@ -42,6 +42,7 @@ and visualization elements.</p>
 <dl>
 <dt id="orbits.orbit.EarthOrbit"><code class="flex name class">
 <span>class <span class="ident">EarthOrbit</span></span>
+<span>(</span><span>scale_factor: float)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents the orbit of the Earth around the Sun.</p>
@@ -51,10 +52,13 @@ specific parameters for the Earth's orbit.</p>
 <dl>
 <dt><strong><code>SIDEREAL_YEAR</code></strong> :&ensp;<code>float</code></dt>
 <dd>The sidereal year duration in days.</dd>
-<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
-<dd>How much to scale the size of the Earth orbit.</dd>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
 <dd>Parameters defining the Earth's orbit.</dd>
+</dl>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Earth's orbit.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -69,11 +73,9 @@ specific parameters for the Earth's orbit.</p>
     
     Attributes:
         SIDEREAL_YEAR (float): The sidereal year duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Earth orbit.
         params (OrbitParams): Parameters defining the Earth&#39;s orbit.
     &#34;&#34;&#34;
     SIDEREAL_YEAR: Final[float] = 365.256 # days
-    SCALE_FACTOR: Final[float] = 1/30
 
     params = OrbitParams(
         semi_major_axis = 149_597_870,  # km
@@ -82,11 +84,14 @@ specific parameters for the Earth's orbit.</p>
         period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -&gt; None:
+    def __init__(self,
+                 scale_factor: float) -&gt; None:
         &#34;&#34;&#34;
+        Args:
+            scale_factor (float): How much to scale the size of the Earth&#39;s orbit.
         &#34;&#34;&#34;
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)</code></pre>
+                         scale_factor=scale_factor)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -95,10 +100,6 @@ specific parameters for the Earth's orbit.</p>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.orbit.EarthOrbit.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.orbit.EarthOrbit.SIDEREAL_YEAR"><code class="name">var <span class="ident">SIDEREAL_YEAR</span> : Final[float]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -125,6 +126,7 @@ specific parameters for the Earth's orbit.</p>
 </dd>
 <dt id="orbits.orbit.MoonOrbit"><code class="flex name class">
 <span>class <span class="ident">MoonOrbit</span></span>
+<span>(</span><span>scale_factor: float)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents the orbit of the Moon around Earth.</p>
@@ -134,10 +136,13 @@ specific parameters for the Moon's orbit.</p>
 <dl>
 <dt><strong><code>SIDEREAL_MONTH</code></strong> :&ensp;<code>float</code></dt>
 <dd>The sidereal month duration in days.</dd>
-<dt><strong><code>SCALE_FACTOR</code></strong> :&ensp;<code>float</code></dt>
-<dd>How much to scale the size of the Moon's orbit.</dd>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitParams" href="#orbits.orbit.OrbitParams">OrbitParams</a></code></dt>
 <dd>Parameters defining the Moon's orbit.</dd>
+</dl>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
+<dd>How much to scale the size of the Moon's orbit.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -152,11 +157,9 @@ specific parameters for the Moon's orbit.</p>
 
     Attributes:
         SIDEREAL_MONTH (float): The sidereal month duration in days.
-        SCALE_FACTOR (float): How much to scale the size of the Moon&#39;s orbit.
         params (OrbitParams): Parameters defining the Moon&#39;s orbit.
     &#34;&#34;&#34;
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
-    SCALE_FACTOR: Final[float] = 1/4
 
     params = OrbitParams(
         semi_major_axis = 384_405,  # km
@@ -165,11 +168,14 @@ specific parameters for the Moon's orbit.</p>
         period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -&gt; None:
+    def __init__(self,
+                 scale_factor: float) -&gt; None:
         &#34;&#34;&#34;
+        Args:
+            scale_factor (float): How much to scale the size of the Moon&#39;s orbit.
         &#34;&#34;&#34;
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)</code></pre>
+                         scale_factor=scale_factor)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -178,10 +184,6 @@ specific parameters for the Moon's orbit.</p>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="orbits.orbit.MoonOrbit.SCALE_FACTOR"><code class="name">var <span class="ident">SCALE_FACTOR</span> : Final[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="orbits.orbit.MoonOrbit.SIDEREAL_MONTH"><code class="name">var <span class="ident">SIDEREAL_MONTH</span> : Final[float]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -536,7 +538,7 @@ def orbit_mag(self) -&gt; float:
 </dd>
 <dt id="orbits.orbit.OrbitParams"><code class="flex name class">
 <span>class <span class="ident">OrbitParams</span></span>
-<span>(</span><span>semi_major_axis: float, eccentricity: float, inclination: float, period: float, direction: <a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a>, no_gui: bool = False)</span>
+<span>(</span><span>semi_major_axis: float, eccentricity: float, inclination: float, period: float, direction: <a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Data class to encapsulate the key parameters of a celestial body's orbit</p>
@@ -552,8 +554,6 @@ def orbit_mag(self) -&gt; float:
 <dd>The orbital period in seconds</dd>
 <dt><strong><code>direction</code></strong> :&ensp;<code><a title="orbits.orbit.OrbitDirection" href="#orbits.orbit.OrbitDirection">OrbitDirection</a></code></dt>
 <dd>The direction of the orbit (clockwise or counter-clockwise)</dd>
-<dt><strong><code>no_gui</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to display a GUI (True = no GUI). Defaults to False</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -570,14 +570,12 @@ class OrbitParams:
         inclination (float): The inclination of the orbit in radians
         period (float): The orbital period in seconds
         direction (OrbitDirection): The direction of the orbit (clockwise or counter-clockwise)
-        no_gui (bool): Whether to display a GUI (True = no GUI). Defaults to False
 &#34;&#34;&#34;
     semi_major_axis: float
     eccentricity: float
     inclination: float
     period: float
     direction: OrbitDirection
-    no_gui: bool = False
 
     @property
     def inclination_degs(self) -&gt; float:
@@ -620,10 +618,6 @@ class OrbitParams:
 <div class="desc"></div>
 </dd>
 <dt id="orbits.orbit.OrbitParams.inclination"><code class="name">var <span class="ident">inclination</span> : float</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="orbits.orbit.OrbitParams.no_gui"><code class="name">var <span class="ident">no_gui</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -727,7 +721,6 @@ def period_hrs(self) -&gt; float:
 <li>
 <h4><code><a title="orbits.orbit.EarthOrbit" href="#orbits.orbit.EarthOrbit">EarthOrbit</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.orbit.EarthOrbit.SCALE_FACTOR" href="#orbits.orbit.EarthOrbit.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.orbit.EarthOrbit.SIDEREAL_YEAR" href="#orbits.orbit.EarthOrbit.SIDEREAL_YEAR">SIDEREAL_YEAR</a></code></li>
 <li><code><a title="orbits.orbit.EarthOrbit.params" href="#orbits.orbit.EarthOrbit.params">params</a></code></li>
 </ul>
@@ -735,7 +728,6 @@ def period_hrs(self) -&gt; float:
 <li>
 <h4><code><a title="orbits.orbit.MoonOrbit" href="#orbits.orbit.MoonOrbit">MoonOrbit</a></code></h4>
 <ul class="">
-<li><code><a title="orbits.orbit.MoonOrbit.SCALE_FACTOR" href="#orbits.orbit.MoonOrbit.SCALE_FACTOR">SCALE_FACTOR</a></code></li>
 <li><code><a title="orbits.orbit.MoonOrbit.SIDEREAL_MONTH" href="#orbits.orbit.MoonOrbit.SIDEREAL_MONTH">SIDEREAL_MONTH</a></code></li>
 <li><code><a title="orbits.orbit.MoonOrbit.params" href="#orbits.orbit.MoonOrbit.params">params</a></code></li>
 </ul>
@@ -766,7 +758,6 @@ def period_hrs(self) -&gt; float:
 <li><code><a title="orbits.orbit.OrbitParams.eccentricity" href="#orbits.orbit.OrbitParams.eccentricity">eccentricity</a></code></li>
 <li><code><a title="orbits.orbit.OrbitParams.inclination" href="#orbits.orbit.OrbitParams.inclination">inclination</a></code></li>
 <li><code><a title="orbits.orbit.OrbitParams.inclination_degs" href="#orbits.orbit.OrbitParams.inclination_degs">inclination_degs</a></code></li>
-<li><code><a title="orbits.orbit.OrbitParams.no_gui" href="#orbits.orbit.OrbitParams.no_gui">no_gui</a></code></li>
 <li><code><a title="orbits.orbit.OrbitParams.period" href="#orbits.orbit.OrbitParams.period">period</a></code></li>
 <li><code><a title="orbits.orbit.OrbitParams.period_days" href="#orbits.orbit.OrbitParams.period_days">period_days</a></code></li>
 <li><code><a title="orbits.orbit.OrbitParams.period_hrs" href="#orbits.orbit.OrbitParams.period_hrs">period_hrs</a></code></li>

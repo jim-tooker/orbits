@@ -1,8 +1,14 @@
 """
-FIXME
+Motion Tracker Module
+
+This module defines a data class used to store information about the celestial bodies
+movements, including rotation and orbit times.
 """
 from dataclasses import dataclass, field
 from enum import Enum, auto
+
+__author__ = "Jim Tooker"
+
 
 class MotionType(Enum):
     """Enum for different types of motions we track."""
