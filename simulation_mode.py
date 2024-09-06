@@ -2,7 +2,7 @@
 FIXME
 """
 from abc import ABC, abstractmethod
-from typing import List, Final, Tuple
+from typing import List, Final
 import math
 import vpython as vp
 from orbits import config
@@ -12,7 +12,9 @@ from orbits.motion_tracker import MotionTracker, MotionType
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
 
 class SimulationMode(ABC):
+    """FIXME"""
     def __init__(self):
+        # Create celestial bodies
         self.sun: Sun
         self.earth: Earth
         self.moon: Moon
@@ -31,21 +33,14 @@ class SimulationMode(ABC):
                                                 align='left')
 
         self._create_celestial_bodies()
-        self._create_orientation_figure()
 
         if config.no_gui is False:
+            self._create_orientation_figure()
             self._info_canvas: vp.canvas
-            self._setup_info_canvas()
-
-            # Set default canvas back to normal canvas
-            self._canvas.select()
-
-            # rotate camera around the x axis to see the orbits better (not straight on)
-            camera_rotate_angle: Final[float] = 30  # degrees
-            self._canvas.camera.rotate(angle=-math.radians(camera_rotate_angle), axis=vp.vector(1, 0, 0))
 
     @abstractmethod
     def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
+        """FIXME"""
         pass
 
     @abstractmethod
@@ -57,6 +52,7 @@ class SimulationMode(ABC):
         pass
 
     def add_quit_button(self, sim):
+        """FIXME"""
         # Reduce the height of the info canvas by the height of the quit button
         height_of_quit_button: Final[int] = 25
         self._info_canvas.height -= height_of_quit_button
@@ -70,10 +66,6 @@ class SimulationMode(ABC):
 
     def _create_orientation_figure(self) -> None:
         """Create orientation arrows and labels to show the x, y, and z axes."""
-        # If no GUI, then return
-        if config.no_gui is True:
-            return
-
         # Define orientation figure size and position using the largest object on the canvas.
         canvas_mag: Final[float] = self._largest_orbit_mag()
         orient_size: Final[float] = canvas_mag/8
@@ -159,11 +151,6 @@ class SimulationMode(ABC):
         # Start lines at the top minus 2
         self._info_canvas_line_number = int(self._info_canvas.range * height/width - 2)
 
-        # Create time scale label
-        self._create_info_label(f'Time scale: {config.time_scale_factor:,.0f}x. 1 sec = {
-              config.time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).')
-        self._info_canvas_line_number -= 2
-
         # Create Sim view scale info label
         self._create_info_label(text='Note:  Celestial body sizes and orbits have\n' +
                                      '           been scaled to fit screen.\n' +
@@ -182,6 +169,9 @@ class SimulationMode(ABC):
         # Create Time remaining label
         self.runtime_left_label = self._create_info_label(text='')
         self._info_canvas_line_number -= 2
+
+    def _rotate_camera_angle(self, angle: float) -> None:
+        self._canvas.camera.rotate(angle=-math.radians(angle), axis=vp.vector(1, 0, 0))
 
     def _check_earth_rotation(self, t: float) -> None:
         # If the Earth has rotated 360°, store rotation time
@@ -302,10 +292,35 @@ class SimulationMode(ABC):
                                 f'  Period: {self.moon.orbit.params.period_days:.2f} days')
         self._info_canvas_line_number -= 7
 
+    def _create_time_scale_info_label(self )-> None:
+        """
+        FIXME
+        """
+        # Create time scale label
+        self._create_info_label(f'Time scale: {config.time_scale_factor:,.0f}x. 1 sec = {
+              config.time_scale_factor/(SECS_IN_HR*HRS_IN_DAY):.1f} day(s).')
+        self._info_canvas_line_number -= 2
+
+
 class SunEarthMoonMode(SimulationMode):
     """
     FIXME
     """
+    def __init__(self):
+        super().__init__()
+
+        # Set time scale, if not set
+        if config.time_scale_factor == 0:
+            default_time_scale_factor: Final[float] = 10 * SECS_IN_HR * HRS_IN_DAY  # 10 day = 1 sec
+            config.time_scale_factor = default_time_scale_factor
+
+        if config.no_gui is False:
+            self._setup_info_canvas()
+
+        # rotate camera around the x axis to see the orbits better (not straight on)
+        camera_rotate_angle: Final[float] = 30  # degrees
+        self._rotate_camera_angle(camera_rotate_angle)
+
     def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
         """
         FIXME
@@ -340,24 +355,31 @@ class SunEarthMoonMode(SimulationMode):
         orbits: List[Orbit] = []
 
         # Create Earth and its orbit
-        earth_orbit: EarthOrbit = EarthOrbit()
+        earth_orbit_scale_factor: Final[float] = 1/30
+        earth_orbit: EarthOrbit = EarthOrbit(scale_factor=earth_orbit_scale_factor)
         orbits.append(earth_orbit)
-        self.earth = Earth(orbits=orbits)
+        earth_scale_factor: Final[float] = 8
+        self.earth = Earth(scale_factor=earth_scale_factor, orbits=orbits)
 
         # Create Moon and its orbit
-        moon_orbit: MoonOrbit = MoonOrbit()
+        moon_orbit_scale_factor: Final[float] = 1/4
+        moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
         orbits.append(moon_orbit)
-        self.moon = Moon(orbits=orbits,
-                         earth=self.earth)
+        moon_scale_factor: Final[float] = 8
+        self.moon = Moon(scale_factor=moon_scale_factor, orbits=orbits, earth=self.earth)
 
     def _setup_info_canvas(self) -> None:
         super()._setup_info_canvas()
 
+        self._create_time_scale_info_label()
         self._create_sun_info_label()
         self._create_earth_info_label()
         self._create_moon_info_label()
         self._create_earth_orbit_info_label()
         self._create_moon_orbit_info_label()
+
+        # Set default canvas back to normal canvas
+        self._canvas.select()
 
     def _largest_orbit_mag(self) -> float:
         """
@@ -367,6 +389,22 @@ class SunEarthMoonMode(SimulationMode):
 
 
 class EarthMoonMode(SimulationMode):
+    """FIXME"""
+    def __init__(self):
+        super().__init__()
+
+        # Set time scale, if not set
+        if config.time_scale_factor == 0:
+            default_time_scale_factor: Final[float] = SECS_IN_HR * HRS_IN_DAY  # 1 day = 1 sec
+            config.time_scale_factor = default_time_scale_factor
+
+        if config.no_gui is False:
+            self._setup_info_canvas()
+
+        # rotate camera around the x axis to see the orbits better (not straight on)
+        camera_rotate_angle: Final[float] = 2  # degrees
+        self._rotate_camera_angle(camera_rotate_angle)
+
     def update_celestial_bodies(self, t_prime: float, dt_prime: float) -> None:
         """
         FIXME
@@ -397,17 +435,21 @@ class EarthMoonMode(SimulationMode):
         self.earth = Earth()
 
         # Create Moon and its orbit
-        moon_orbit: MoonOrbit = MoonOrbit()
+        moon_orbit_scale_factor: Final[float] = 1/10
+        moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
         orbits.append(moon_orbit)
-        self.moon = Moon(orbits=orbits,
-                         earth=self.earth)
+        self.moon = Moon(orbits=orbits, earth=self.earth)
 
     def _setup_info_canvas(self) -> None:
         super()._setup_info_canvas()
 
+        self._create_time_scale_info_label()
         self._create_earth_info_label()
         self._create_moon_info_label()
         self._create_moon_orbit_info_label()
+
+        # Set default canvas back to normal canvas
+        self._canvas.select()
 
     def _largest_orbit_mag(self) -> float:
         """

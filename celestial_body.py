@@ -94,8 +94,8 @@ class CelestialBody(ABC):
             self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
                                                 make_trail=True,
-                                                trail_radius=0.25*self.radius,
-                                                retain=1000)
+                                                #trail_radius=0.25*self.radius,
+                                                retain=500)
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
 
@@ -206,22 +206,20 @@ class Sun(CelestialBody):
     Represents the Sun
     
     Attributes:
-        SCALE_FACTOR (float): How much to scale the size of the Sun.
         params (CelestialBodyParams): Parameters defining the Sun.
     """
-    SCALE_FACTOR: Final[float] = 1
-
     params = CelestialBodyParams(
         radius = 695_700,  # km
         tilt = 0,  # radians
         rotation_period = 27 * HRS_IN_DAY * SECS_IN_HR,  # seconds
         texture = 'images/sun_texture.jpg')
 
-    def __init__(self):
+    def __init__(self,
+                 scale_factor: float = 1):
         """
         """
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
         if config.no_gui is False:
             # Make Sun glow
@@ -239,7 +237,6 @@ class Earth(CelestialBody):
         params (CelestialBodyParams): Parameters defining the Earth.
     """
     SIDEREAL_DAY: Final[float] = 23.9344696  # hours
-    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
         radius = (6378.137 + 6356.752) / 2,  # km
@@ -248,14 +245,15 @@ class Earth(CelestialBody):
         texture=vp.textures.earth)
 
     def __init__(self,
-                 orbits: Optional[List[Orbit]] = None):
+                 orbits: Optional[List[Orbit]] = None,
+                 scale_factor: float = 1):
         """
         Args:
             orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
         """
         super().__init__(params=self.params,
                          orbits=orbits,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
 
 class Moon(CelestialBody):
@@ -268,7 +266,6 @@ class Moon(CelestialBody):
         params (CelestialBodyParams): Parameters defining the Moon.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
-    SCALE_FACTOR: Final[float] = 8
 
     params = CelestialBodyParams(
         radius = 1738,  # km
@@ -278,7 +275,8 @@ class Moon(CelestialBody):
 
     def __init__(self,
                  orbits: List[Orbit],
-                 earth: Earth):
+                 earth: Earth,
+                 scale_factor: float = 1):
         """
         Args:
             orbits (List[Orbit]): A list of orbits relevant to the Moon.
@@ -287,7 +285,7 @@ class Moon(CelestialBody):
         self.earth = earth
         super().__init__(params=self.params,
                          orbits=orbits,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
         if config.no_gui is False:
             # Create arrow for Moon that points to Earth

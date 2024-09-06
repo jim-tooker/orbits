@@ -197,7 +197,6 @@ class EarthOrbit(Orbit):
         params (OrbitParams): Parameters defining the Earth's orbit.
     """
     SIDEREAL_YEAR: Final[float] = 365.256 # days
-    SCALE_FACTOR: Final[float] = 1/30
 
     params = OrbitParams(
         semi_major_axis = 149_597_870,  # km
@@ -206,11 +205,12 @@ class EarthOrbit(Orbit):
         period = SIDEREAL_YEAR * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 scale_factor: float) -> None:
         """
         """
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)
 
 
 class MoonOrbit(Orbit):
@@ -226,7 +226,6 @@ class MoonOrbit(Orbit):
         params (OrbitParams): Parameters defining the Moon's orbit.
     """
     SIDEREAL_MONTH: Final[float] = 27.321661  # days
-    SCALE_FACTOR: Final[float] = 1/4
 
     params = OrbitParams(
         semi_major_axis = 384_405,  # km
@@ -235,8 +234,9 @@ class MoonOrbit(Orbit):
         period = SIDEREAL_MONTH * HRS_IN_DAY * SECS_IN_HR,  # secs
         direction = OrbitDirection.COUNTER_CLOCKWISE)
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 scale_factor: float) -> None:
         """
         """
         super().__init__(params=self.params,
-                         scale_factor=self.SCALE_FACTOR)
+                         scale_factor=scale_factor)

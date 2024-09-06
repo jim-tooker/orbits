@@ -27,7 +27,7 @@ import argparse
 from typing import Final
 import vpython as vp
 from orbits.constants import SECS_IN_HR
-from orbits.simulation_mode import SunEarthMoonMode, EarthMoonMode
+from orbits.simulation_mode import SimulationMode, SunEarthMoonMode, EarthMoonMode
 from orbits import config
 from orbits.config import SimMode
 
@@ -53,9 +53,10 @@ class OrbitSimulator:
             vp_services.stop_server()
 
     def __init__(self):
-        if not 1 <= config.time_scale_factor <= config.MAX_TIME_SCALE_FACTOR:
-            raise ValueError(f'time_scale_factor must be between 1 and {config.MAX_TIME_SCALE_FACTOR}')
+        if not 0 <= config.time_scale_factor <= config.MAX_TIME_SCALE_FACTOR:
+            raise ValueError(f'time_scale_factor must be between 0 and {config.MAX_TIME_SCALE_FACTOR}')
 
+        self.mode: SimulationMode
         if config.sim_mode == SimMode.EARTH_MOON:
             self.mode = EarthMoonMode()
         else:
