@@ -81,6 +81,7 @@ def test_earth_orbital_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 50_000
     config.time_scale_factor = time_scale_factor
+    config.sim_mode = SimMode.SUN_EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for one orbit
@@ -107,6 +108,7 @@ def test_sun_rotation_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 100_000
     config.time_scale_factor = time_scale_factor
+    config.sim_mode = SimMode.SUN_EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for 3 revolutions plus a margin

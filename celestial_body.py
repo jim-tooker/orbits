@@ -127,6 +127,7 @@ class CelestialBody(ABC):
         Returns:
             Orbit: The primary orbit of the celestial body.
         """
+        assert self._orbits
         return self._orbits[-1]
 
     @property
