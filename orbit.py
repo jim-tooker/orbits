@@ -20,7 +20,6 @@ class OrbitDirection(Enum):
     CLOCKWISE = auto()
     COUNTER_CLOCKWISE = auto()
 
-
 @dataclass
 class OrbitParams:
     """

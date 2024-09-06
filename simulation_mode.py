@@ -6,7 +6,7 @@ from typing import List, Final
 import math
 import vpython as vp
 from orbits import config
-from orbits.celestial_body import Earth, Moon, Sun
+from orbits.celestial_body import Earth, Moon, Sun, TrailParams
 from orbits.orbit import Orbit, EarthOrbit, MoonOrbit
 from orbits.motion_tracker import MotionTracker, MotionType
 from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
@@ -360,6 +360,10 @@ class SunEarthMoonMode(SimulationMode):
         orbits.append(earth_orbit)
         earth_scale_factor: Final[float] = 8
         self.earth = Earth(scale_factor=earth_scale_factor, orbits=orbits)
+        trail_params = TrailParams(
+            trail_radius=0.1*self.earth.radius,
+            trail_retain=1000)
+        self.earth.set_trail_params(trail_params)
 
         # Create Moon and its orbit
         moon_orbit_scale_factor: Final[float] = 1/4
@@ -367,6 +371,10 @@ class SunEarthMoonMode(SimulationMode):
         orbits.append(moon_orbit)
         moon_scale_factor: Final[float] = 8
         self.moon = Moon(scale_factor=moon_scale_factor, orbits=orbits, earth=self.earth)
+        trail_params = TrailParams(
+            trail_radius=0.25*self.moon.radius,
+            trail_retain=1000)
+        self.moon.set_trail_params(trail_params)
 
     def _setup_info_canvas(self) -> None:
         super()._setup_info_canvas()
@@ -439,6 +447,10 @@ class EarthMoonMode(SimulationMode):
         moon_orbit: MoonOrbit = MoonOrbit(scale_factor=moon_orbit_scale_factor)
         orbits.append(moon_orbit)
         self.moon = Moon(orbits=orbits, earth=self.earth)
+        trail_params = TrailParams(
+            trail_radius=0,
+            trail_retain=1000)
+        self.moon.set_trail_params(trail_params)
 
     def _setup_info_canvas(self) -> None:
         super()._setup_info_canvas()

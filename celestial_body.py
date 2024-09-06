@@ -6,7 +6,7 @@ in an orbital simulation. It includes abstract base classes and specific impleme
 for Earth and Moon, along with their physical parameters and visualization properties.
 """
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from copy import copy
 from typing import List, Any, Final, Optional
 import math
@@ -62,6 +62,15 @@ class CelestialBodyParams:
         """
         return self.rotation_period_hrs / HRS_IN_DAY
 
+
+@dataclass
+class TrailParams:
+    """FIXME"""
+    trail_radius: float = 0
+    trail_color: vp.vector = field(default_factory=lambda: vp.color.white)
+    trail_retain: int = 1000
+
+
 class CelestialBody(ABC):
     """
     Abstract base class for visualizing and animating celestial bodies
@@ -93,9 +102,8 @@ class CelestialBody(ABC):
         if config.no_gui is False:
             self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
-                                                make_trail=True,
-                                                #trail_radius=0.25*self.radius,
-                                                retain=500)
+                                                make_trail=True)
+
             self._axis: vp.vector = self._calculate_axis()
             self._axis_line: vp.cylinder = self._create_axis_line()
 
@@ -199,6 +207,11 @@ class CelestialBody(ABC):
         angle: float = self.angle(dt)
         self._sphere.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
         self._axis_line.rotate(angle=angle, axis=self._axis, origin=self._sphere.pos)
+
+    def set_trail_params(self, params: TrailParams) -> None:
+        self._sphere.trail_radius = params.trail_radius
+        self._sphere.trail_color = params.trail_color
+        self._sphere.retain = params.trail_retain
 
 
 class Sun(CelestialBody):
