@@ -36,6 +36,11 @@ options:
 For detailed API documentation, see:
 [Orbit Simulator API Documentation](https://jim-tooker.github.io/orbits/docs/orbits/index.html)
 
+## To Use
+1. Clone this repository.
+2. Run the setup script: `setup.bat`.  *(This will install needed dependencies)*
+3. Run `python orbit_simulator.py`.  *(With or without command line options)*
+
 ## Sample Screenshots
 <img width="1509" alt="orbits-screenshot" src="https://github.com/user-attachments/assets/abca1b0c-a3c6-4a7e-9778-f43632b80673">
 <img width="1497" alt="Orbits with Sun-Screenshot" src="https://github.com/user-attachments/assets/8d678c19-4ded-462b-bae4-1fa0840d9824">
