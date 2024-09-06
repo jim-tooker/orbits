@@ -4,10 +4,9 @@ Tests for Orbit Simulator
 import sys
 import argparse
 import pytest
-from orbits import config
-from orbits.config import SimMode
-from orbits.orbit_simulator import OrbitSimulator
-from orbits.motion_tracker import MotionType
+import config
+from orbit_simulator import OrbitSimulator
+from motion_tracker import MotionType
 
 
 @pytest.mark.earth
@@ -19,7 +18,7 @@ def test_earth_rotation_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 10_000
     config.time_scale_factor = time_scale_factor
-    config.sim_mode = SimMode.EARTH_MOON
+    config.sim_mode = config.SimMode.EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for 3 revolutions plus a margin
@@ -47,7 +46,7 @@ def test_moon_orbital_and_rotation_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 100_000
     config.time_scale_factor = time_scale_factor
-    config.sim_mode = SimMode.EARTH_MOON
+    config.sim_mode = config.SimMode.EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for one orbit
@@ -81,7 +80,7 @@ def test_earth_orbital_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 50_000
     config.time_scale_factor = time_scale_factor
-    config.sim_mode = SimMode.SUN_EARTH_MOON
+    config.sim_mode = config.SimMode.SUN_EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for one orbit
@@ -108,7 +107,7 @@ def test_sun_rotation_period() -> None:
     # Initialize simulator
     time_scale_factor: float = 100_000
     config.time_scale_factor = time_scale_factor
-    config.sim_mode = SimMode.SUN_EARTH_MOON
+    config.sim_mode = config.SimMode.SUN_EARTH_MOON
     sim: OrbitSimulator = OrbitSimulator()
 
     # Run long enough for 3 revolutions plus a margin

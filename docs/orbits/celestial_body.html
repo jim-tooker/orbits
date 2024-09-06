@@ -41,7 +41,7 @@ for the Sun, Earth and Moon, along with their physical parameters and visualizat
 <dl>
 <dt id="orbits.celestial_body.CelestialBody"><code class="flex name class">
 <span>class <span class="ident">CelestialBody</span></span>
-<span>(</span><span>params: <a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a>, orbits: Optional[List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]] = None, scale_factor: float = 1)</span>
+<span>(</span><span>params: <a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a>, orbits: Optional[List[orbit.Orbit]] = None, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class for visualizing and animating celestial bodies</p>
@@ -56,7 +56,7 @@ for the Sun, Earth and Moon, along with their physical parameters and visualizat
 <dl>
 <dt><strong><code>params</code></strong> :&ensp;<code><a title="orbits.celestial_body.CelestialBodyParams" href="#orbits.celestial_body.CelestialBodyParams">CelestialBodyParams</a></code></dt>
 <dd>Parameters defining the celestial body.</dd>
-<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[Orbit]]</code></dt>
+<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]]</code></dt>
 <dd>A list of orbits relevant to the celestial body.</dd>
 <dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
 <dd>How much to scale the size of the celestial body.</dd>
@@ -80,7 +80,7 @@ for the Sun, Earth and Moon, along with their physical parameters and visualizat
         &#34;&#34;&#34;
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            orbits (Optional[List[Orbit]]): A list of orbits relevant to the celestial body.
+            orbits (Optional[List[orbits.orbit.Orbit]]): A list of orbits relevant to the celestial body.
             scale_factor (float): How much to scale the size of the celestial body.
         &#34;&#34;&#34;
         self.params: CelestialBodyParams = params
@@ -117,8 +117,9 @@ for the Sun, Earth and Moon, along with their physical parameters and visualizat
         The primary orbit of the celestial body.
 
         Returns:
-            Orbit: The primary orbit of the celestial body.
+            orbits.orbit.Orbit: The primary orbit of the celestial body.
         &#34;&#34;&#34;
+        assert self._orbits
         return self._orbits[-1]
 
     @property
@@ -209,9 +210,10 @@ for the Sun, Earth and Moon, along with their physical parameters and visualizat
         Args:
           params (TrailParams): The parameters for the sphere trail.
         &#34;&#34;&#34;
-        self._sphere.trail_radius = params.trail_radius
-        self._sphere.trail_color = params.trail_color
-        self._sphere.retain = params.trail_retain</code></pre>
+        if config.no_gui is False:
+            self._sphere.trail_radius = params.trail_radius
+            self._sphere.trail_color = params.trail_color
+            self._sphere.retain = params.trail_retain</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -248,12 +250,12 @@ def angular_velocity(self) -&gt; float:
     return FULL_ANGLE / self.params.rotation_period</code></pre>
 </details>
 </dd>
-<dt id="orbits.celestial_body.CelestialBody.orbit"><code class="name">prop <span class="ident">orbit</span> : <a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a></code></dt>
+<dt id="orbits.celestial_body.CelestialBody.orbit"><code class="name">prop <span class="ident">orbit</span> : orbit.Orbit</code></dt>
 <dd>
 <div class="desc"><p>The primary orbit of the celestial body.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Orbit</code></dt>
+<dt><code><a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a></code></dt>
 <dd>The primary orbit of the celestial body.</dd>
 </dl></div>
 <details class="source">
@@ -266,8 +268,9 @@ def orbit(self) -&gt; Orbit:
     The primary orbit of the celestial body.
 
     Returns:
-        Orbit: The primary orbit of the celestial body.
+        orbits.orbit.Orbit: The primary orbit of the celestial body.
     &#34;&#34;&#34;
+    assert self._orbits
     return self._orbits[-1]</code></pre>
 </details>
 </dd>
@@ -532,7 +535,7 @@ def tilt_degrees(self) -&gt; float:
 </dd>
 <dt id="orbits.celestial_body.Earth"><code class="flex name class">
 <span>class <span class="ident">Earth</span></span>
-<span>(</span><span>orbits: Optional[List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]] = None, scale_factor: float = 1)</span>
+<span>(</span><span>orbits: Optional[List[orbit.Orbit]] = None, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Representation of Earth</p>
@@ -545,7 +548,7 @@ def tilt_degrees(self) -&gt; float:
 </dl>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[Orbit]]</code></dt>
+<dt><strong><code>orbits</code></strong> :&ensp;<code>Optional[List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]]</code></dt>
 <dd>A list of orbits relevant to the Earth.</dd>
 <dt><strong><code>scale_factor</code></strong> :&ensp;<code>float</code></dt>
 <dd>How much to scale the size of the Earth.</dd>
@@ -575,7 +578,7 @@ def tilt_degrees(self) -&gt; float:
                  scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
-            orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
+            orbits (Optional[List[orbits.orbit.Orbit]]): A list of orbits relevant to the Earth.
             scale_factor (float): How much to scale the size of the Earth.
         &#34;&#34;&#34;
         super().__init__(params=self.params,
@@ -616,7 +619,7 @@ def tilt_degrees(self) -&gt; float:
 </dd>
 <dt id="orbits.celestial_body.Moon"><code class="flex name class">
 <span>class <span class="ident">Moon</span></span>
-<span>(</span><span>orbits: List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>], earth: <a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a>, scale_factor: float = 1)</span>
+<span>(</span><span>orbits: List[orbit.Orbit], earth: <a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a>, scale_factor: float = 1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents the Earth's moon with its own orbit and visualization.</p>
@@ -629,7 +632,7 @@ def tilt_degrees(self) -&gt; float:
 </dl>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>orbits</code></strong> :&ensp;<code>List[Orbit]</code></dt>
+<dt><strong><code>orbits</code></strong> :&ensp;<code>List[<a title="orbits.orbit.Orbit" href="orbit.html#orbits.orbit.Orbit">Orbit</a>]</code></dt>
 <dd>A list of orbits relevant to the Moon.</dd>
 <dt><strong><code>earth</code></strong> :&ensp;<code><a title="orbits.celestial_body.Earth" href="#orbits.celestial_body.Earth">Earth</a></code></dt>
 <dd>A reference to the Earth object</dd>
@@ -662,7 +665,7 @@ def tilt_degrees(self) -&gt; float:
                  scale_factor: float = 1):
         &#34;&#34;&#34;
         Args:
-            orbits (List[Orbit]): A list of orbits relevant to the Moon.
+            orbits (List[orbits.orbit.Orbit]): A list of orbits relevant to the Moon.
             earth (Earth): A reference to the Earth object
             scale_factor (float): How much to scale the size of the Moon.
         &#34;&#34;&#34;

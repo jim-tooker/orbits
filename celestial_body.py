@@ -11,9 +11,9 @@ from copy import copy
 from typing import List, Any, Final, Optional
 import math
 import vpython as vp
-from orbits.constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
-from orbits import config
-from orbits.orbit import Orbit
+from constants import FULL_ANGLE, HRS_IN_DAY, SECS_IN_HR
+import config
+from orbit import Orbit
 
 __author__ = "Jim Tooker"
 
@@ -88,7 +88,7 @@ class CelestialBody(ABC):
         """
         Args:
             params (CelestialBodyParams): Parameters defining the celestial body.
-            orbits (Optional[List[Orbit]]): A list of orbits relevant to the celestial body.
+            orbits (Optional[List[orbits.orbit.Orbit]]): A list of orbits relevant to the celestial body.
             scale_factor (float): How much to scale the size of the celestial body.
         """
         self.params: CelestialBodyParams = params
@@ -125,7 +125,7 @@ class CelestialBody(ABC):
         The primary orbit of the celestial body.
 
         Returns:
-            Orbit: The primary orbit of the celestial body.
+            orbits.orbit.Orbit: The primary orbit of the celestial body.
         """
         assert self._orbits
         return self._orbits[-1]
@@ -273,7 +273,7 @@ class Earth(CelestialBody):
                  scale_factor: float = 1):
         """
         Args:
-            orbits (Optional[List[Orbit]]): A list of orbits relevant to the Earth.
+            orbits (Optional[List[orbits.orbit.Orbit]]): A list of orbits relevant to the Earth.
             scale_factor (float): How much to scale the size of the Earth.
         """
         super().__init__(params=self.params,
@@ -303,7 +303,7 @@ class Moon(CelestialBody):
                  scale_factor: float = 1):
         """
         Args:
-            orbits (List[Orbit]): A list of orbits relevant to the Moon.
+            orbits (List[orbits.orbit.Orbit]): A list of orbits relevant to the Moon.
             earth (Earth): A reference to the Earth object
             scale_factor (float): How much to scale the size of the Moon.
         """

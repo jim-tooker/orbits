@@ -101,7 +101,7 @@ parameters, and runs the simulation.</p>
 <div class="desc"><p>Main class responsible for setting up and running the orbit simulation.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
-<dt><strong><code>mode</code></strong> :&ensp;<code>SimulationMode</code></dt>
+<dt><strong><code>mode</code></strong> :&ensp;<code><a title="orbits.simulation_mode.SimulationMode" href="simulation_mode.html#orbits.simulation_mode.SimulationMode">SimulationMode</a></code></dt>
 <dd>Reference to the simulation mode instance</dd>
 </dl></div>
 <details class="source">
@@ -113,7 +113,7 @@ parameters, and runs the simulation.</p>
     Main class responsible for setting up and running the orbit simulation.
 
     Attributes:
-      mode (SimulationMode): Reference to the simulation mode instance
+      mode (orbits.simulation_mode.SimulationMode): Reference to the simulation mode instance
     &#34;&#34;&#34;
 
     @staticmethod
@@ -130,7 +130,7 @@ parameters, and runs the simulation.</p>
             raise ValueError(f&#39;time_scale_factor must be between 0 and {config.MAX_TIME_SCALE_FACTOR}&#39;)
 
         self.mode: SimulationMode
-        if config.sim_mode == SimMode.EARTH_MOON:
+        if config.sim_mode == config.SimMode.EARTH_MOON:
             self.mode = EarthMoonMode()
         else:
             self.mode = SunEarthMoonMode()

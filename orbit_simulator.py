@@ -29,10 +29,9 @@ import sys
 import argparse
 from typing import Final
 import vpython as vp
-from orbits.constants import SECS_IN_HR
-from orbits import config
-from orbits.config import SimMode
-from orbits.simulation_mode import SimulationMode, SunEarthMoonMode, EarthMoonMode
+from constants import SECS_IN_HR
+import config
+from simulation_mode import SimulationMode, SunEarthMoonMode, EarthMoonMode
 
 __author__ = "Jim Tooker"
 
@@ -42,7 +41,7 @@ class OrbitSimulator:
     Main class responsible for setting up and running the orbit simulation.
 
     Attributes:
-      mode (SimulationMode): Reference to the simulation mode instance
+      mode (orbits.simulation_mode.SimulationMode): Reference to the simulation mode instance
     """
 
     @staticmethod
@@ -59,7 +58,7 @@ class OrbitSimulator:
             raise ValueError(f'time_scale_factor must be between 0 and {config.MAX_TIME_SCALE_FACTOR}')
 
         self.mode: SimulationMode
-        if config.sim_mode == SimMode.EARTH_MOON:
+        if config.sim_mode == config.SimMode.EARTH_MOON:
             self.mode = EarthMoonMode()
         else:
             self.mode = SunEarthMoonMode()
@@ -148,7 +147,7 @@ def main() -> None:
         print('Hit Ctrl-C to exit.')
 
     if args.mode == 'earth_moon':
-        config.sim_mode = SimMode.EARTH_MOON
+        config.sim_mode = config.SimMode.EARTH_MOON
 
     if args.time_scale_factor != 0:
         config.time_scale_factor = args.time_scale_factor
