@@ -104,6 +104,7 @@ class CelestialBody(ABC):
         if config.no_gui is False:
             self._sphere: vp.sphere = vp.sphere(radius=self.radius,
                                                 texture=self.params.texture,
+                                                shininess=0,
                                                 make_trail=True)
 
             self._axis: vp.vector = self._calculate_axis()
@@ -249,7 +250,6 @@ class Sun(CelestialBody):
         if config.no_gui is False:
             # Make Sun glow
             self._sphere.emissive = True
-            self._sphere.shininess = 1
 
 
 class Earth(CelestialBody):

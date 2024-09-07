@@ -4,6 +4,8 @@ Tests for Orbit Simulator
 import sys
 import argparse
 import pytest
+
+sys.path.append('.')
 import config
 from orbit_simulator import OrbitSimulator
 from motion_tracker import MotionType
@@ -127,7 +129,6 @@ def main() -> None:
     """Main entry point for test."""
     parser = argparse.ArgumentParser(description='Orbit Simulator Tester')
     parser.add_argument('--no_gui', action='store_true', help='Run without GUI')
-    parser.add_argument('--test', help='Specify a test to run')
     parser.add_argument('-k', help='Only run tests which match the given substring expression')
     parser.add_argument('-m', help='Only run tests matching given mark expression')
     args = parser.parse_args()
@@ -136,8 +137,6 @@ def main() -> None:
         config.no_gui = True
 
     pytest_args = ["tests/test_orbit_simulator.py"]
-    if args.test:
-        pytest_args.append(f"::test_{args.test}")
     if args.k:
         pytest_args.extend(["-k", args.k])
     if args.m:
