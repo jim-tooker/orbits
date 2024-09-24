@@ -38,7 +38,7 @@ For detailed API documentation, see:
 
 ## To Use
 1. Clone this repository.
-2. Run the setup script: `setup.bat`.  *(This will install needed dependencies)*
+2. Run the setup script: `setup.sh`.  *(This will install needed dependencies)*
 3. Run `python orbit_simulator.py`.  *(With or without command line options)*
 
 ## Sample Screenshots
